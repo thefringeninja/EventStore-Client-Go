@@ -1,0 +1,13 @@
+package esgrpc
+
+// StreamRevision ...
+type StreamRevision int
+
+const (
+	// StreamRevisionNoStream ...
+	StreamRevisionNoStream StreamRevision = iota
+	// StreamRevisionAny ...
+	StreamRevisionAny
+	// StreamRevisionStreamExists ...
+	StreamRevisionStreamExists
+)
