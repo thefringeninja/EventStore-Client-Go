@@ -1,5 +1,5 @@
 syntax = "proto3";
-package event_store.grpc.projections;
+package event_store.client.projections;
 option java_package = "com.eventstore.client.projections";
 
 import "google/protobuf/struct.proto";
@@ -48,7 +48,7 @@ message UpdateReq {
 	message Options {
 		string name = 1;
 		string query = 2;
-		oneof emit_options {
+		oneof emit_option {
 			bool emit_enabled = 3;
 			Empty no_emit_options = 4;
 		}
