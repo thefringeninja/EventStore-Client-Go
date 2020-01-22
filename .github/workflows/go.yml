@@ -24,8 +24,10 @@ jobs:
 
       - name: Docker Login
         shell: bash
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u EventStore --password-stdin docker.pkg.github.com
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u EventStore --password-stdin docker.pkg.github.com
+          docker pull docker.pkg.github.com/eventstore/eventstore-client-grpc-testdata/eventstore-client-grpc-testdata:6.0.0-preview1.0.1869-buster-slim
 
       - name: Tests
         run: |
-          go test ./...
+          go test -v ./...

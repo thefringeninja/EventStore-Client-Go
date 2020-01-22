@@ -102,7 +102,7 @@ func (client *Client) AppendToStream(context context.Context, streamID string, s
 		return nil, err
 	}
 
-	header := protoutils.AppendHeaderFromStreamIDAndStreamRevision(streamID, streamRevision)
+	header := protoutils.ToAppendHeaderFromStreamIDAndStreamRevision(streamID, streamRevision)
 
 	if err := appendOperation.Send(header); err != nil {
 		log.Printf("Could not send append request header %+v", err)
@@ -146,16 +146,9 @@ func (client *Client) ReadStreamEvents(context context.Context, direction direct
 			FilterOption: &api.ReadReq_Options_NoFilter{
 				NoFilter: &api.ReadReq_Empty{},
 			},
-			ReadDirection: protoutils.ReadDirectionFromDirection(direction),
+			ReadDirection: protoutils.ToReadDirectionFromDirection(direction),
 			ResolveLinks:  resolveLinks,
-			StreamOption: &api.ReadReq_Options_Stream{
-				Stream: &api.ReadReq_Options_StreamOptions{
-					StreamName: streamID,
-					RevisionOption: &api.ReadReq_Options_StreamOptions_Revision{
-						Revision: streamRevision,
-					},
-				},
-			},
+			StreamOption:  protoutils.ToReadStreamOptionsFromStreamAndStreamRevision(streamID, streamRevision),
 			UuidOption: &api.ReadReq_Options_UUIDOption{
 				Content: &api.ReadReq_Options_UUIDOption_String_{
 					String_: &api.ReadReq_Empty{},
@@ -176,9 +169,9 @@ func (client *Client) ReadAllEvents(context context.Context, direction direction
 			FilterOption: &api.ReadReq_Options_NoFilter{
 				NoFilter: &api.ReadReq_Empty{},
 			},
-			ReadDirection: protoutils.ReadDirectionFromDirection(direction),
+			ReadDirection: protoutils.ToReadDirectionFromDirection(direction),
 			ResolveLinks:  resolveLinks,
-			StreamOption:  protoutils.AllReadOptionsFromPosition(position),
+			StreamOption:  protoutils.ToAllReadOptionsFromPosition(position),
 			UuidOption: &api.ReadReq_Options_UUIDOption{
 				Content: &api.ReadReq_Options_UUIDOption_String_{
 					String_: &api.ReadReq_Empty{},

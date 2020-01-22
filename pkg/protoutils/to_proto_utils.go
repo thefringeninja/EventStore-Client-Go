@@ -9,8 +9,8 @@ import (
 	api "github.com/eventstore/EventStore-Client-Go/protos"
 )
 
-//AppendHeaderFromStreamIDAndStreamRevision ...
-func AppendHeaderFromStreamIDAndStreamRevision(streamID string, streamRevision stream_revision.StreamRevision) *api.AppendReq {
+//ToAppendHeaderFromStreamIDAndStreamRevision ...
+func ToAppendHeaderFromStreamIDAndStreamRevision(streamID string, streamRevision stream_revision.StreamRevision) *api.AppendReq {
 	appendReq := &api.AppendReq{
 		Content: &api.AppendReq_Options_{
 			Options: &api.AppendReq_Options{},
@@ -59,8 +59,8 @@ func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMess
 	}
 }
 
-//ReadDirectionFromDirection ...
-func ReadDirectionFromDirection(dir direction.Direction) api.ReadReq_Options_ReadDirection {
+//ToReadDirectionFromDirection ...
+func ToReadDirectionFromDirection(dir direction.Direction) api.ReadReq_Options_ReadDirection {
 	var readDirection api.ReadReq_Options_ReadDirection
 	switch dir {
 	case direction.Forwards:
@@ -71,8 +71,8 @@ func ReadDirectionFromDirection(dir direction.Direction) api.ReadReq_Options_Rea
 	return readDirection
 }
 
-//AllReadOptionsFromPosition ...
-func AllReadOptionsFromPosition(position position.Position) *api.ReadReq_Options_All {
+//ToAllReadOptionsFromPosition ...
+func ToAllReadOptionsFromPosition(position position.Position) *api.ReadReq_Options_All {
 	return &api.ReadReq_Options_All{
 		All: &api.ReadReq_Options_AllOptions{
 			AllOption: &api.ReadReq_Options_AllOptions_Position{
@@ -80,6 +80,18 @@ func AllReadOptionsFromPosition(position position.Position) *api.ReadReq_Options
 					PreparePosition: uint64(position.Prepare),
 					CommitPosition:  uint64(position.Commit),
 				},
+			},
+		},
+	}
+}
+
+// ToReadStreamOptionsFromStreamAndStreamRevision ...
+func ToReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamRevision uint64) *api.ReadReq_Options_Stream {
+	return &api.ReadReq_Options_Stream{
+		Stream: &api.ReadReq_Options_StreamOptions{
+			StreamName: streamID,
+			RevisionOption: &api.ReadReq_Options_StreamOptions_Revision{
+				Revision: uint64(streamRevision),
 			},
 		},
 	}

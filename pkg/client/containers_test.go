@@ -50,6 +50,7 @@ func GetPrePopulatedDatabase() *Container {
 
 func getDatabase(options *dockertest.RunOptions) *Container {
 	pool, err := dockertest.NewPool("")
+
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
