@@ -137,7 +137,7 @@ func (client *Client) AppendToStream(context context.Context, streamID string, s
 }
 
 // ReadStreamEvents ...
-func (client *Client) ReadStreamEvents(context context.Context, direction direction.Direction, streamID string, streamRevision uint64, count int32, resolveLinks bool) (*ReadResult, error) {
+func (client *Client) ReadStreamEvents(context context.Context, direction direction.Direction, streamID string, streamRevision uint64, count int32, resolveLinks bool) ([]messages.RecordedEvent, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -167,7 +167,7 @@ func (client *Client) ReadStreamEvents(context context.Context, direction direct
 }
 
 // ReadAllEvents ...
-func (client *Client) ReadAllEvents(context context.Context, direction direction.Direction, position position.Position, count int32, resolveLinks bool) (*ReadResult, error) {
+func (client *Client) ReadAllEvents(context context.Context, direction direction.Direction, position position.Position, count int32, resolveLinks bool) ([]messages.RecordedEvent, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -189,7 +189,7 @@ func (client *Client) ReadAllEvents(context context.Context, direction direction
 	return readInternal(context, client.Connection, readReq, count)
 }
 
-func readInternal(context context.Context, connection *grpc.ClientConn, readRequest *api.ReadReq, limit int32) (*ReadResult, error) {
+func readInternal(context context.Context, connection *grpc.ClientConn, readRequest *api.ReadReq, limit int32) ([]messages.RecordedEvent, error) {
 	streamsClient := api.NewStreamsClient(connection)
 
 	result, err := streamsClient.Read(context, readRequest)
@@ -226,7 +226,5 @@ func readInternal(context context.Context, connection *grpc.ClientConn, readRequ
 			break
 		}
 	}
-	return &ReadResult{
-		Events: events,
-	}, nil
+	return events, nil
 }

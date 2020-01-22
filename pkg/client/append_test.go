@@ -38,31 +38,31 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 		UserMetadata: []byte{0xd, 0xe, 0xa, 0xd},
 		Data:         []byte{0xb, 0xe, 0xe, 0xf},
 	}
-	events := []messages.ProposedEvent{
+	proposedEvents := []messages.ProposedEvent{
 		testEvent,
 	}
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	_, err := client.AppendToStream(context, streamID.String(), stream_revision.StreamRevisionNoStream, events)
+	_, err := client.AppendToStream(context, streamID.String(), stream_revision.StreamRevisionNoStream, proposedEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
 	}
 
-	readResult, err := client.ReadStreamEvents(context, direction.Forwards, streamID.String(), stream_revision.StreamRevisionStart, 1, false)
+	events, err := client.ReadStreamEvents(context, direction.Forwards, streamID.String(), stream_revision.StreamRevisionStart, 1, false)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
 	}
 
-	assert.Equal(t, int32(1), int32(len(readResult.Events)), "Expected the correct number of messages to be returned")
-	assert.Equal(t, testEvent.EventID, readResult.Events[0].EventID)
-	assert.Equal(t, testEvent.EventType, readResult.Events[0].EventType)
-	assert.Equal(t, streamID.String(), readResult.Events[0].StreamID)
-	assert.Equal(t, testEvent.Data, readResult.Events[0].Data)
-	assert.Equal(t, testEvent.UserMetadata, readResult.Events[0].UserMetadata)
+	assert.Equal(t, int32(1), int32(len(events)), "Expected the correct number of messages to be returned")
+	assert.Equal(t, testEvent.EventID, events[0].EventID)
+	assert.Equal(t, testEvent.EventType, events[0].EventType)
+	assert.Equal(t, streamID.String(), events[0].StreamID)
+	assert.Equal(t, testEvent.Data, events[0].Data)
+	assert.Equal(t, testEvent.UserMetadata, events[0].UserMetadata)
 }
 
 func TestAppendWithInvalidStreamRevision(t *testing.T) {

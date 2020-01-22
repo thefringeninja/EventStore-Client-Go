@@ -1,5 +1,5 @@
 name: Go
-on: [push]
+on: [push, pull_request]
 jobs:
   build:
     name: Build
@@ -22,11 +22,10 @@ jobs:
         run: |
           go build -v ./...
 
+      - name: Docker Login
+        shell: bash
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u EventStore --password-stdin docker.pkg.github.com
+
       - name: Tests
         run: |
-          sudo apt-get install wget
-          wget https://eventstore.org/downloads/ubuntu/EventStore-OSS-Linux-Ubuntu-18.04-v6.0.0-preview1.tar.gz
-          tar xfv EventStore-OSS-Linux-Ubuntu-18.04-v6.0.0-preview1.tar.gz
-          ./EventStore-OSS-Linux-Ubuntu-18.04-v6.0.0-preview1/eventstored --dev &
-          timeout 60 bash -c 'while [[ "$(curl --insecure -u admin:changeit -s -o /dev/null -w ''%{http_code}'' https://localhost:2113/users/admin)" != "200" ]]; do sleep 5; done'
           go test ./...
