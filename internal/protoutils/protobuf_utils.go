@@ -20,50 +20,74 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type appendSetOptions struct {
+	req *api.AppendReq
+}
+
+func (append *appendSetOptions) VisitAny() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Any{
+		Any: &shared.Empty{},
+	}
+}
+
+func (append *appendSetOptions) VisitStreamExists() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_StreamExists{
+		StreamExists: &shared.Empty{},
+	}
+}
+
+func (append *appendSetOptions) VisitNoStream() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_NoStream{
+		NoStream: &shared.Empty{},
+	}
+}
+
+func (append *appendSetOptions) VisitExact(value uint64) {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Revision{
+		Revision: value,
+	}
+}
+
 // ToAppendHeader ...
-func ToAppendHeader(streamID string, streamRevision stream_revision.StreamRevision) *api.AppendReq {
+func ToAppendHeader(streamID string, streamRevision stream_revision.ExpectedRevision) *api.AppendReq {
 	appendReq := &api.AppendReq{
 		Content: &api.AppendReq_Options_{
 			Options: &api.AppendReq_Options{},
 		},
 	}
+
 	appendReq.GetOptions().StreamIdentifier = &shared.StreamIdentifier{
 		StreamName: []byte(streamID),
 	}
-	switch streamRevision {
-	case stream_revision.StreamRevisionAny:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Any{
-			Any: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionNoStream:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_NoStream{
-			NoStream: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionStreamExists:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_StreamExists{
-			StreamExists: &shared.Empty{},
-		}
-	default:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Revision{
-			Revision: uint64(streamRevision),
-		}
+
+	setOptions := appendSetOptions{
+		req: appendReq,
 	}
+
+	streamRevision.AcceptExpectedRevision(&setOptions)
+
 	return appendReq
 }
 
 // ToProposedMessage ...
 func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMessage {
 	metadata := map[string]string{}
-	metadata[system_metadata.SystemMetadataKeysContentType] = event.ContentType
-	metadata[system_metadata.SystemMetadataKeysType] = event.EventType
+	metadata[system_metadata.SystemMetadataKeysContentType] = event.GetContentType()
+	metadata[system_metadata.SystemMetadataKeysType] = event.GetEventType()
+	eventId := event.GetEventID()
+
+	if eventId == uuid.Nil {
+		eventId = uuid.Must(uuid.NewV4())
+	}
+
 	return &api.AppendReq_ProposedMessage{
 		Id: &shared.UUID{
 			Value: &shared.UUID_String_{
-				String_: event.EventID.String(),
+				String_: eventId.String(),
 			},
 		},
-		Data:           event.Data,
-		CustomMetadata: event.UserMetadata,
+		Data:           event.GetData(),
+		CustomMetadata: event.GetMetadata(),
 		Metadata:       metadata,
 	}
 }
@@ -160,43 +184,71 @@ func (reg *regularStream) VisitEnd() {
 
 // toFilterOptions ...
 func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_Options_FilterOptions, error) {
-	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
-		return nil, fmt.Errorf("The subscription filter requires a set of prefixes or a regex")
+	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
+		return nil, fmt.Errorf("the subscription filter requires a set of prefixes or a regex")
 	}
-	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.Regex) > 0 {
-		return nil, fmt.Errorf("The subscription filter may only contain a regex or a set of prefixes, but not both.")
+	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
+		return nil, fmt.Errorf("the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := api.ReadReq_Options_FilterOptions{
-		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
+		CheckpointIntervalMultiplier: uint32(options.CheckpointIntervalValue),
 	}
 	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_EventType{
 			EventType: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	} else {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_StreamIdentifier{
 			StreamIdentifier: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	}
-	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindowValue == filtering.NoMaxSearchWindow {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
 	} else {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Max{
-			Max: uint32(options.MaxSearchWindow),
+			Max: uint32(options.MaxSearchWindowValue),
 		}
 	}
 	return &filterOptions, nil
 }
 
-func ToDeleteRequest(streamID string, streamRevision streamrevision.StreamRevision) *api.DeleteReq {
+type deleteSetOptions struct {
+	req *api.DeleteReq
+}
+
+func (append *deleteSetOptions) VisitAny() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Any{
+		Any: &shared.Empty{},
+	}
+}
+
+func (append *deleteSetOptions) VisitStreamExists() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_StreamExists{
+		StreamExists: &shared.Empty{},
+	}
+}
+
+func (append *deleteSetOptions) VisitNoStream() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_NoStream{
+		NoStream: &shared.Empty{},
+	}
+}
+
+func (append *deleteSetOptions) VisitExact(value uint64) {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Revision{
+		Revision: value,
+	}
+}
+
+func ToDeleteRequest(streamID string, streamRevision streamrevision.ExpectedRevision) *api.DeleteReq {
 	deleteReq := &api.DeleteReq{
 		Options: &api.DeleteReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -204,28 +256,45 @@ func ToDeleteRequest(streamID string, streamRevision streamrevision.StreamRevisi
 			},
 		},
 	}
-	switch streamRevision {
-	case stream_revision.StreamRevisionAny:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Any{
-			Any: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionNoStream:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_NoStream{
-			NoStream: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionStreamExists:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_StreamExists{
-			StreamExists: &shared.Empty{},
-		}
-	default:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Revision{
-			Revision: uint64(streamRevision),
-		}
+
+	setOptions := deleteSetOptions{
+		req: deleteReq,
 	}
+
+	streamRevision.AcceptExpectedRevision(&setOptions)
+
 	return deleteReq
 }
 
-func ToTombstoneRequest(streamID string, streamRevision streamrevision.StreamRevision) *api.TombstoneReq {
+type tombstoneSetOptions struct {
+	req *api.TombstoneReq
+}
+
+func (append *tombstoneSetOptions) VisitAny() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Any{
+		Any: &shared.Empty{},
+	}
+}
+
+func (append *tombstoneSetOptions) VisitStreamExists() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_StreamExists{
+		StreamExists: &shared.Empty{},
+	}
+}
+
+func (append *tombstoneSetOptions) VisitNoStream() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_NoStream{
+		NoStream: &shared.Empty{},
+	}
+}
+
+func (append *tombstoneSetOptions) VisitExact(value uint64) {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Revision{
+		Revision: value,
+	}
+}
+
+func ToTombstoneRequest(streamID string, streamRevision streamrevision.ExpectedRevision) *api.TombstoneReq {
 	tombstoneReq := &api.TombstoneReq{
 		Options: &api.TombstoneReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -233,24 +302,13 @@ func ToTombstoneRequest(streamID string, streamRevision streamrevision.StreamRev
 			},
 		},
 	}
-	switch streamRevision {
-	case stream_revision.StreamRevisionAny:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Any{
-			Any: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionNoStream:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_NoStream{
-			NoStream: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionStreamExists:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_StreamExists{
-			StreamExists: &shared.Empty{},
-		}
-	default:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Revision{
-			Revision: uint64(streamRevision),
-		}
+
+	optionsSet := tombstoneSetOptions{
+		req: tombstoneReq,
 	}
+
+	streamRevision.AcceptExpectedRevision(&optionsSet)
+
 	return tombstoneReq
 }
 

@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 
-	direction "github.com/EventStore/EventStore-Client-Go/direction"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -66,7 +66,11 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 
 	streamId := "dataset20M-1800"
 
-	stream, err := client.ReadStreamEvents(context, direction.Forwards, streamId, stream_position.Start{}, numberOfEvents, true)
+	opts := options.ReadStreamEventsOptionsDefault().
+		Forwards().
+		ResolveLinks()
+
+	stream, err := client.ReadStreamEvents(context, streamId, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -116,8 +120,12 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 	numberOfEvents := uint64(numberOfEventsToRead)
 
 	streamId := "dataset20M-1800"
+	opts := options.ReadStreamEventsOptionsDefault().
+		Backwards().
+		Position(stream_position.End()).
+		ResolveLinks()
 
-	stream, err := client.ReadStreamEvents(context, direction.Backwards, streamId, stream_position.End{}, numberOfEvents, true)
+	stream, err := client.ReadStreamEvents(context, streamId, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -160,10 +168,12 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 		proposedEvents = append(proposedEvents, createTestEvent())
 	}
 
-	_, err := client.AppendToStream(context.Background(), "testing-closing", streamrevision.StreamRevisionNoStream, proposedEvents)
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(streamrevision.NoStream())
+	_, err := client.AppendToStream(context.Background(), "testing-closing", &opts, proposedEvents...)
 	require.NoError(t, err)
 
-	stream, err := client.ReadStreamEvents(context.Background(), direction.Forwards, "testing-closing", stream_position.Start{}, 1_024, false)
+	ropts := options.ReadStreamEventsOptionsDefault()
+	stream, err := client.ReadStreamEvents(context.Background(), "testing-closing", &ropts, 1_024)
 
 	require.NoError(t, err)
 	_, err = collectStreamEvents(stream)

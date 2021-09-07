@@ -12,6 +12,7 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/options"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/require"
@@ -24,17 +25,16 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	defer client.Close()
 
 	streamID := "dataset20M-0"
-	testEvent := messages.ProposedEvent{
-		EventID:      uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f"),
-		EventType:    "TestEvent",
-		ContentType:  "application/octet-stream",
-		UserMetadata: []byte{0xd, 0xe, 0xa, 0xd},
-		Data:         []byte{0xb, 0xe, 0xe, 0xf},
-	}
+	testEvent := messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
+		EventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f")).
+		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
 
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", stream_position.Start{}, false)
+
+	opts := options.SubscribeToStreamOptionsDefault().Position(stream_position.Start())
+
+	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", &opts)
 
 	go func() {
 		current := 0
@@ -49,11 +49,11 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 				}
 
 				event := subEvent.EventAppeared
-				require.Equal(t, testEvent.EventID, event.GetOriginalEvent().EventID)
+				require.Equal(t, testEvent.GetEventID(), event.GetOriginalEvent().EventID)
 				require.Equal(t, uint64(6_000), event.GetOriginalEvent().EventNumber)
 				require.Equal(t, streamID, event.GetOriginalEvent().StreamID)
-				require.Equal(t, testEvent.Data, event.GetOriginalEvent().Data)
-				require.Equal(t, testEvent.UserMetadata, event.GetOriginalEvent().UserMetadata)
+				require.Equal(t, testEvent.GetData(), event.GetOriginalEvent().Data)
+				require.Equal(t, testEvent.GetMetadata(), event.GetOriginalEvent().UserMetadata)
 				appendedEvents.Done()
 				break
 			}
@@ -67,7 +67,8 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	require.False(t, timedOut, "Timed out waiting for initial set of events")
 
 	// Write a new event
-	writeResult, err := client.AppendToStream(context.Background(), streamID, stream_revision.NewStreamRevision(5999), []messages.ProposedEvent{testEvent})
+	opts2 := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(5_999))
+	writeResult, err := client.AppendToStream(context.Background(), streamID, &opts2, testEvent)
 	require.NoError(t, err)
 	require.Equal(t, uint64(6_000), writeResult.NextExpectedVersion)
 
@@ -102,10 +103,14 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	var receivedEvents sync.WaitGroup
 	receivedEvents.Add(len(positions))
 
-	filter := filtering.NewEventPrefixFilter([]string{"eventType-194"})
-	filterOptions := filtering.NewDefaultSubscriptionFilterOptions(filter)
+	filter := filtering.FilterOnEventType().AddPrefixes("eventType-194")
+	filterOptions := filtering.SubscriptionFilterOptionsDefault(filter)
 
-	subscription, err := client.SubscribeToAllFiltered(context.Background(), stream_position.Start{}, false, filterOptions)
+	opts := options.SubscribeToAllOptionsDefault().
+		Position(stream_position.Start()).
+		Filter(filterOptions)
+
+	subscription, err := client.SubscribeToAll(context.Background(), &opts)
 
 	go func() {
 		current := 0
@@ -141,7 +146,8 @@ func TestConnectionClosing(t *testing.T) {
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", stream_position.Start{}, false)
+	opts := options.SubscribeToStreamOptionsDefault().Position(stream_position.Start())
+	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", &opts)
 
 	go func() {
 		current := 1

@@ -10,13 +10,13 @@ type DeleteOptions struct {
 	GroupName  string
 }
 
-func deleteRequestStreamProto(options DeleteOptions) *persistent.DeleteReq {
+func deleteRequestStreamProto(streamName string, groupName string) *persistent.DeleteReq {
 	return &persistent.DeleteReq{
 		Options: &persistent.DeleteReq_Options{
-			GroupName: options.GroupName,
+			GroupName: groupName,
 			StreamOption: &persistent.DeleteReq_Options_StreamIdentifier{
 				StreamIdentifier: &shared.StreamIdentifier{
-					StreamName: options.StreamName,
+					StreamName: []byte(streamName),
 				},
 			},
 		},

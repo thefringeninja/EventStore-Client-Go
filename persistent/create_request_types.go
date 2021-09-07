@@ -7,16 +7,27 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
+	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
-func createRequestProto(config SubscriptionStreamConfig) *persistent.CreateReq {
+func createRequestProto(
+	streamName string,
+	groupName string,
+	position stream_position.StreamPosition,
+	settings SubscriptionSettings,
+) *persistent.CreateReq {
 	return &persistent.CreateReq{
-		Options: createSubscriptionStreamConfigProto(config),
+		Options: createSubscriptionStreamConfigProto(streamName, groupName, position, settings),
 	}
 }
 
-func createRequestAllOptionsProto(config SubscriptionAllOptionConfig) (*persistent.CreateReq, error) {
-	options, err := createRequestAllOptionsSettingsProto(config.Position, config.Filter)
+func createRequestAllOptionsProto(
+	groupName string,
+	position stream_position.AllStreamPosition,
+	settings SubscriptionSettings,
+	filter *filtering.SubscriptionFilterOptions,
+) (*persistent.CreateReq, error) {
+	options, err := createRequestAllOptionsSettingsProto(position, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -24,14 +35,14 @@ func createRequestAllOptionsProto(config SubscriptionAllOptionConfig) (*persiste
 	return &persistent.CreateReq{
 		Options: &persistent.CreateReq_Options{
 			StreamOption: options,
-			GroupName:    config.GroupName,
-			Settings:     createSubscriptionSettingsProto(config.Settings),
+			GroupName:    groupName,
+			Settings:     createSubscriptionSettingsProto(settings),
 		},
 	}, nil
 }
 
 func createRequestAllOptionsSettingsProto(
-	pos position.Position,
+	pos stream_position.AllStreamPosition,
 	filter *filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
 	options := &persistent.CreateReq_Options_All{
@@ -43,16 +54,17 @@ func createRequestAllOptionsSettingsProto(
 		},
 	}
 
-	if pos == position.StartPosition {
+	switch value := pos.(type) {
+	case stream_position.RevisionStart:
 		options.All.AllOption = &persistent.CreateReq_AllOptions_Start{
 			Start: &shared.Empty{},
 		}
-	} else if pos == position.EndPosition {
+	case stream_position.RevisionEnd:
 		options.All.AllOption = &persistent.CreateReq_AllOptions_End{
 			End: &shared.Empty{},
 		}
-	} else {
-		options.All.AllOption = toCreateRequestAllOptionsFromPosition(pos)
+	case stream_position.RevisionPosition:
+		options.All.AllOption = toCreateRequestAllOptionsFromPosition(value.Value)
 	}
 
 	if filter != nil {
@@ -68,40 +80,47 @@ func createRequestAllOptionsSettingsProto(
 	return options, nil
 }
 
-func createSubscriptionStreamConfigProto(config SubscriptionStreamConfig) *persistent.CreateReq_Options {
+func createSubscriptionStreamConfigProto(
+	streamName string,
+	groupName string,
+	position stream_position.StreamPosition,
+	settings SubscriptionSettings,
+) *persistent.CreateReq_Options {
 	return &persistent.CreateReq_Options{
-		StreamOption: createSubscriptionStreamSettingsProto(config.StreamOption),
+		StreamOption: createSubscriptionStreamSettingsProto(streamName, position),
 		// backward compatibility
 		StreamIdentifier: &shared.StreamIdentifier{
-			StreamName: config.StreamOption.StreamName,
+			StreamName: []byte(streamName),
 		},
-		GroupName: config.GroupName,
-		Settings:  createSubscriptionSettingsProto(config.Settings),
+		GroupName: groupName,
+		Settings:  createSubscriptionSettingsProto(settings),
 	}
 }
 
 func createSubscriptionStreamSettingsProto(
-	streamConfig StreamSettings,
+	streamName string,
+	position stream_position.StreamPosition,
 ) *persistent.CreateReq_Options_Stream {
 	streamOption := &persistent.CreateReq_Options_Stream{
 		Stream: &persistent.CreateReq_StreamOptions{
 			StreamIdentifier: &shared.StreamIdentifier{
-				StreamName: streamConfig.StreamName,
+				StreamName: []byte(streamName),
 			},
 		},
 	}
 
-	if streamConfig.Revision == Revision_Start {
+	switch value := position.(type) {
+	case stream_position.RevisionStart:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_Start{
 			Start: &shared.Empty{},
 		}
-	} else if streamConfig.Revision == Revision_End {
+	case stream_position.RevisionEnd:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_End{
 			End: &shared.Empty{},
 		}
-	} else {
+	case stream_position.RevisionExact:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_Revision{
-			Revision: uint64(streamConfig.Revision),
+			Revision: value.Value,
 		}
 	}
 
@@ -161,39 +180,39 @@ const (
 func createRequestFilterOptionsProto(
 	options filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq_AllOptions_FilterOptions, error) {
-	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
+	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
 		return nil, NewErrorCodeMsg(createRequestFilterOptionsProto_MustProvideRegexOrPrefixErr,
 			"the subscription filter requires a set of prefixes or a regex")
 	}
-	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.Regex) > 0 {
+	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
 		return nil, NewErrorCodeMsg(createRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr,
 			"the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := persistent.CreateReq_AllOptions_FilterOptions{
-		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
+		CheckpointIntervalMultiplier: uint32(options.CheckpointIntervalValue),
 	}
 	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_EventType{
 			EventType: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	} else {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_StreamIdentifier{
 			StreamIdentifier: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	}
-	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindowValue == filtering.NoMaxSearchWindow {
 		filterOptions.Window = &persistent.CreateReq_AllOptions_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
 	} else {
 		filterOptions.Window = &persistent.CreateReq_AllOptions_FilterOptions_Max{
-			Max: uint32(options.MaxSearchWindow),
+			Max: uint32(options.MaxSearchWindowValue),
 		}
 	}
 	return &filterOptions, nil

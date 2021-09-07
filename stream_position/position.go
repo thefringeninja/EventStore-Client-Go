@@ -2,18 +2,18 @@ package stream_position
 
 import pos "github.com/EventStore/EventStore-Client-Go/position"
 
-type Revision struct {
+type RevisionExact struct {
 	Value uint64
 }
 
-type Position struct {
+type RevisionPosition struct {
 	Value pos.Position
 }
 
-type Start struct {
+type RevisionStart struct {
 }
 
-type End struct {
+type RevisionEnd struct {
 }
 
 type StreamPosition interface {
@@ -36,26 +36,46 @@ type AllStreamVisitor interface {
 	VisitEnd()
 }
 
-func (r Revision) AcceptRegularVisitor(visitor RegularStreamVisitor) {
+func (r RevisionExact) AcceptRegularVisitor(visitor RegularStreamVisitor) {
 	visitor.VisitRevision(r.Value)
 }
 
-func (r Position) AcceptAllVisitor(visitor AllStreamVisitor) {
+func (r RevisionPosition) AcceptAllVisitor(visitor AllStreamVisitor) {
 	visitor.VisitPosition(r.Value)
 }
 
-func (r Start) AcceptRegularVisitor(visitor RegularStreamVisitor) {
+func (r RevisionStart) AcceptRegularVisitor(visitor RegularStreamVisitor) {
 	visitor.VisitStart()
 }
 
-func (r End) AcceptRegularVisitor(visitor RegularStreamVisitor) {
+func (r RevisionEnd) AcceptRegularVisitor(visitor RegularStreamVisitor) {
 	visitor.VisitEnd()
 }
 
-func (r Start) AcceptAllVisitor(visitor AllStreamVisitor) {
+func (r RevisionStart) AcceptAllVisitor(visitor AllStreamVisitor) {
 	visitor.VisitStart()
 }
 
-func (r End) AcceptAllVisitor(visitor AllStreamVisitor) {
+func (r RevisionEnd) AcceptAllVisitor(visitor AllStreamVisitor) {
 	visitor.VisitEnd()
+}
+
+func Start() RevisionStart {
+	return RevisionStart{}
+}
+
+func End() RevisionEnd {
+	return RevisionEnd{}
+}
+
+func Position(value pos.Position) AllStreamPosition {
+	return RevisionPosition {
+		Value: value,
+	}
+}
+
+func Revision(value uint64) StreamPosition {
+	return RevisionExact {
+		Value: value,
+	}
 }

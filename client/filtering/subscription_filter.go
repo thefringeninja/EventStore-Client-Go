@@ -9,56 +9,62 @@ const (
 )
 
 type SubscriptionFilterOptions struct {
-	MaxSearchWindow    int
-	CheckpointInterval int
-	SubscriptionFilter SubscriptionFilter
+	MaxSearchWindowValue    int
+	CheckpointIntervalValue int
+	SubscriptionFilter      SubscriptionFilter
 }
 type SubscriptionFilter struct {
 	FilterType FilterType
 	Prefixes   []string
-	Regex      string
+	RegexValue string
 }
 
-func NewDefaultSubscriptionFilterOptions(filter SubscriptionFilter) SubscriptionFilterOptions {
+func SubscriptionFilterOptionsDefault(filter SubscriptionFilter) SubscriptionFilterOptions {
 	return SubscriptionFilterOptions{
-		MaxSearchWindow:    32,
-		CheckpointInterval: 1,
-		SubscriptionFilter: filter,
+		MaxSearchWindowValue:    32,
+		CheckpointIntervalValue: 1,
+		SubscriptionFilter:      filter,
 	}
+}
+
+func (opts SubscriptionFilterOptions) MaxSearchWindow(value int) SubscriptionFilterOptions {
+	opts.MaxSearchWindowValue = value
+	return opts
+}
+
+func (opts SubscriptionFilterOptions) CheckpointInterval(value int) SubscriptionFilterOptions {
+	opts.CheckpointIntervalValue = value
+	return opts
 }
 
 func NewSubscriptionFilterOptions(maxSearchWindow int, checkpointInterval int, filter SubscriptionFilter) SubscriptionFilterOptions {
 	return SubscriptionFilterOptions{
-		MaxSearchWindow:    maxSearchWindow,
-		CheckpointInterval: checkpointInterval,
-		SubscriptionFilter: filter,
+		MaxSearchWindowValue:    maxSearchWindow,
+		CheckpointIntervalValue: checkpointInterval,
+		SubscriptionFilter:      filter,
 	}
 }
 
-func NewEventPrefixFilter(prefixes []string) SubscriptionFilter {
-	return SubscriptionFilter{
+func FilterOnEventType() *SubscriptionFilter {
+	return &SubscriptionFilter{
 		FilterType: EventFilter,
-		Prefixes:   prefixes,
+		Prefixes:   []string{},
 	}
 }
 
-func NewEventRegexFilter(regex string) SubscriptionFilter {
-	return SubscriptionFilter{
-		FilterType: EventFilter,
-		Regex:      regex,
-	}
-}
-
-func NewStreamPrefixFilter(prefixes []string) SubscriptionFilter {
-	return SubscriptionFilter{
+func FilterOnStreamName() *SubscriptionFilter {
+	return &SubscriptionFilter{
 		FilterType: StreamFilter,
-		Prefixes:   prefixes,
 	}
 }
 
-func NewStreamRegexFilter(regex string) SubscriptionFilter {
-	return SubscriptionFilter{
-		FilterType: StreamFilter,
-		Regex:      regex,
-	}
+func (filter SubscriptionFilter) Regex(value string) SubscriptionFilter {
+	filter.RegexValue = value
+	return filter
+}
+
+func (filter SubscriptionFilter) AddPrefixes(values ...string) SubscriptionFilter {
+	filter.Prefixes = append(filter.Prefixes, values...)
+
+	return filter
 }
