@@ -14,40 +14,58 @@ import (
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	shared "github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
+	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
 	"github.com/gofrs/uuid"
 )
 
+type appendSetOptions struct {
+	req *api.AppendReq
+}
+
+func (append *appendSetOptions) VisitAny() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Any{
+		Any: &shared.Empty{},
+	}
+}
+
+func (append *appendSetOptions) VisitStreamExists() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_StreamExists{
+		StreamExists: &shared.Empty{},
+	}
+}
+
+func (append *appendSetOptions) VisitNoStream() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_NoStream{
+		NoStream: &shared.Empty{},
+	}
+}
+
+func (append *appendSetOptions) VisitExact(value uint64) {
+	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Revision{
+		Revision: value,
+	}
+}
+
 // ToAppendHeader ...
-func ToAppendHeader(streamID string, streamRevision stream_revision.StreamRevision) *api.AppendReq {
+func ToAppendHeader(streamID string, streamRevision stream_revision.ExpectedRevision) *api.AppendReq {
 	appendReq := &api.AppendReq{
 		Content: &api.AppendReq_Options_{
 			Options: &api.AppendReq_Options{},
 		},
 	}
+
 	appendReq.GetOptions().StreamIdentifier = &shared.StreamIdentifier{
 		StreamName: []byte(streamID),
 	}
-	switch streamRevision {
-	case stream_revision.StreamRevisionAny:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Any{
-			Any: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionNoStream:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_NoStream{
-			NoStream: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionStreamExists:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_StreamExists{
-			StreamExists: &shared.Empty{},
-		}
-	default:
-		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Revision{
-			Revision: uint64(streamRevision),
-		}
+
+	setOptions := appendSetOptions {
+		req: appendReq,
 	}
+
+	streamRevision.AcceptExpectedRevision(&setOptions)
+
 	return appendReq
 }
 
@@ -196,7 +214,35 @@ func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_
 	return &filterOptions, nil
 }
 
-func ToDeleteRequest(streamID string, streamRevision streamrevision.StreamRevision) *api.DeleteReq {
+type deleteSetOptions struct {
+	req *api.DeleteReq
+}
+
+func (append *deleteSetOptions) VisitAny() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Any{
+		Any: &shared.Empty{},
+	}
+}
+
+func (append *deleteSetOptions) VisitStreamExists() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_StreamExists{
+		StreamExists: &shared.Empty{},
+	}
+}
+
+func (append *deleteSetOptions) VisitNoStream() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_NoStream{
+		NoStream: &shared.Empty{},
+	}
+}
+
+func (append *deleteSetOptions) VisitExact(value uint64) {
+	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Revision{
+		Revision: value,
+	}
+}
+
+func ToDeleteRequest(streamID string, streamRevision streamrevision.ExpectedRevision) *api.DeleteReq {
 	deleteReq := &api.DeleteReq{
 		Options: &api.DeleteReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -204,24 +250,13 @@ func ToDeleteRequest(streamID string, streamRevision streamrevision.StreamRevisi
 			},
 		},
 	}
-	switch streamRevision {
-	case stream_revision.StreamRevisionAny:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Any{
-			Any: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionNoStream:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_NoStream{
-			NoStream: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionStreamExists:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_StreamExists{
-			StreamExists: &shared.Empty{},
-		}
-	default:
-		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Revision{
-			Revision: uint64(streamRevision),
-		}
+
+	setOptions := deleteSetOptions {
+		req: &deleteReq,
 	}
+
+	streamRevision.AcceptExpectedRevision(&setOptions)
+
 	return deleteReq
 }
 

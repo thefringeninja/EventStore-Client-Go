@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
+	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/direction"
 	"github.com/EventStore/EventStore-Client-Go/errors"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
@@ -52,7 +53,7 @@ func (client *Client) Close() error {
 func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
-	streamRevision stream_revision.StreamRevision,
+	opts *options.AppendToStreamOptions,
 	events []messages.ProposedEvent,
 ) (*WriteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
@@ -68,7 +69,7 @@ func (client *Client) AppendToStream(
 		return nil, fmt.Errorf("Could not construct append operation. Reason: %v", err)
 	}
 
-	header := protoutils.ToAppendHeader(streamID, streamRevision)
+	header := protoutils.ToAppendHeader(streamID, opts.Revision)
 
 	if err := appendOperation.Send(header); err != nil {
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)
