@@ -8,6 +8,7 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/stretchr/testify/require"
@@ -304,7 +305,7 @@ func pushEventsToStream(t *testing.T,
 	_, err := clientInstance.AppendToStream(
 		context.Background(),
 		streamID,
-		stream_revision.StreamRevisionNoStream,
+		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
 		events)
 
 	require.NoError(t, err)

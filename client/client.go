@@ -19,7 +19,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 )
 
 type Configuration = connection.Configuration
@@ -138,7 +137,7 @@ func (client *Client) AppendToStream(
 func (client *Client) DeleteStream(
 	context context.Context,
 	streamID string,
-	streamRevision stream_revision.StreamRevision,
+	opts *options.DeleteStreamOptions,
 ) (*DeleteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -146,7 +145,7 @@ func (client *Client) DeleteStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	deleteRequest := protoutils.ToDeleteRequest(streamID, streamRevision)
+	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.Revision)
 	deleteResponse, err := streamsClient.Delete(context, deleteRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)
@@ -160,7 +159,7 @@ func (client *Client) DeleteStream(
 func (client *Client) TombstoneStream(
 	context context.Context,
 	streamID string,
-	streamRevision stream_revision.StreamRevision,
+	opts *options.TombstoneStreamOptions,
 ) (*DeleteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -168,7 +167,7 @@ func (client *Client) TombstoneStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, streamRevision)
+	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.Revision)
 	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 
 	if err != nil {

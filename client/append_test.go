@@ -15,6 +15,7 @@ import (
 	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	messages "github.com/EventStore/EventStore-Client-Go/messages"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
+	"github.com/EventStore/EventStore-Client-Go/options"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -68,7 +69,8 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	_, err := client.AppendToStream(context, streamID.String(), stream_revision.StreamRevisionNoStream, proposedEvents)
+	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream())
+	_, err := client.AppendToStream(context, streamID.String(), opts, proposedEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -109,7 +111,8 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	_, err := client.AppendToStream(context, streamID.String(), stream_revision.StreamRevisionStreamExists, events)
+	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.StreamExists())
+	_, err := client.AppendToStream(context, streamID.String(), opts, events)
 
 	if !errors.Is(err, client_errors.ErrWrongExpectedStreamRevision) {
 		t.Fatalf("Expected WrongExpectedVersion, got %+v", err)
@@ -139,7 +142,8 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	_, err = client.AppendToStream(context, streamID.String(), stream_revision.StreamRevisionAny, events)
+	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.Any())
+	_, err = client.AppendToStream(context, streamID.String(), opts, events)
 
 	if !errors.Is(err, client_errors.ErrUnauthenticated) {
 		t.Fatalf("Expected Unauthenticated, got %+v", err)

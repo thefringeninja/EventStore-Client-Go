@@ -14,7 +14,7 @@ func NewAppendToStreamOptions() *AppendToStreamOptions {
 	}
 }
 
-func (options *AppendToStreamOptions) ExpectedRevision(revision ExpectedRevision) *AppendToStreamOptions {
+func (options *AppendToStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) *AppendToStreamOptions {
 	options.Revision = revision
 
 	return options

@@ -252,7 +252,7 @@ func ToDeleteRequest(streamID string, streamRevision streamrevision.ExpectedRevi
 	}
 
 	setOptions := deleteSetOptions {
-		req: &deleteReq,
+		req: deleteReq,
 	}
 
 	streamRevision.AcceptExpectedRevision(&setOptions)
@@ -260,7 +260,35 @@ func ToDeleteRequest(streamID string, streamRevision streamrevision.ExpectedRevi
 	return deleteReq
 }
 
-func ToTombstoneRequest(streamID string, streamRevision streamrevision.StreamRevision) *api.TombstoneReq {
+type tombstoneSetOptions struct {
+	req *api.TombstoneReq
+}
+
+func (append *tombstoneSetOptions) VisitAny() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Any{
+		Any: &shared.Empty{},
+	}
+}
+
+func (append *tombstoneSetOptions) VisitStreamExists() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_StreamExists{
+		StreamExists: &shared.Empty{},
+	}
+}
+
+func (append *tombstoneSetOptions) VisitNoStream() {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_NoStream{
+		NoStream: &shared.Empty{},
+	}
+}
+
+func (append *tombstoneSetOptions) VisitExact(value uint64) {
+	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Revision{
+		Revision: value,
+	}
+}
+
+func ToTombstoneRequest(streamID string, streamRevision streamrevision.ExpectedRevision) *api.TombstoneReq {
 	tombstoneReq := &api.TombstoneReq{
 		Options: &api.TombstoneReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -268,24 +296,13 @@ func ToTombstoneRequest(streamID string, streamRevision streamrevision.StreamRev
 			},
 		},
 	}
-	switch streamRevision {
-	case stream_revision.StreamRevisionAny:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Any{
-			Any: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionNoStream:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_NoStream{
-			NoStream: &shared.Empty{},
-		}
-	case stream_revision.StreamRevisionStreamExists:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_StreamExists{
-			StreamExists: &shared.Empty{},
-		}
-	default:
-		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Revision{
-			Revision: uint64(streamRevision),
-		}
+
+	optionsSet := tombstoneSetOptions {
+		req: tombstoneReq,
 	}
+
+	streamRevision.AcceptExpectedRevision(&optionsSet)
+
 	return tombstoneReq
 }
 
