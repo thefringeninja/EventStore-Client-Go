@@ -46,20 +46,20 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 		context.Background(), bufferSize, groupName, []byte(streamID))
 	require.NoError(t, err)
 
-	firstReadEvent := readConnectionClient.Recv().EventAppeared
+	firstReadEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, firstReadEvent)
 
-	secondReadEvent := readConnectionClient.Recv()
+	secondReadEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, secondReadEvent)
 
 	// since buffer size is two, after reading two outstanding messages
 	// we must acknowledge a message in order to receive third one
-	err = readConnectionClient.Ack(firstReadEvent)
+	err = readConnectionClient.Ack(firstReadEvent.GetOriginalEvent().EventID)
 	require.NoError(t, err)
 
-	thirdReadEvent := readConnectionClient.Recv()
+	thirdReadEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, thirdReadEvent)
 }
@@ -79,7 +79,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
 	_, err := clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events)
 	require.NoError(t, err)
 	// create persistent stream connection with Revision set to Start
@@ -101,7 +101,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
 
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 
@@ -140,7 +140,7 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 	// append events to StreamsClient.AppendToStreamAsync(Stream, stream_revision.StreamRevisionNoStream, Events);
 	_, err = clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events)
 	require.NoError(t, err)
 	// read one event
@@ -149,7 +149,7 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
 
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 	// assert Event Number == stream Start
@@ -175,7 +175,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
 	_, err := clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events[:10])
 	require.NoError(t, err)
 	// create persistent stream connection with Revision set to End
@@ -196,7 +196,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, new StreamRevision(9), event[10])
 	_, err = clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.Exact(9)),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(9)),
 		events[10:])
 	require.NoError(t, err)
 
@@ -205,7 +205,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
 
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 	// assert readEvent.EventNumber == stream position 10
@@ -231,7 +231,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
 	_, err := clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events[:10])
 	require.NoError(t, err)
 	// create persistent stream connection with position set to End
@@ -257,7 +257,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 
 	doneChannel := make(chan struct{})
 	go func() {
-		event := readConnectionClient.Recv().EventAppeared
+		event, err := readConnectionClient.Read()
 
 		if event != nil && err == nil {
 			doneChannel <- struct{}{}
@@ -312,14 +312,14 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 	// append 3 event to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events)
 	_, err = clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events)
 	require.NoError(t, err)
 	// read one event
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 
@@ -346,7 +346,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events[:10])
 	require.NoError(t, err)
 
@@ -368,7 +368,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(9), events[10:)
 	_, err = clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.Exact(9)),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(9)),
 		events[10:])
 	require.NoError(t, err)
 
@@ -376,7 +376,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 
@@ -403,7 +403,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events[:10])
 	require.NoError(t, err)
 
@@ -425,7 +425,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(9), events)
 	_, err = clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.Exact(9)),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(9)),
 		events[10:])
 	require.NoError(t, err)
 
@@ -433,7 +433,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 
@@ -461,7 +461,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream()),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
 		events[:11])
 	require.NoError(t, err)
 
@@ -483,7 +483,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	// append event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(10), events[11:])
 	_, err = clientInstance.AppendToStream(context.Background(),
 		streamID,
-		options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.Exact(10)),
+		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(10)),
 		events[11:])
 	require.NoError(t, err)
 
@@ -491,7 +491,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), 10, groupName, []byte(streamID))
 	require.NoError(t, err)
-	readEvent := readConnectionClient.Recv().EventAppeared
+	readEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, readEvent)
 
@@ -534,20 +534,20 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 		context.Background(), bufferSize, groupName, []byte(streamID))
 	require.NoError(t, err)
 
-	firstReadEvent := readConnectionClient.Recv().EventAppeared
+	firstReadEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, firstReadEvent)
 
-	secondReadEvent := readConnectionClient.Recv()
+	secondReadEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, secondReadEvent)
 
 	// since buffer size is two, after reading two outstanding messages
 	// we must acknowledge a message in order to receive third one
-	err = readConnectionClient.Nack("test reason", persistent.Nack_Park, firstReadEvent)
+	err = readConnectionClient.Nack("test reason", persistent.Nack_Park, firstReadEvent.GetOriginalEvent().EventID)
 	require.NoError(t, err)
 
-	thirdReadEvent := readConnectionClient.Recv()
+	thirdReadEvent, err := readConnectionClient.Read()
 	require.NoError(t, err)
 	require.NotNil(t, thirdReadEvent)
 }

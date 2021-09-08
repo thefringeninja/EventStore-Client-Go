@@ -18,7 +18,7 @@ func TestCanDeleteStream(t *testing.T) {
 	client := CreateTestClient(container, t)
 	defer client.Close()
 
-	opts := options.NewDeleteStreamOptions().ExpectedRevision(streamrevision.Exact(1_999))
+	opts := options.DeleteStreamOptionsDefault().ExpectedRevision(streamrevision.Exact(1_999))
 	deleteResult, err := client.DeleteStream(context.Background(), "dataset20M-1800", opts)
 
 	if err != nil {
@@ -36,7 +36,7 @@ func TestCanTombstoneStream(t *testing.T) {
 	client := CreateTestClient(container, t)
 	defer client.Close()
 
-	opts := options.NewTombstoneStreamOptions().ExpectedRevision(streamrevision.Exact(1_999))
+	opts := options.TombstoneStreamOptionsDefault().ExpectedRevision(streamrevision.Exact(1_999))
 	deleteResult, err := client.TombstoneStream(context.Background(), "dataset20M-1800", opts)
 
 	if err != nil {
@@ -46,7 +46,7 @@ func TestCanTombstoneStream(t *testing.T) {
 	assert.True(t, deleteResult.Position.Commit > 0)
 	assert.True(t, deleteResult.Position.Prepare > 0)
 
-	opts2 := options.NewAppendToStreamOptions()
+	opts2 := options.AppendToStreamOptionsDefault()
 	_, err = client.AppendToStream(context.Background(), "dataset20M-1800", opts2, []messages.ProposedEvent{createTestEvent()})
 	require.Error(t, err)
 }

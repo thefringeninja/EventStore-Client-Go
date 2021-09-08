@@ -11,10 +11,10 @@ type ReadStreamEventsOptions struct {
 	ResolveToS     bool
 }
 
-func NewReadStreamEventsOptions() *ReadStreamEventsOptions {
+func ReadStreamEventsOptionsDefault() *ReadStreamEventsOptions {
 	return &ReadStreamEventsOptions{
 		DirectionValue: direction.Forwards,
-		From:           stream_position.Start{},
+		From:           stream_position.RevisionStart{},
 		ResolveToS:     false,
 	}
 }
@@ -50,10 +50,10 @@ type ReadAllEventsOptions struct {
 	ResolveToS     bool
 }
 
-func NewReadAllEventsOptions() *ReadAllEventsOptions {
+func ReadAllEventsOptionsDefault() *ReadAllEventsOptions {
 	return &ReadAllEventsOptions{
 		DirectionValue: direction.Forwards,
-		From:           stream_position.Start{},
+		From:           stream_position.RevisionStart{},
 		ResolveToS:     false,
 	}
 }

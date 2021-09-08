@@ -32,7 +32,7 @@ func Test_CloseConnection(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream())
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
 	_, err := client.AppendToStream(context, streamID.String(), opts, proposedEvents)
 
 	if err != nil {
@@ -40,7 +40,7 @@ func Test_CloseConnection(t *testing.T) {
 	}
 
 	client.Close()
-	opts = options.NewAppendToStreamOptions()
+	opts = options.AppendToStreamOptionsDefault()
 	_, err = client.AppendToStream(context, streamID.String(), opts, proposedEvents)
 
 	assert.NotNil(t, err)

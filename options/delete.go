@@ -8,7 +8,7 @@ type DeleteStreamOptions struct {
 	Revision stream_revision.ExpectedRevision
 }
 
-func NewDeleteStreamOptions() *DeleteStreamOptions {
+func DeleteStreamOptionsDefault() *DeleteStreamOptions {
 	return &DeleteStreamOptions {
 		Revision: stream_revision.Any(),
 	}

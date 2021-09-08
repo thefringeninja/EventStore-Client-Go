@@ -8,10 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	direction "github.com/EventStore/EventStore-Client-Go/direction"
 	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	messages "github.com/EventStore/EventStore-Client-Go/messages"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
@@ -69,14 +67,14 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.NoStream())
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
 	_, err := client.AppendToStream(context, streamID.String(), opts, proposedEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
 	}
 
-	stream, err := client.ReadStreamEvents(context, direction.Forwards, streamID.String(), stream_position.Start{}, 1, false)
+	stream, err := client.ReadStreamEvents(context, streamID.String(), options.ReadStreamEventsOptionsDefault(), 1)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -111,7 +109,7 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.StreamExists())
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.StreamExists())
 	_, err := client.AppendToStream(context, streamID.String(), opts, events)
 
 	if !errors.Is(err, client_errors.ErrWrongExpectedStreamRevision) {
@@ -142,7 +140,7 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	opts := options.NewAppendToStreamOptions().ExpectedRevision(stream_revision.Any())
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Any())
 	_, err = client.AppendToStream(context, streamID.String(), opts, events)
 
 	if !errors.Is(err, client_errors.ErrUnauthenticated) {

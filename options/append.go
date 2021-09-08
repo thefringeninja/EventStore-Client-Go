@@ -8,7 +8,7 @@ type AppendToStreamOptions struct {
 	Revision stream_revision.ExpectedRevision
 }
 
-func NewAppendToStreamOptions() *AppendToStreamOptions {
+func AppendToStreamOptionsDefault() *AppendToStreamOptions {
 	return &AppendToStreamOptions {
 		Revision: stream_revision.Any(),
 	}

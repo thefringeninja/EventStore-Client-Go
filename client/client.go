@@ -13,11 +13,10 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/options"
-	"github.com/EventStore/EventStore-Client-Go/direction"
 	"github.com/EventStore/EventStore-Client-Go/errors"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/options"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 )
 
@@ -181,12 +180,11 @@ func (client *Client) TombstoneStream(
 // ReadStreamEvents ...
 func (client *Client) ReadStreamEvents(
 	context context.Context,
-	direction direction.Direction,
 	streamID string,
-	from stream_position.StreamPosition,
+	opts *options.ReadStreamEventsOptions,
 	count uint64,
-	resolveLinks bool) (*ReadStream, error) {
-	readRequest := protoutils.ToReadStreamRequest(streamID, direction, from, count, resolveLinks)
+) (*ReadStream, error) {
+	readRequest := protoutils.ToReadStreamRequest(streamID, opts.DirectionValue, opts.From, count, opts.ResolveToS)
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
 		return nil, err
@@ -199,17 +197,15 @@ func (client *Client) ReadStreamEvents(
 // ReadAllEvents ...
 func (client *Client) ReadAllEvents(
 	context context.Context,
-	direction direction.Direction,
-	from stream_position.AllStreamPosition,
+	opts *options.ReadAllEventsOptions,
 	count uint64,
-	resolveLinks bool,
 ) (*ReadStream, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
 		return nil, err
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	readRequest := protoutils.ToReadAllRequest(direction, from, count, resolveLinks)
+	readRequest := protoutils.ToReadAllRequest(opts.DirectionValue, opts.From, count, opts.ResolveToS)
 	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest)
 }
 

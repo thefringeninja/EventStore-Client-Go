@@ -8,7 +8,7 @@ type TombstoneStreamOptions struct {
 	Revision stream_revision.ExpectedRevision
 }
 
-func NewTombstoneStreamOptions() *TombstoneStreamOptions {
+func TombstoneStreamOptionsDefault() *TombstoneStreamOptions {
 	return &TombstoneStreamOptions {
 		Revision: stream_revision.Any(),
 	}
