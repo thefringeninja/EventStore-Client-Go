@@ -14,7 +14,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 
-	direction "github.com/EventStore/EventStore-Client-Go/direction"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
