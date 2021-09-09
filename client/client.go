@@ -52,7 +52,7 @@ func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
 	opts *options.AppendToStreamOptions,
-	events []messages.ProposedEvent,
+	events ...messages.ProposedEvent,
 ) (*WriteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {

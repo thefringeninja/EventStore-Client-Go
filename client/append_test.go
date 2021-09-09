@@ -8,12 +8,11 @@ import (
 	"testing"
 	"time"
 
-
 	"github.com/EventStore/EventStore-Client-Go/client"
 	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	messages "github.com/EventStore/EventStore-Client-Go/messages"
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/EventStore/EventStore-Client-Go/options"
+	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,22 +52,16 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 
 	client := CreateTestClient(container, t)
 	defer client.Close()
-	testEvent := messages.ProposedEvent{
-		EventID:      uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872"),
-		EventType:    "TestEvent",
-		ContentType:  "application/octet-stream",
-		UserMetadata: []byte{0xd, 0xe, 0xa, 0xd},
-		Data:         []byte{0xb, 0xe, 0xe, 0xf},
-	}
-	proposedEvents := []messages.ProposedEvent{
-		testEvent,
-	}
+	testEvent := messages.NewBinaryEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
+		SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")).
+		SetMetadata([]byte{0xd, 0xe, 0xa, 0xd}).
+		Build()
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
-	_, err := client.AppendToStream(context, streamID.String(), opts, proposedEvents)
+	_, err := client.AppendToStream(context, streamID.String(), opts, testEvent)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -102,15 +95,12 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 
 	client := CreateTestClient(container, t)
 	defer client.Close()
-	events := []messages.ProposedEvent{
-		createTestEvent(),
-	}
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.StreamExists())
-	_, err := client.AppendToStream(context, streamID.String(), opts, events)
+	_, err := client.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
 	if !errors.Is(err, client_errors.ErrWrongExpectedStreamRevision) {
 		t.Fatalf("Expected WrongExpectedVersion, got %+v", err)
@@ -133,15 +123,12 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	}
 
 	defer client.Close()
-	events := []messages.ProposedEvent{
-		createTestEvent(),
-	}
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Any())
-	_, err = client.AppendToStream(context, streamID.String(), opts, events)
+	_, err = client.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
 	if !errors.Is(err, client_errors.ErrUnauthenticated) {
 		t.Fatalf("Expected Unauthenticated, got %+v", err)
