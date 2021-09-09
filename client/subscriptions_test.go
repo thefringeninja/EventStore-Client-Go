@@ -69,7 +69,7 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 
 	// Write a new event
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(5_999))
-	writeResult, err := client.AppendToStream(context.Background(), streamID, opts, []messages.ProposedEvent{testEvent})
+	writeResult, err := client.AppendToStream(context.Background(), streamID, opts, testEvent)
 	require.NoError(t, err)
 	require.Equal(t, uint64(6_000), writeResult.NextExpectedVersion)
 

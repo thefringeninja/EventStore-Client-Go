@@ -2,8 +2,8 @@ package client_test
 
 import (
 	"context"
-	"testing"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
@@ -306,7 +306,7 @@ func pushEventsToStream(t *testing.T,
 		context.Background(),
 		streamID,
 		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
-		events)
+		events...)
 
 	require.NoError(t, err)
 }

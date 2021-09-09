@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/stretchr/testify/assert"
@@ -47,6 +46,6 @@ func TestCanTombstoneStream(t *testing.T) {
 	assert.True(t, deleteResult.Position.Prepare > 0)
 
 	opts2 := options.AppendToStreamOptionsDefault()
-	_, err = client.AppendToStream(context.Background(), "dataset20M-1800", opts2, []messages.ProposedEvent{createTestEvent()})
+	_, err = client.AppendToStream(context.Background(), "dataset20M-1800", opts2, createTestEvent())
 	require.Error(t, err)
 }
