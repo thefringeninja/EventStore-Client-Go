@@ -105,9 +105,13 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	receivedEvents.Add(len(positions))
 
 	filter := filtering.NewEventPrefixFilter([]string{"eventType-194"})
-	filterOptions := filtering.NewDefaultSubscriptionFilterOptions(filter)
+	filterOptions := filtering.SubscriptionFilterOptionsDefault(filter)
 
-	subscription, err := client.SubscribeToAllFiltered(context.Background(), stream_position.RevisionStart{}, false, filterOptions)
+	opts := options.SubscribeToAllOptionsDefault().
+		Position(stream_position.Start()).
+		Filter(filterOptions)
+
+	subscription, err := client.SubscribeToAll(context.Background(), opts)
 
 	go func() {
 		current := 0

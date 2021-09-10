@@ -19,7 +19,7 @@ type SubscriptionFilter struct {
 	Regex      string
 }
 
-func NewDefaultSubscriptionFilterOptions(filter SubscriptionFilter) SubscriptionFilterOptions {
+func SubscriptionFilterOptionsDefault(filter SubscriptionFilter) SubscriptionFilterOptions {
 	return SubscriptionFilterOptions{
 		MaxSearchWindow:    32,
 		CheckpointInterval: 1,

@@ -32,3 +32,26 @@ type SubscribeToAllOptions struct {
 	ResolveToS    bool
 	FilterValue   *filtering.SubscriptionFilterOptions
 }
+
+func SubscribeToAllOptionsDefault() *SubscribeToAllOptions {
+	return &SubscribeToAllOptions{
+		PositionValue: stream_position.End(),
+		ResolveToS:    false,
+		FilterValue:   nil,
+	}
+}
+
+func (opts *SubscribeToAllOptions) Position(value stream_position.AllStreamPosition) *SubscribeToAllOptions {
+	opts.PositionValue = value
+	return opts
+}
+
+func (opts *SubscribeToAllOptions) ResolveLinks() *SubscribeToAllOptions {
+	opts.ResolveToS = true
+	return opts
+}
+
+func (opts *SubscribeToAllOptions) Filter(value filtering.SubscriptionFilterOptions) *SubscribeToAllOptions {
+	opts.FilterValue = &value
+	return opts
+}

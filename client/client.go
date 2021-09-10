@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
-
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/errors"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
@@ -257,8 +254,7 @@ func (client *Client) SubscribeToStream(
 // SubscribeToAll ...
 func (client *Client) SubscribeToAll(
 	ctx context.Context,
-	from stream_position.AllStreamPosition,
-	resolveLinks bool,
+	opts *options.SubscribeToAllOptions,
 ) (*Subscription, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -266,19 +262,22 @@ func (client *Client) SubscribeToAll(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(from, resolveLinks, nil)
+	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.PositionValue, opts.ResolveToS, opts.FilterValue)
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct subscription. Reason: %v", err)
+	}
 	ctx, cancel := context.WithCancel(ctx)
 	readClient, err := streamsClient.Read(ctx, subscriptionRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		defer cancel()
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)
-		return nil, fmt.Errorf("Failed to construct subscription. Reason: %v", err)
+		return nil, fmt.Errorf("failed to construct subscription. Reason: %v", err)
 	}
 	readResult, err := readClient.Recv()
 	if err != nil {
 		defer cancel()
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)
-		return nil, fmt.Errorf("Failed to perform read. Reason: %v", err)
+		return nil, fmt.Errorf("failed to perform read. Reason: %v", err)
 	}
 	switch readResult.Content.(type) {
 	case *api.ReadResp_Confirmation:
@@ -288,48 +287,7 @@ func (client *Client) SubscribeToAll(
 		}
 	}
 	defer cancel()
-	return nil, fmt.Errorf("Failed to initiate subscription.")
-}
-
-// SubscribeToAllFiltered ...
-func (client *Client) SubscribeToAllFiltered(
-	ctx context.Context,
-	from stream_position.AllStreamPosition,
-	resolveLinks bool,
-	filterOptions filtering.SubscriptionFilterOptions,
-) (*Subscription, error) {
-	handle, err := client.grpcClient.GetConnectionHandle()
-	if err != nil {
-		return nil, err
-	}
-	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(from, resolveLinks, &filterOptions)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to construct subscription. Reason: %v", err)
-	}
-	var headers, trailers metadata.MD
-	ctx, cancel := context.WithCancel(ctx)
-	readClient, err := streamsClient.Read(ctx, subscriptionRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
-	if err != nil {
-		defer cancel()
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
-		return nil, fmt.Errorf("Failed to initiate subscription. Reason: %v", err)
-	}
-	readResult, err := readClient.Recv()
-	if err != nil {
-		defer cancel()
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
-		return nil, fmt.Errorf("Failed to read from subscription. Reason: %v", err)
-	}
-	switch readResult.Content.(type) {
-	case *api.ReadResp_Confirmation:
-		{
-			confirmation := readResult.GetConfirmation()
-			return NewSubscription(client, cancel, readClient, confirmation.SubscriptionId), nil
-		}
-	}
-	defer cancel()
-	return nil, fmt.Errorf("Failed to initiate subscription.")
+	return nil, fmt.Errorf("failed to initiate subscription")
 }
 
 // ConnectToPersistentSubscription ...
