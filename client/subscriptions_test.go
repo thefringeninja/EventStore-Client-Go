@@ -25,17 +25,17 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	defer client.Close()
 
 	streamID := "dataset20M-0"
-	testEvent := messages.ProposedEvent{
-		EventID:      uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f"),
-		EventType:    "TestEvent",
-		ContentType:  "application/octet-stream",
-		UserMetadata: []byte{0xd, 0xe, 0xa, 0xd},
-		Data:         []byte{0xb, 0xe, 0xe, 0xf},
-	}
+	testEvent := messages.NewBinaryEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
+		SetEventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f")).
+		SetMetadata([]byte{0xd, 0xe, 0xa, 0xd}).
+		Build()
 
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", stream_position.RevisionStart{}, false)
+
+	opts := options.SubscribeToStreamOptionsDefault().Position(stream_position.Start())
+
+	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", opts)
 
 	go func() {
 		current := 0
@@ -68,8 +68,8 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	require.False(t, timedOut, "Timed out waiting for initial set of events")
 
 	// Write a new event
-	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(5_999))
-	writeResult, err := client.AppendToStream(context.Background(), streamID, opts, testEvent)
+	opts2 := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Exact(5_999))
+	writeResult, err := client.AppendToStream(context.Background(), streamID, opts2, testEvent)
 	require.NoError(t, err)
 	require.Equal(t, uint64(6_000), writeResult.NextExpectedVersion)
 
@@ -143,7 +143,8 @@ func TestConnectionClosing(t *testing.T) {
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", stream_position.RevisionStart{}, false)
+	opts := options.SubscribeToStreamOptionsDefault().Position(stream_position.Start())
+	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", opts)
 
 	go func() {
 		current := 1

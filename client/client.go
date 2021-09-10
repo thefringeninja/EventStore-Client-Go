@@ -213,8 +213,7 @@ func (client *Client) ReadAllEvents(
 func (client *Client) SubscribeToStream(
 	ctx context.Context,
 	streamID string,
-	from stream_position.StreamPosition,
-	resolveLinks bool,
+	opts *options.SubscribeToStreamOptions,
 ) (*Subscription, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -222,7 +221,7 @@ func (client *Client) SubscribeToStream(
 	}
 	var headers, trailers metadata.MD
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, from, resolveLinks, nil)
+	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.PositionValue, opts.ResolveToS, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to construct subscription. Reason: %v", err)
 	}

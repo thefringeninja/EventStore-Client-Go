@@ -2,7 +2,6 @@ package messages
 
 import (
 	"encoding/json"
-	"log"
 
 	uuid "github.com/gofrs/uuid"
 )
@@ -76,13 +75,7 @@ func (builder *Builder) Build() ProposedEvent {
 	var eventId uuid.UUID
 
 	if builder.EventID == uuid.Nil {
-		tmp, err := uuid.NewV4()
-
-		log.Printf("[error] failed to generate random uuid: %v", err)
-
-		// If there is an error, the UUID is defaulted to a Nil UUID (only zeroes). This should never happen.
-		// We decided to not complicate the API over an very unlikely situation.
-		eventId = tmp
+		eventId = uuid.Must(uuid.NewV4())
 	} else {
 		eventId = builder.EventID
 	}
