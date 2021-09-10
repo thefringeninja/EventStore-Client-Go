@@ -14,8 +14,8 @@ import (
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	shared "github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/EventStore/EventStore-Client-Go/streamrevision"
+	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
 	"github.com/gofrs/uuid"
 )
@@ -60,7 +60,7 @@ func ToAppendHeader(streamID string, streamRevision stream_revision.ExpectedRevi
 		StreamName: []byte(streamID),
 	}
 
-	setOptions := appendSetOptions {
+	setOptions := appendSetOptions{
 		req: appendReq,
 	}
 
@@ -185,7 +185,7 @@ func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_
 		return nil, fmt.Errorf("The subscription filter may only contain a regex or a set of prefixes, but not both.")
 	}
 	filterOptions := api.ReadReq_Options_FilterOptions{
-		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
+		CheckpointIntervalMultiplier: uint32(options.CheckpointIntervalValue),
 	}
 	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_EventType{
@@ -202,13 +202,13 @@ func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_
 			},
 		}
 	}
-	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindowValue == filtering.NoMaxSearchWindow {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
 	} else {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Max{
-			Max: uint32(options.MaxSearchWindow),
+			Max: uint32(options.MaxSearchWindowValue),
 		}
 	}
 	return &filterOptions, nil
@@ -251,7 +251,7 @@ func ToDeleteRequest(streamID string, streamRevision streamrevision.ExpectedRevi
 		},
 	}
 
-	setOptions := deleteSetOptions {
+	setOptions := deleteSetOptions{
 		req: deleteReq,
 	}
 
@@ -297,7 +297,7 @@ func ToTombstoneRequest(streamID string, streamRevision streamrevision.ExpectedR
 		},
 	}
 
-	optionsSet := tombstoneSetOptions {
+	optionsSet := tombstoneSetOptions{
 		req: tombstoneReq,
 	}
 

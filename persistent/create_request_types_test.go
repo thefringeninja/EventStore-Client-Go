@@ -46,8 +46,8 @@ func Test_createRequestAllOptionsProto(t *testing.T) {
 			Prepare: 20,
 		},
 		Filter: &filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   nil,
@@ -285,8 +285,8 @@ func Test_checkpointAfterMsProto(t *testing.T) {
 func Test_createRequestFilterOptionsProto(t *testing.T) {
 	t.Run("Event filter", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   nil,
@@ -314,8 +314,8 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 
 	t.Run("Event filter no prefix not regex", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   nil,
@@ -329,8 +329,8 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 
 	t.Run("Event filter both prefix and regex", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   []string{"a", "b"},
@@ -344,8 +344,8 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 
 	t.Run("Stream filter", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   nil,
@@ -373,8 +373,8 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 
 	t.Run("Stream filter no prefix not regex", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   nil,
@@ -388,8 +388,8 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 
 	t.Run("Stream filter both prefix and regex", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    10,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    10,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   []string{"a", "b"},
@@ -403,8 +403,8 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 
 	t.Run("No max search window", func(t *testing.T) {
 		config := filtering.SubscriptionFilterOptions{
-			MaxSearchWindow:    filtering.NoMaxSearchWindow,
-			CheckpointInterval: 20,
+			MaxSearchWindowValue:    filtering.NoMaxSearchWindow,
+			CheckpointIntervalValue: 20,
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   nil,
