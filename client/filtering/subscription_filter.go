@@ -16,23 +16,23 @@ type SubscriptionFilterOptions struct {
 type SubscriptionFilter struct {
 	FilterType FilterType
 	Prefixes   []string
-	RegexValue *string
+	RegexValue string
 }
 
-func SubscriptionFilterOptionsDefault(filter SubscriptionFilter) *SubscriptionFilterOptions {
-	return &SubscriptionFilterOptions{
+func SubscriptionFilterOptionsDefault(filter SubscriptionFilter) SubscriptionFilterOptions {
+	return SubscriptionFilterOptions{
 		MaxSearchWindowValue:    32,
 		CheckpointIntervalValue: 1,
 		SubscriptionFilter:      filter,
 	}
 }
 
-func (opts *SubscriptionFilterOptions) MaxSearchWindow(value int) *SubscriptionFilterOptions {
+func (opts SubscriptionFilterOptions) MaxSearchWindow(value int) SubscriptionFilterOptions {
 	opts.MaxSearchWindowValue = value
 	return opts
 }
 
-func (opts *SubscriptionFilterOptions) CheckpointInterval(value int) *SubscriptionFilterOptions {
+func (opts SubscriptionFilterOptions) CheckpointInterval(value int) SubscriptionFilterOptions {
 	opts.CheckpointIntervalValue = value
 	return opts
 }
@@ -58,12 +58,12 @@ func FilterOnStreamName() *SubscriptionFilter {
 	}
 }
 
-func (filter *SubscriptionFilter) Regex(value string) *SubscriptionFilter {
-	filter.RegexValue = &value
+func (filter SubscriptionFilter) Regex(value string) SubscriptionFilter {
+	filter.RegexValue = value
 	return filter
 }
 
-func (filter *SubscriptionFilter) AddPrefixes(values ...string) *SubscriptionFilter {
+func (filter SubscriptionFilter) AddPrefixes(values ...string) SubscriptionFilter {
 	filter.Prefixes = append(filter.Prefixes, values...)
 
 	return filter

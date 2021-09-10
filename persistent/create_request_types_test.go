@@ -51,7 +51,7 @@ func Test_createRequestAllOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   nil,
-				Regex:      "some regexp",
+				RegexValue: "some regexp",
 			},
 		},
 		GroupName: "group name",
@@ -290,7 +290,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   nil,
-				Regex:      "regexp",
+				RegexValue: "regexp",
 			},
 		}
 
@@ -319,7 +319,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   nil,
-				Regex:      "",
+				RegexValue: "",
 			},
 		}
 
@@ -334,7 +334,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.EventFilter,
 				Prefixes:   []string{"a", "b"},
-				Regex:      "a",
+				RegexValue: "a",
 			},
 		}
 
@@ -349,7 +349,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   nil,
-				Regex:      "regexp",
+				RegexValue: "regexp",
 			},
 		}
 
@@ -378,7 +378,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   nil,
-				Regex:      "",
+				RegexValue: "",
 			},
 		}
 
@@ -393,7 +393,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   []string{"a", "b"},
-				Regex:      "a",
+				RegexValue: "a",
 			},
 		}
 
@@ -408,7 +408,7 @@ func Test_createRequestFilterOptionsProto(t *testing.T) {
 			SubscriptionFilter: filtering.SubscriptionFilter{
 				FilterType: filtering.StreamFilter,
 				Prefixes:   nil,
-				Regex:      "regexp",
+				RegexValue: "regexp",
 			},
 		}
 

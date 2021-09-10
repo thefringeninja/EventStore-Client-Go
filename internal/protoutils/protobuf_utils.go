@@ -178,11 +178,11 @@ func (reg *regularStream) VisitEnd() {
 
 // toFilterOptions ...
 func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_Options_FilterOptions, error) {
-	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
-		return nil, fmt.Errorf("The subscription filter requires a set of prefixes or a regex")
+	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
+		return nil, fmt.Errorf("the subscription filter requires a set of prefixes or a regex")
 	}
-	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.Regex) > 0 {
-		return nil, fmt.Errorf("The subscription filter may only contain a regex or a set of prefixes, but not both.")
+	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
+		return nil, fmt.Errorf("the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := api.ReadReq_Options_FilterOptions{
 		CheckpointIntervalMultiplier: uint32(options.CheckpointIntervalValue),
@@ -191,14 +191,14 @@ func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_EventType{
 			EventType: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	} else {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_StreamIdentifier{
 			StreamIdentifier: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	}

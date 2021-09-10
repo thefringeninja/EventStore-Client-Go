@@ -161,11 +161,11 @@ const (
 func createRequestFilterOptionsProto(
 	options filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq_AllOptions_FilterOptions, error) {
-	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
+	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
 		return nil, NewErrorCodeMsg(createRequestFilterOptionsProto_MustProvideRegexOrPrefixErr,
 			"the subscription filter requires a set of prefixes or a regex")
 	}
-	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.Regex) > 0 {
+	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
 		return nil, NewErrorCodeMsg(createRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr,
 			"the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
@@ -176,14 +176,14 @@ func createRequestFilterOptionsProto(
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_EventType{
 			EventType: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	} else {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_StreamIdentifier{
 			StreamIdentifier: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.Regex,
+				Regex:  options.SubscriptionFilter.RegexValue,
 			},
 		}
 	}
