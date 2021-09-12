@@ -134,6 +134,18 @@ func flattenRoles(props map[string]interface{}, key string, roles []string) {
 	props[key] = roles
 }
 
+func collectRoles(value interface{}) ([]string, error) {
+
+	switch roleValue := value.(type) {
+	case string:
+		return []string{roleValue}, nil
+	case []string:
+		return roleValue, nil
+	default:
+		return nil, fmt.Errorf("invalid acl role value: %v", roleValue)
+	}
+}
+
 func (acl Acl) ToMap() map[string]interface{} {
 	props := make(map[string]interface{})
 
@@ -148,6 +160,53 @@ func (acl Acl) ToMap() map[string]interface{} {
 
 func AclFromMap(props map[string]interface{}) (*Acl, error) {
 	acl := AclDefault()
+
+	for key, value := range props {
+		switch key {
+		case "$r":
+			roles, err := collectRoles(value)
+
+			if err != nil {
+				return nil, err
+			}
+
+			acl.readRoles = roles
+		case "$w":
+			roles, err := collectRoles(value)
+
+			if err != nil {
+				return nil, err
+			}
+
+			acl.writeRoles = roles
+		case "$d":
+			roles, err := collectRoles(value)
+
+			if err != nil {
+				return nil, err
+			}
+
+			acl.deleteRoles = roles
+		case "$mr":
+			roles, err := collectRoles(value)
+
+			if err != nil {
+				return nil, err
+			}
+
+			acl.metaReadRoles = roles
+		case "$mw":
+			roles, err := collectRoles(value)
+
+			if err != nil {
+				return nil, err
+			}
+
+			acl.metaWriteRoles = roles
+		default:
+			return nil, fmt.Errorf("unknown acl key: %v", key)
+		}
+	}
 
 	return &acl, nil
 }
