@@ -79,7 +79,7 @@ type StreamMetadata struct {
 	MaxAgeValue         *time.Duration
 	TruncateBeforeValue *uint64
 	CacheControlValue   *time.Duration
-	AclValue            *interface{}
+	AclValue            interface{}
 	PropertiesValue     map[string]interface{}
 }
 
@@ -110,7 +110,7 @@ func (meta StreamMetadata) CacheControl(value time.Duration) StreamMetadata {
 }
 
 func (meta StreamMetadata) Acl(value interface{}) StreamMetadata {
-	meta.AclValue = &value
+	meta.AclValue = value
 	return meta
 }
 
@@ -146,6 +146,12 @@ func (acl Acl) ToMap() map[string]interface{} {
 	return props
 }
 
+func AclFromMap(props map[string]interface{}) (*Acl, error) {
+	acl := AclDefault()
+
+	return &acl, nil
+}
+
 func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
 	props := make(map[string]interface{})
 
@@ -166,7 +172,7 @@ func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
 	}
 
 	if meta.AclValue != nil {
-		switch value := (*meta.AclValue).(type) {
+		switch value := meta.AclValue.(type) {
 		case string:
 			if value != UserStreamAcl && value != SystemStreamAcl {
 				return nil, fmt.Errorf("unsupported acl string value: %s", value)
@@ -188,4 +194,67 @@ func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
 	}
 
 	return props, nil
+}
+
+func StreamMetadataFromMap(props map[string]interface{}) (*StreamMetadata, error) {
+	meta := StreamMetadataDefault()
+
+	for key, value := range props {
+		switch key {
+		case "$maxCount":
+			if i, ok := value.(uint64); ok {
+				meta.MaxCountValue = &i
+				continue
+			}
+
+			return nil, fmt.Errorf("invalid $maxCount value: %v", value)
+		case "$maxAge":
+			if ms, ok := value.(uint64); ok {
+				age := time.Duration(ms) * time.Millisecond
+				meta.MaxAgeValue = &age
+				continue
+			}
+
+			return nil, fmt.Errorf("invalid $maxAge value: %v", value)
+		case "$tb":
+			if i, ok := value.(uint64); ok {
+				meta.TruncateBeforeValue = &i
+				continue
+			}
+
+			return nil, fmt.Errorf("invalid $tb value: %v", value)
+		case "$cacheControl":
+			if ms, ok := value.(uint64); ok {
+				age := time.Duration(ms) * time.Millisecond
+				meta.CacheControlValue = &age
+				continue
+			}
+
+			return nil, fmt.Errorf("invalid $cacheControl value: %v", value)
+		case "$acl":
+			switch aclValue := value.(type) {
+			case string:
+				if aclValue != UserStreamAcl && aclValue != SystemStreamAcl {
+					return nil, fmt.Errorf("invalid string $acl value: %v", aclValue)
+				}
+
+				meta.AclValue = &value
+			case map[string]interface{}:
+				acl, err := AclFromMap(aclValue)
+
+				if err != nil {
+					return nil, err
+				}
+
+				meta.AclValue = acl
+			default:
+				return nil, fmt.Errorf("invalid $acl object value: %v", value)
+			}
+
+		default:
+			meta.PropertiesValue[key] = value
+		}
+	}
+
+	return &meta, nil
 }
