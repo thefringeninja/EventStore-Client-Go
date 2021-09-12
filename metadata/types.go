@@ -75,48 +75,92 @@ func (acl Acl) AddMetaReadRoles(roles ...string) Acl {
 }
 
 type StreamMetadata struct {
-	MaxCountValue       *uint64
-	MaxAgeValue         *time.Duration
-	TruncateBeforeValue *uint64
-	CacheControlValue   *time.Duration
-	AclValue            interface{}
-	PropertiesValue     map[string]interface{}
+	maxCount         *uint64
+	maxAge           *time.Duration
+	truncateBefore   *uint64
+	cacheControl     *time.Duration
+	acl              interface{}
+	customProperties map[string]interface{}
 }
 
 func StreamMetadataDefault() StreamMetadata {
 	return StreamMetadata{
-		PropertiesValue: make(map[string]interface{}),
+		customProperties: make(map[string]interface{}),
 	}
 }
 
 func (meta StreamMetadata) MaxCount(value uint64) StreamMetadata {
-	meta.MaxCountValue = &value
+	meta.maxCount = &value
 	return meta
 }
 
 func (meta StreamMetadata) MaxAge(value time.Duration) StreamMetadata {
-	meta.MaxAgeValue = &value
+	meta.maxAge = &value
 	return meta
 }
 
 func (meta StreamMetadata) TruncateBefore(value uint64) StreamMetadata {
-	meta.TruncateBeforeValue = &value
+	meta.truncateBefore = &value
 	return meta
 }
 
 func (meta StreamMetadata) CacheControl(value time.Duration) StreamMetadata {
-	meta.CacheControlValue = &value
+	meta.cacheControl = &value
 	return meta
 }
 
 func (meta StreamMetadata) Acl(value interface{}) StreamMetadata {
-	meta.AclValue = value
+	meta.acl = value
 	return meta
 }
 
 func (meta StreamMetadata) AddCustomProperty(name string, value interface{}) StreamMetadata {
-	meta.PropertiesValue[name] = value
+	meta.customProperties[name] = value
 	return meta
+}
+
+func (meta StreamMetadata) GetMaxCount() *uint64 {
+	return meta.maxCount
+}
+
+func (meta StreamMetadata) GetMaxAge() *time.Duration {
+	return meta.maxAge
+}
+
+func (meta StreamMetadata) GetTruncateBefore() *uint64 {
+	return meta.truncateBefore
+}
+
+func (meta StreamMetadata) GetCacheControl() *time.Duration {
+	return meta.cacheControl
+}
+
+func (meta StreamMetadata) GetAcl() interface{} {
+	return meta.acl
+}
+
+func (meta StreamMetadata) GetStreamAcl() *Acl {
+	if acl, ok := meta.acl.(Acl); ok {
+		return &acl
+	}
+
+	return nil
+}
+
+func (meta StreamMetadata) IsUserStreamAcl() bool {
+	if acl, ok := meta.acl.(string); ok {
+		return acl == UserStreamAcl
+	}
+
+	return false
+}
+
+func (meta StreamMetadata) IsSystemStreamAcl() bool {
+	if acl, ok := meta.acl.(string); ok {
+		return acl == SystemStreamAcl
+	}
+
+	return false
 }
 
 func flattenRoles(props map[string]interface{}, key string, roles []string) {
@@ -214,24 +258,24 @@ func AclFromMap(props map[string]interface{}) (*Acl, error) {
 func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
 	props := make(map[string]interface{})
 
-	if meta.MaxCountValue != nil {
-		props["$maxCount"] = *meta.MaxCountValue
+	if meta.maxCount != nil {
+		props["$maxCount"] = *meta.maxCount
 	}
 
-	if meta.MaxAgeValue != nil {
-		props["$maxAge"] = *meta.MaxAgeValue
+	if meta.maxAge != nil {
+		props["$maxAge"] = *meta.maxAge
 	}
 
-	if meta.TruncateBeforeValue != nil {
-		props["$tb"] = *meta.TruncateBeforeValue
+	if meta.truncateBefore != nil {
+		props["$tb"] = *meta.truncateBefore
 	}
 
-	if meta.CacheControlValue != nil {
-		props["$cacheControl"] = (*meta.CacheControlValue).Milliseconds()
+	if meta.cacheControl != nil {
+		props["$cacheControl"] = (*meta.cacheControl).Milliseconds()
 	}
 
-	if meta.AclValue != nil {
-		switch value := meta.AclValue.(type) {
+	if meta.acl != nil {
+		switch value := meta.acl.(type) {
 		case string:
 			if value != UserStreamAcl && value != SystemStreamAcl {
 				return nil, fmt.Errorf("unsupported acl string value: %s", value)
@@ -243,7 +287,7 @@ func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
 		}
 	}
 
-	for key, value := range meta.PropertiesValue {
+	for key, value := range meta.customProperties {
 		// We ignore properties that can conflict with internal metatadata names.
 		if strings.HasPrefix(key, "$") {
 			continue
@@ -262,7 +306,7 @@ func StreamMetadataFromMap(props map[string]interface{}) (*StreamMetadata, error
 		switch key {
 		case "$maxCount":
 			if i, ok := value.(uint64); ok {
-				meta.MaxCountValue = &i
+				meta.maxCount = &i
 				continue
 			}
 
@@ -270,14 +314,14 @@ func StreamMetadataFromMap(props map[string]interface{}) (*StreamMetadata, error
 		case "$maxAge":
 			if ms, ok := value.(uint64); ok {
 				age := time.Duration(ms) * time.Millisecond
-				meta.MaxAgeValue = &age
+				meta.maxAge = &age
 				continue
 			}
 
 			return nil, fmt.Errorf("invalid $maxAge value: %v", value)
 		case "$tb":
 			if i, ok := value.(uint64); ok {
-				meta.TruncateBeforeValue = &i
+				meta.truncateBefore = &i
 				continue
 			}
 
@@ -285,7 +329,7 @@ func StreamMetadataFromMap(props map[string]interface{}) (*StreamMetadata, error
 		case "$cacheControl":
 			if ms, ok := value.(uint64); ok {
 				age := time.Duration(ms) * time.Millisecond
-				meta.CacheControlValue = &age
+				meta.cacheControl = &age
 				continue
 			}
 
@@ -297,7 +341,7 @@ func StreamMetadataFromMap(props map[string]interface{}) (*StreamMetadata, error
 					return nil, fmt.Errorf("invalid string $acl value: %v", aclValue)
 				}
 
-				meta.AclValue = &value
+				meta.acl = &value
 			case map[string]interface{}:
 				acl, err := AclFromMap(aclValue)
 
@@ -305,13 +349,13 @@ func StreamMetadataFromMap(props map[string]interface{}) (*StreamMetadata, error
 					return nil, err
 				}
 
-				meta.AclValue = acl
+				meta.acl = acl
 			default:
 				return nil, fmt.Errorf("invalid $acl object value: %v", value)
 			}
 
 		default:
-			meta.PropertiesValue[key] = value
+			meta.customProperties[key] = value
 		}
 	}
 
