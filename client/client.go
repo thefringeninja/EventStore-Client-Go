@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"encoding/json"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
@@ -133,10 +134,70 @@ func (client *Client) AppendToStream(
 func (client *Client) SetStreamMetadata(
 	context context.Context,
 	streamID string,
-	opts options.AppendToStreamOptions,
+	opts *options.AppendToStreamOptions,
 	metadata esdb_metadata.StreamMetadata,
 ) (*WriteResult, error) {
-	return nil, nil
+	streamName := fmt.Sprintf("$$%v", streamID)
+	props, err := metadata.ToMap()
+
+	if err != nil {
+		return nil, err
+	}
+
+	event, err := messages.NewJsonProposedEvent("$metadata", props)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := client.AppendToStream(context, streamName, opts, event)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (client *Client) GetStreamMetadata(
+	context context.Context,
+	streamID string,
+	opts *options.ReadStreamEventsOptions,
+) (*esdb_metadata.StreamMetadata, error) {
+	streamName := fmt.Sprintf("$$%v", streamID)
+
+	stream, err := client.ReadStreamEvents(context, streamName, opts, 1)
+
+	if err != nil {
+		return nil, err
+	}
+
+	event, err := stream.Recv()
+
+	if err == errors.ErrStreamNotFound {
+		meta := esdb_metadata.StreamMetadataDefault()
+		return &meta, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var props map[string]interface{}
+
+	err = json.Unmarshal(event.GetOriginalEvent().Data, &props)
+
+	if err != nil {
+		return nil, err
+	}
+
+	meta, err := esdb_metadata.StreamMetadataFromMap(props)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &meta, nil
 }
 
 // DeleteStream ...
