@@ -18,10 +18,9 @@ func Test_CloseConnection(t *testing.T) {
 
 	client := CreateTestClient(container, t)
 
-	testEvent := messages.NewBinaryEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
-		SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")).
-		SetMetadata([]byte{0xd, 0xe, 0xa, 0xd}).
-		Build()
+	testEvent := messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
+		EventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")).
+		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)

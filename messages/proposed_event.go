@@ -8,83 +8,99 @@ import (
 
 // ProposedEvent ...
 type ProposedEvent struct {
-	EventID      uuid.UUID
-	EventType    string
-	ContentType  string
-	Data         []byte
-	UserMetadata []byte
+	eventID      uuid.UUID
+	eventType    string
+	contentType  string
+	data         []byte
+	userMetadata []byte
 }
 
-type Builder struct {
-	EventID      uuid.UUID
-	EventType    string
-	ContentType  string
-	Data         []byte
-	UserMetadata []byte
-}
-
-func NewJsonEvent(eventType string, payload interface{}) (*Builder, error) {
+func NewJsonProposedEvent(eventType string, payload interface{}) (ProposedEvent, error) {
+	event := ProposedEvent {}
 	bytes, err := json.Marshal(payload)
 
 	if err != nil {
-		return nil, err
+		return event, err
 	}
 
-	return NewEvent(eventType, "application/json", bytes), nil
+	event.eventType = eventType
+	event.contentType = "application/json"
+	event.data = bytes
+
+	return event, nil
 }
 
-func NewBinaryEvent(eventType string, payload []byte) *Builder {
-	return NewEvent(eventType, "application/octet-stream", payload)
-}
-
-func NewEvent(eventType string, contentType string, payload []byte) *Builder {
-	return &Builder{
-		EventID:      uuid.Nil,
-		EventType:    eventType,
-		ContentType:  contentType,
-		Data:         payload,
-		UserMetadata: []byte{},
+func NewBinaryProposedEvent(eventType string, bytes []byte) ProposedEvent {
+	event := ProposedEvent {
+		eventType: eventType,
+		contentType: "application/octet-stream",
+		data: bytes,
 	}
+
+	return event
 }
 
-func (builder *Builder) SetMetadataAsJson(payload interface{}) error {
+func (event ProposedEvent) GetEventID() uuid.UUID {
+	return event.eventID
+}
+
+func (event ProposedEvent) GetEventType() string {
+	return event.eventType
+}
+
+func (event ProposedEvent) GetContentType() string {
+	return event.contentType
+}
+
+func (event ProposedEvent) GetData() []byte {
+	return event.data
+}
+
+func (event ProposedEvent) GetMetadata() []byte {
+	return event.userMetadata
+}
+
+func (event ProposedEvent) EventID(value uuid.UUID) ProposedEvent {
+	event.eventID = value
+	return event
+}
+
+func (event ProposedEvent) EventType(value string) ProposedEvent {
+	event.eventType = value
+	return event
+}
+
+func (event ProposedEvent) ContentType(value string) ProposedEvent {
+	event.contentType = value
+	return event
+}
+
+func (event ProposedEvent) JsonData(payload interface{}) (ProposedEvent, error) {
 	bytes, err := json.Marshal(payload)
 
 	if err != nil {
-		return err
+		return event, err
 	}
 
-	builder.UserMetadata = bytes
+	event.data = bytes
+	event.contentType = "application/json"
 
-	return nil
+	return event, nil
 }
 
-func (builder *Builder) SetMetadata(payload []byte) *Builder {
-	builder.UserMetadata = payload
+func (event ProposedEvent) BinaryData(payload []byte) ProposedEvent {
+	event.data = payload
+	event.contentType = "application/octet-stream"
 
-	return builder
+	return event
 }
 
-func (builder *Builder) SetEventID(id uuid.UUID) *Builder {
-	builder.EventID = id
-
-	return builder
+func (event ProposedEvent) Data(payload []byte) ProposedEvent {
+	event.data = payload
+	return event
 }
 
-func (builder *Builder) Build() ProposedEvent {
-	var eventId uuid.UUID
-
-	if builder.EventID == uuid.Nil {
-		eventId = uuid.Must(uuid.NewV4())
-	} else {
-		eventId = builder.EventID
-	}
-
-	return ProposedEvent{
-		EventID:      eventId,
-		EventType:    builder.EventType,
-		ContentType:  builder.ContentType,
-		Data:         builder.Data,
-		UserMetadata: builder.UserMetadata,
-	}
+func (event ProposedEvent) Metadata(payload []byte) ProposedEvent {
+	event.userMetadata = payload
+	return event
 }

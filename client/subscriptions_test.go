@@ -25,10 +25,9 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	defer client.Close()
 
 	streamID := "dataset20M-0"
-	testEvent := messages.NewBinaryEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
-		SetEventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f")).
-		SetMetadata([]byte{0xd, 0xe, 0xa, 0xd}).
-		Build()
+	testEvent := messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
+		EventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f")).
+		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
 
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
@@ -50,11 +49,11 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 				}
 
 				event := subEvent.EventAppeared
-				require.Equal(t, testEvent.EventID, event.GetOriginalEvent().EventID)
+				require.Equal(t, testEvent.GetEventID(), event.GetOriginalEvent().EventID)
 				require.Equal(t, uint64(6_000), event.GetOriginalEvent().EventNumber)
 				require.Equal(t, streamID, event.GetOriginalEvent().StreamID)
-				require.Equal(t, testEvent.Data, event.GetOriginalEvent().Data)
-				require.Equal(t, testEvent.UserMetadata, event.GetOriginalEvent().UserMetadata)
+				require.Equal(t, testEvent.GetData(), event.GetOriginalEvent().Data)
+				require.Equal(t, testEvent.GetMetadata(), event.GetOriginalEvent().UserMetadata)
 				appendedEvents.Done()
 				break
 			}

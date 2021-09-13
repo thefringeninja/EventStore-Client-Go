@@ -14,6 +14,7 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
+	esdb_metadata "github.com/EventStore/EventStore-Client-Go/metadata"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 )
 
@@ -127,6 +128,15 @@ func (client *Client) AppendToStream(
 		PreparePosition:     0,
 		NextExpectedVersion: 1,
 	}, nil
+}
+
+func (client *Client) SetStreamMetadata(
+	context context.Context,
+	streamID string,
+	opts options.AppendToStreamOptions,
+	metadata esdb_metadata.StreamMetadata,
+) (*WriteResult, error) {
+	return nil, nil
 }
 
 // DeleteStream ...
