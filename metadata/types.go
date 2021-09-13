@@ -85,11 +85,11 @@ type StreamMetadata struct {
 
 func StreamMetadataDefault() StreamMetadata {
 	return StreamMetadata{
-		// maxCount: []uint64{},
-		// maxAge: []time.Duration{},
-		// truncateBefore: []uint64{},
-		// cacheControl: []time.Duration{},
-		// acl: []interface{}{},
+		maxCount:         []uint64{},
+		maxAge:           []time.Duration{},
+		truncateBefore:   []uint64{},
+		cacheControl:     []time.Duration{},
+		acl:              []interface{}{},
 		customProperties: make(map[string]interface{}),
 	}
 }

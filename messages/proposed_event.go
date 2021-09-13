@@ -26,6 +26,7 @@ func NewJsonProposedEvent(eventType string, payload interface{}) (ProposedEvent,
 	event.eventType = eventType
 	event.contentType = "application/json"
 	event.data = bytes
+	event.metadata = []byte{}
 
 	return event, nil
 }
@@ -35,6 +36,7 @@ func NewBinaryProposedEvent(eventType string, bytes []byte) ProposedEvent {
 		eventType: eventType,
 		contentType: "application/octet-stream",
 		data: bytes,
+		userMetadata: []byte{},
 	}
 
 	return event
