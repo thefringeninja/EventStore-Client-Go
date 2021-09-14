@@ -20,6 +20,7 @@ import (
 
 func createTestEvent() messages.ProposedEvent {
 	return messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
+		EventID(uuid.Must(uuid.NewV4())).
 		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
 }
 

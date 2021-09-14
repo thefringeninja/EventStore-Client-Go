@@ -47,7 +47,7 @@ func NewSubscriptionFilterOptions(maxSearchWindow int, checkpointInterval int, f
 
 func FilterOnEventType() *SubscriptionFilter {
 	return &SubscriptionFilter{
-		FilterType: StreamFilter,
+		FilterType: EventFilter,
 		Prefixes:   []string{},
 	}
 }
