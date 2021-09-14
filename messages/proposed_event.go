@@ -12,7 +12,7 @@ type ProposedEvent struct {
 	eventType    string
 	contentType  string
 	data         []byte
-	userMetadata []byte
+	metadata []byte
 }
 
 func NewJsonProposedEvent(eventType string, payload interface{}) (ProposedEvent, error) {
@@ -36,7 +36,7 @@ func NewBinaryProposedEvent(eventType string, bytes []byte) ProposedEvent {
 		eventType: eventType,
 		contentType: "application/octet-stream",
 		data: bytes,
-		userMetadata: []byte{},
+		metadata: []byte{},
 	}
 
 	return event
@@ -59,7 +59,7 @@ func (event ProposedEvent) GetData() []byte {
 }
 
 func (event ProposedEvent) GetMetadata() []byte {
-	return event.userMetadata
+	return event.metadata
 }
 
 func (event ProposedEvent) EventID(value uuid.UUID) ProposedEvent {
@@ -103,6 +103,6 @@ func (event ProposedEvent) Data(payload []byte) ProposedEvent {
 }
 
 func (event ProposedEvent) Metadata(payload []byte) ProposedEvent {
-	event.userMetadata = payload
+	event.metadata = payload
 	return event
 }

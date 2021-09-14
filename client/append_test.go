@@ -11,6 +11,7 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/client"
 	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	messages "github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/metadata"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	uuid "github.com/gofrs/uuid"
@@ -127,4 +128,49 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	if !errors.Is(err, client_errors.ErrUnauthenticated) {
 		t.Fatalf("Expected Unauthenticated, got %+v", err)
 	}
+}
+
+func TestMetadataOperation(t *testing.T) {
+	container := GetEmptyDatabase()
+	defer container.Close()
+
+	str := fmt.Sprintf("esdb://bad_user:bad_password@%s?tlsverifycert=false", container.Endpoint)
+	config, err := client.ParseConnectionString(str)
+
+	if err != nil {
+		t.Fatalf("Unexpected configuration error: %s", err.Error())
+	}
+
+	client, err := client.NewClient(config)
+
+	if err != nil {
+		t.Fatalf("Unexpected failure setting up test connection: %s", err.Error())
+	}
+
+	defer client.Close()
+
+	streamID := uuid.Must(uuid.NewV4())
+	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
+	defer cancel()
+
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Any())
+	_, err = client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+
+	assert.Nil(t, err, "error when writing an event")
+
+	acl := metadata.AclDefault().AddReadRoles("admin")
+	meta := metadata.StreamMetadataDefault().
+		MaxAge(2 * time.Second).
+		Acl(acl)
+
+	result, err := client.SetStreamMetadata(context, streamID.String(), opts, meta)
+
+	assert.Nil(t, err, "no error from writing stream metadata")
+	assert.NotNil(t, result, "defined write result after writing metadata")
+
+	metaActual, err := client.GetStreamMetadata(context, streamID.String(), options.ReadStreamEventsOptionsDefault())
+
+	assert.Nil(t, err, "no error when reading stream metadata")
+
+	assert.Equal(t, meta, *metaActual, "matching metadata")
 }
