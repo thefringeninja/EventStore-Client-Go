@@ -134,7 +134,7 @@ func TestMetadataOperation(t *testing.T) {
 	container := GetEmptyDatabase()
 	defer container.Close()
 
-	str := fmt.Sprintf("esdb://bad_user:bad_password@%s?tlsverifycert=false", container.Endpoint)
+	str := fmt.Sprintf("esdb://admin:changeit@%s?tlsverifycert=false", container.Endpoint)
 	config, err := client.ParseConnectionString(str)
 
 	if err != nil {
