@@ -285,6 +285,8 @@ func createGrpcConnection(conf *Configuration, address string) (*grpc.ClientConn
 				})))
 	}
 
+	log.Printf("[warn] >>> [%v]:[%v]", conf.Username, conf.Password)
+
 	opts = append(opts, grpc.WithPerRPCCredentials(basicAuth{
 		username: conf.Username,
 		password: conf.Password,

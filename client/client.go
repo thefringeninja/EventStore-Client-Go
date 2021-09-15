@@ -66,7 +66,7 @@ func (client *Client) AppendToStream(
 		return nil, fmt.Errorf("Could not construct append operation. Reason: %v", err)
 	}
 
-	header := protoutils.ToAppendHeader(streamID, opts.Revision)
+	header := protoutils.ToAppendHeader(streamID, opts.GetExpectedRevision())
 
 	if err := appendOperation.Send(header); err != nil {
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)

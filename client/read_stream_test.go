@@ -169,7 +169,7 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 	}
 
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(streamrevision.NoStream())
-	_, err := client.AppendToStream(context.Background(), "testing-closing", opts, proposedEvents...)
+	_, err := client.AppendToStream(context.Background(), "testing-closing", &opts, proposedEvents...)
 	require.NoError(t, err)
 
 	stream, err := client.ReadStreamEvents(context.Background(), "testing-closing", options.ReadStreamEventsOptionsDefault(), 1_024)

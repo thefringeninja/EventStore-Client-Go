@@ -303,11 +303,8 @@ func pushEventsToStream(t *testing.T,
 	streamID string,
 	events []messages.ProposedEvent) {
 
-	_, err := clientInstance.AppendToStream(
-		context.Background(),
-		streamID,
-		options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream()),
-		events...)
+	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
+	_, err := clientInstance.AppendToStream(context.Background(), streamID, &opts, events...)
 
 	require.NoError(t, err)
 }

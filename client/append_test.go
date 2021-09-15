@@ -57,7 +57,7 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
-	_, err := client.AppendToStream(context, streamID.String(), opts, testEvent)
+	_, err := client.AppendToStream(context, streamID.String(), &opts, testEvent)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -96,7 +96,7 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.StreamExists())
-	_, err := client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+	_, err := client.AppendToStream(context, streamID.String(), &opts, createTestEvent())
 
 	if !errors.Is(err, client_errors.ErrWrongExpectedStreamRevision) {
 		t.Fatalf("Expected WrongExpectedVersion, got %+v", err)
@@ -124,7 +124,7 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Any())
-	_, err = client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+	_, err = client.AppendToStream(context, streamID.String(), &opts, createTestEvent())
 
 	if !errors.Is(err, client_errors.ErrUnauthenticated) {
 		t.Fatalf("Expected Unauthenticated, got %+v", err)
@@ -155,7 +155,7 @@ func TestMetadataOperation(t *testing.T) {
 	defer cancel()
 
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.Any())
-	_, err = client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+	_, err = client.AppendToStream(context, streamID.String(), &opts, createTestEvent())
 
 	assert.Nil(t, err, "error when writing an event")
 
@@ -164,7 +164,7 @@ func TestMetadataOperation(t *testing.T) {
 		MaxAge(2 * time.Second).
 		Acl(acl)
 
-	result, err := client.SetStreamMetadata(context, streamID.String(), opts, meta)
+	result, err := client.SetStreamMetadata(context, streamID.String(), &opts, meta)
 
 	assert.Nil(t, err, "no error from writing stream metadata")
 	assert.NotNil(t, result, "defined write result after writing metadata")

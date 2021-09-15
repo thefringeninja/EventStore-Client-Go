@@ -26,7 +26,7 @@ func Test_CloseConnection(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
-	_, err := client.AppendToStream(context, streamID.String(), opts, testEvent)
+	_, err := client.AppendToStream(context, streamID.String(), &opts, testEvent)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -34,7 +34,7 @@ func Test_CloseConnection(t *testing.T) {
 
 	client.Close()
 	opts = options.AppendToStreamOptionsDefault()
-	_, err = client.AppendToStream(context, streamID.String(), opts, testEvent)
+	_, err = client.AppendToStream(context, streamID.String(), &opts, testEvent)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "esdb connection is closed", err.Error())
