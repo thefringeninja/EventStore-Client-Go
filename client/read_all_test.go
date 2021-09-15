@@ -35,7 +35,8 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	stream, err := client.ReadAllEvents(context, options.ReadAllEventsOptionsDefault().ResolveLinks(), numberOfEvents)
+	opts := options.ReadAllEventsOptionsDefault().ResolveLinks()
+	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -86,7 +87,7 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 		Position(stream_position.Position(position.Position{Commit: 1788, Prepare: 1788})).
 		ResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -138,7 +139,7 @@ func TestReadAllEventsBackwardsFromZeroPosition(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -190,7 +191,7 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)

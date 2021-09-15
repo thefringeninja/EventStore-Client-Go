@@ -70,7 +70,7 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 		Forwards().
 		ResolveLinks()
 
-	stream, err := client.ReadStreamEvents(context, streamId, opts, numberOfEvents)
+	stream, err := client.ReadStreamEvents(context, streamId, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -125,7 +125,7 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 		Position(stream_position.End()).
 		ResolveLinks()
 
-	stream, err := client.ReadStreamEvents(context, streamId, opts, numberOfEvents)
+	stream, err := client.ReadStreamEvents(context, streamId, &opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -172,7 +172,8 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 	_, err := client.AppendToStream(context.Background(), "testing-closing", &opts, proposedEvents...)
 	require.NoError(t, err)
 
-	stream, err := client.ReadStreamEvents(context.Background(), "testing-closing", options.ReadStreamEventsOptionsDefault(), 1_024)
+	ropts := options.ReadStreamEventsOptionsDefault()
+	stream, err := client.ReadStreamEvents(context.Background(), "testing-closing", &ropts, 1_024)
 
 	require.NoError(t, err)
 	_, err = collectStreamEvents(stream)

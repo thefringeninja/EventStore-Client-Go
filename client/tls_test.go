@@ -38,7 +38,7 @@ func TestTLSDefaults(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
@@ -74,7 +74,7 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -99,7 +99,7 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -124,7 +124,7 @@ func TestTLSWithoutCertificate(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
@@ -160,7 +160,7 @@ func TestTLSWithCertificate(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -191,7 +191,7 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -216,7 +216,7 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -251,7 +251,7 @@ func TestTLSWithInvalidCertificate(t *testing.T) {
 		Backwards().
 		ResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
