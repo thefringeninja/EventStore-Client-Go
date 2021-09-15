@@ -212,7 +212,7 @@ func (client *Client) DeleteStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.Revision)
+	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.GetExpectedRevision())
 	deleteResponse, err := streamsClient.Delete(context, deleteRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)
@@ -234,7 +234,7 @@ func (client *Client) TombstoneStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.Revision)
+	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.GetExpectedRevision())
 	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 
 	if err != nil {

@@ -5,17 +5,21 @@ import (
 )
 
 type TombstoneStreamOptions struct {
-	Revision stream_revision.ExpectedRevision
+	expectedRevision stream_revision.ExpectedRevision
 }
 
-func TombstoneStreamOptionsDefault() *TombstoneStreamOptions {
-	return &TombstoneStreamOptions {
-		Revision: stream_revision.Any(),
+func TombstoneStreamOptionsDefault() TombstoneStreamOptions {
+	return TombstoneStreamOptions {
+		expectedRevision: stream_revision.Any(),
 	}
 }
 
-func (options *TombstoneStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) *TombstoneStreamOptions {
-	options.Revision = revision
+func (options TombstoneStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) TombstoneStreamOptions {
+	options.expectedRevision = revision
 
 	return options
+}
+
+func (options TombstoneStreamOptions) GetExpectedRevision() stream_revision.ExpectedRevision {
+	return options.expectedRevision
 }

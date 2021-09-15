@@ -5,17 +5,21 @@ import (
 )
 
 type DeleteStreamOptions struct {
-	Revision stream_revision.ExpectedRevision
+	expectedRevision stream_revision.ExpectedRevision
 }
 
-func DeleteStreamOptionsDefault() *DeleteStreamOptions {
-	return &DeleteStreamOptions {
-		Revision: stream_revision.Any(),
+func DeleteStreamOptionsDefault() DeleteStreamOptions {
+	return DeleteStreamOptions {
+		expectedRevision: stream_revision.Any(),
 	}
 }
 
-func (options *DeleteStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) *DeleteStreamOptions {
-	options.Revision = revision
+func (options DeleteStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) DeleteStreamOptions {
+	options.expectedRevision = revision
 
 	return options
+}
+
+func (options DeleteStreamOptions) GetExpectedRevision() stream_revision.ExpectedRevision {
+	return options.expectedRevision
 }
