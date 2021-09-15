@@ -289,7 +289,7 @@ func (client *Client) SubscribeToStream(
 	}
 	var headers, trailers metadata.MD
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.PositionValue, opts.ResolveToS, nil)
+	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.GetPosition(), opts.GetResolveLinks(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to construct subscription. Reason: %v", err)
 	}
@@ -333,7 +333,7 @@ func (client *Client) SubscribeToAll(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.PositionValue, opts.ResolveToS, opts.FilterValue)
+	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.GetPosition(), opts.GetResolveLinks(), opts.GetFilter())
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %v", err)
 	}
