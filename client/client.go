@@ -385,7 +385,9 @@ func (client *Client) ConnectToPersistentSubscription(
 
 func (client *Client) CreatePersistentSubscription(
 	ctx context.Context,
-	streamConfig persistent.SubscriptionStreamConfig,
+	streamName string,
+	groupName string,
+	options *options.PersistentStreamSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -393,12 +395,14 @@ func (client *Client) CreatePersistentSubscription(
 	}
 	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamConfig)
+	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.GetPosition(), options.GetSettings())
 }
 
 func (client *Client) CreatePersistentSubscriptionAll(
 	ctx context.Context,
-	allOptions persistent.SubscriptionAllOptionConfig,
+	streamName string,
+	groupName string,
+	options options.PersistentStreamSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
