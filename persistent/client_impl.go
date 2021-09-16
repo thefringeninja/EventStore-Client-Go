@@ -130,8 +130,15 @@ func (client ClientImpl) CreateAllSubscription(
 
 const UpdateStreamSubscription_FailedToUpdateErr ErrorCode = "UpdateStreamSubscription_FailedToUpdateErr"
 
-func (client ClientImpl) UpdateStreamSubscription(ctx context.Context, handle connection.ConnectionHandle, streamConfig SubscriptionStreamConfig) error {
-	updateSubscriptionConfig := updateRequestStreamProto(streamConfig)
+func (client ClientImpl) UpdateStreamSubscription(
+	ctx context.Context,
+	handle connection.ConnectionHandle,
+	streamName string,
+	groupName string,
+	position stream_position.StreamPosition,
+	settings SubscriptionSettings,
+) error {
+	updateSubscriptionConfig := updateRequestStreamProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
@@ -144,8 +151,14 @@ func (client ClientImpl) UpdateStreamSubscription(ctx context.Context, handle co
 
 const UpdateAllSubscription_FailedToUpdateErr ErrorCode = "UpdateAllSubscription_FailedToUpdateErr"
 
-func (client ClientImpl) UpdateAllSubscription(ctx context.Context, handle connection.ConnectionHandle, allOptions SubscriptionUpdateAllOptionConfig) error {
-	updateSubscriptionConfig := UpdateRequestAllOptionsProto(allOptions)
+func (client ClientImpl) UpdateAllSubscription(
+	ctx context.Context,
+	handle connection.ConnectionHandle,
+	groupName string,
+	position stream_position.AllStreamPosition,
+	settings SubscriptionSettings,
+) error {
+	updateSubscriptionConfig := UpdateRequestAllOptionsProto(groupName, position, settings)
 
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
@@ -159,8 +172,13 @@ func (client ClientImpl) UpdateAllSubscription(ctx context.Context, handle conne
 
 const DeleteStreamSubscription_FailedToDeleteErr ErrorCode = "DeleteStreamSubscription_FailedToDeleteErr"
 
-func (client ClientImpl) DeleteStreamSubscription(ctx context.Context, handle connection.ConnectionHandle, deleteOptions DeleteOptions) error {
-	deleteSubscriptionOptions := deleteRequestStreamProto(deleteOptions)
+func (client ClientImpl) DeleteStreamSubscription(
+	ctx context.Context,
+	handle connection.ConnectionHandle,
+	streamName string,
+	groupName string,
+) error {
+	deleteSubscriptionOptions := deleteRequestStreamProto(streamName, groupName)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {

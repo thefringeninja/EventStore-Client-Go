@@ -8,6 +8,7 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
+	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/stretchr/testify/require"
 )
@@ -28,16 +29,12 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
+	options := options.PersistentStreamSubscriptionOptionsDefault()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision_Start,
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&options,
 	)
 	require.NoError(t, err)
 
@@ -82,16 +79,12 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 	require.NoError(t, err)
 	// create persistent stream connection with Revision set to Start
 	groupName := "Group 1"
+	options := options.PersistentStreamSubscriptionOptionsDefault()
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision_Start,
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&options,
 	)
 	require.NoError(t, err)
 	// read one event
@@ -123,16 +116,12 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 	// create persistent stream connection with Revision set to Start
 	streamID := "someStream"
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Start())
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision_Start,
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 	require.NoError(t, err)
 	// append events to StreamsClient.AppendToStreamAsync(Stream, stream_revision.StreamRevisionNoStream, Events);
@@ -174,16 +163,12 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 	require.NoError(t, err)
 	// create persistent stream connection with Revision set to End
 	groupName := "Group 1"
+	optO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.End())
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision_End,
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optO,
 	)
 	require.NoError(t, err)
 
@@ -226,16 +211,12 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 	require.NoError(t, err)
 	// create persistent stream connection with position set to End
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.End())
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision_End,
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 	require.NoError(t, err)
 
@@ -287,16 +268,12 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 	// create persistent stream connection with position set to Position(2)
 	streamID := "someStream"
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Revision(2))
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision(2),
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 	require.NoError(t, err)
 	// append 3 event to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events)
@@ -338,16 +315,12 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 
 	// create persistent stream connection with start position set to Position(10)
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Revision(10))
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision(10),
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 	require.NoError(t, err)
 
@@ -391,16 +364,12 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 
 	// create persistent stream connection with start position set to Position(4)
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Revision(4))
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision(4),
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 	require.NoError(t, err)
 
@@ -445,16 +414,12 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 
 	// create persistent stream connection with start position set to Position(11)
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Revision(11))
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision(11),
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 	require.NoError(t, err)
 
@@ -493,16 +458,12 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
+	optsO := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Start())
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
-		persistent.SubscriptionStreamConfig{
-			StreamOption: persistent.StreamSettings{
-				StreamName: []byte(streamID),
-				Revision:   persistent.Revision_Start,
-			},
-			GroupName: groupName,
-			Settings:  persistent.DefaultSubscriptionSettings,
-		},
+		streamID,
+		groupName,
+		&optsO,
 	)
 
 	var bufferSize int32 = 2

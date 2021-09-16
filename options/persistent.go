@@ -39,13 +39,14 @@ func (opts PersistentStreamSubscriptionOptions) GetPosition() stream_position.St
 type PersistentAllSubscriptionOptions struct {
 	settings persistent.SubscriptionSettings
 	position stream_position.AllStreamPosition
-	filter   filtering.SubscriptionFilterOptions
+	filter   []filtering.SubscriptionFilterOptions
 }
 
 func PersistentAllSubscriptionOptionsDefault() PersistentAllSubscriptionOptions {
 	return PersistentAllSubscriptionOptions{
 		settings: persistent.DefaultSubscriptionSettings,
 		position: stream_position.End(),
+		filter:   []filtering.SubscriptionFilterOptions{},
 	}
 }
 
@@ -60,7 +61,7 @@ func (opts PersistentAllSubscriptionOptions) Position(position stream_position.A
 }
 
 func (opts PersistentAllSubscriptionOptions) Filter(filter filtering.SubscriptionFilterOptions) PersistentAllSubscriptionOptions {
-	opts.filter = filter
+	opts.filter = []filtering.SubscriptionFilterOptions{filter}
 	return opts
 }
 
@@ -70,6 +71,14 @@ func (opts PersistentAllSubscriptionOptions) GetSettings() persistent.Subscripti
 
 func (opts PersistentAllSubscriptionOptions) GetPosition() stream_position.AllStreamPosition {
 	return opts.position
+}
+
+func (opts PersistentAllSubscriptionOptions) GetFilter() *filtering.SubscriptionFilterOptions {
+	if len(opts.filter) == 0 {
+		return nil
+	}
+
+	return &opts.filter[0]
 }
 
 type ConnectToPersistentSubscriptionOptions struct {

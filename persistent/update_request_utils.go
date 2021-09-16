@@ -6,30 +6,38 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
+	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
-func updateRequestStreamProto(config SubscriptionStreamConfig) *persistent.UpdateReq {
+func updateRequestStreamProto(
+	streamName string,
+	groupName string,
+	position stream_position.StreamPosition,
+	settings SubscriptionSettings,
+) *persistent.UpdateReq {
 	return &persistent.UpdateReq{
-		Options: updateSubscriptionStreamConfigProto(config),
+		Options: updateSubscriptionStreamConfigProto(streamName, groupName, position, settings),
 	}
 }
 
 func UpdateRequestAllOptionsProto(
-	config SubscriptionUpdateAllOptionConfig,
+	groupName string,
+	position stream_position.AllStreamPosition,
+	settings SubscriptionSettings,
 ) *persistent.UpdateReq {
-	options := updateRequestAllOptionsSettingsProto(config.Position)
+	options := updateRequestAllOptionsSettingsProto(position)
 
 	return &persistent.UpdateReq{
 		Options: &persistent.UpdateReq_Options{
 			StreamOption: options,
-			GroupName:    config.GroupName,
-			Settings:     updateSubscriptionSettingsProto(config.Settings),
+			GroupName:    groupName,
+			Settings:     updateSubscriptionSettingsProto(settings),
 		},
 	}
 }
 
 func updateRequestAllOptionsSettingsProto(
-	pos position.Position,
+	position stream_position.AllStreamPosition,
 ) *persistent.UpdateReq_Options_All {
 	options := &persistent.UpdateReq_Options_All{
 		All: &persistent.UpdateReq_AllOptions{
@@ -37,56 +45,65 @@ func updateRequestAllOptionsSettingsProto(
 		},
 	}
 
-	if pos == position.StartPosition {
+	switch value := position.(type) {
+	case stream_position.RevisionStart:
 		options.All.AllOption = &persistent.UpdateReq_AllOptions_Start{
 			Start: &shared.Empty{},
 		}
-	} else if pos == position.EndPosition {
-		options.All.AllOption = &persistent.UpdateReq_AllOptions_End{
-			End: &shared.Empty{},
+	case stream_position.RevisionEnd:
+		options.All.AllOption = &persistent.UpdateReq_AllOptions_Start{
+			Start: &shared.Empty{},
 		}
-	} else {
-		options.All.AllOption = toUpdateRequestAllOptionsFromPosition(pos)
+	case stream_position.RevisionPosition:
+		options.All.AllOption = toUpdateRequestAllOptionsFromPosition(value.Value)
 	}
 
 	return options
 }
 
-func updateSubscriptionStreamConfigProto(config SubscriptionStreamConfig) *persistent.UpdateReq_Options {
+func updateSubscriptionStreamConfigProto(
+	streamName string,
+	groupName string,
+	position stream_position.StreamPosition,
+	settings SubscriptionSettings,
+) *persistent.UpdateReq_Options {
 	return &persistent.UpdateReq_Options{
-		StreamOption: updateSubscriptionStreamSettingsProto(config.StreamOption),
+		StreamOption: updateSubscriptionStreamSettingsProto(streamName, groupName, position),
 		// backward compatibility
 		StreamIdentifier: &shared.StreamIdentifier{
-			StreamName: config.StreamOption.StreamName,
+			StreamName: []byte(streamName),
 		},
-		GroupName: config.GroupName,
-		Settings:  updateSubscriptionSettingsProto(config.Settings),
+		GroupName: groupName,
+		Settings:  updateSubscriptionSettingsProto(settings),
 	}
 }
 
 func updateSubscriptionStreamSettingsProto(
-	streamConfig StreamSettings,
+	streamName string,
+	groupName string,
+	position stream_position.StreamPosition,
 ) *persistent.UpdateReq_Options_Stream {
 	streamOption := &persistent.UpdateReq_Options_Stream{
 		Stream: &persistent.UpdateReq_StreamOptions{
 			StreamIdentifier: &shared.StreamIdentifier{
-				StreamName: streamConfig.StreamName,
+				StreamName: []byte(streamName),
 			},
 			RevisionOption: nil,
 		},
 	}
 
-	if streamConfig.Revision == Revision_Start {
+	switch value := position.(type) {
+	case stream_position.RevisionStart:
 		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_Start{
 			Start: &shared.Empty{},
 		}
-	} else if streamConfig.Revision == Revision_End {
-		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_End{
-			End: &shared.Empty{},
+	case stream_position.RevisionEnd:
+		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_Start{
+			Start: &shared.Empty{},
 		}
-	} else {
+	case stream_position.RevisionExact:
 		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_Revision{
-			Revision: uint64(streamConfig.Revision),
+			Revision: value.Value,
 		}
 	}
 
