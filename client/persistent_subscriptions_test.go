@@ -285,19 +285,19 @@ func TestPersistentSubscriptionClosing(t *testing.T) {
 
 	streamID := "dataset20M-0"
 	groupName := "Group 1"
-	var bufferSize int32 = 2
 
-	options := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Start())
+	opts := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Start())
 
-	err := client.CreatePersistentSubscription(context.Background(), streamID, groupName, &options)
+	err := client.CreatePersistentSubscription(context.Background(), streamID, groupName, &opts)
 
 	require.NoError(t, err)
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
 
+	optsC := options.ConnectToPersistentSubscriptionOptionsDefault().BatchSize(2)
 	subscription, err := client.ConnectToPersistentSubscription(
-		context.Background(), bufferSize, groupName, []byte(streamID))
+		context.Background(), streamID, groupName, &optsC)
 
 	require.NoError(t, err)
 

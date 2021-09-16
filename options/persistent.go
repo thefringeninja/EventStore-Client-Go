@@ -82,7 +82,7 @@ func (opts PersistentAllSubscriptionOptions) GetFilter() *filtering.Subscription
 }
 
 type ConnectToPersistentSubscriptionOptions struct {
-	batchSize uint32
+	batchSize int32
 }
 
 func ConnectToPersistentSubscriptionOptionsDefault() ConnectToPersistentSubscriptionOptions {
@@ -91,6 +91,11 @@ func ConnectToPersistentSubscriptionOptionsDefault() ConnectToPersistentSubscrip
 	}
 }
 
-func (opts ConnectToPersistentSubscriptionOptions) GetBatchSize() uint32 {
+func (opts ConnectToPersistentSubscriptionOptions) BatchSize(value int32) ConnectToPersistentSubscriptionOptions {
+	opts.batchSize = value
+	return opts
+}
+
+func (opts ConnectToPersistentSubscriptionOptions) GetBatchSize() int32 {
 	return opts.batchSize
 }

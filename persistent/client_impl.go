@@ -29,8 +29,8 @@ func (client ClientImpl) SubscribeToStreamSync(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	bufferSize int32,
+	streamName string,
 	groupName string,
-	streamName []byte,
 ) (SyncReadConnection, error) {
 	var headers, trailers metadata.MD
 	ctx, cancel := context.WithCancel(ctx)
@@ -41,7 +41,7 @@ func (client ClientImpl) SubscribeToStreamSync(
 		return nil, NewError(SubscribeToStreamSync_FailedToInitPersistentSubscriptionClientErr, err)
 	}
 
-	err = readClient.Send(toPersistentReadRequest(bufferSize, groupName, streamName))
+	err = readClient.Send(toPersistentReadRequest(bufferSize, groupName, []byte(streamName)))
 	if err != nil {
 		defer cancel()
 		return nil, NewError(SubscribeToStreamSync_FailedToSendStreamInitializationErr, err)

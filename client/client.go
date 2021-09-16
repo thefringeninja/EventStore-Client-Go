@@ -364,9 +364,9 @@ func (client *Client) SubscribeToAll(
 // ConnectToPersistentSubscription ...
 func (client *Client) ConnectToPersistentSubscription(
 	ctx context.Context,
-	bufferSize int32,
+	streamName string,
 	groupName string,
-	streamName []byte,
+	options *options.ConnectToPersistentSubscriptionOptions,
 ) (persistent.SyncReadConnection, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -377,9 +377,9 @@ func (client *Client) ConnectToPersistentSubscription(
 	return persistentSubscriptionClient.SubscribeToStreamSync(
 		ctx,
 		handle,
-		bufferSize,
-		groupName,
+		options.GetBatchSize(),
 		streamName,
+		groupName,
 	)
 }
 
