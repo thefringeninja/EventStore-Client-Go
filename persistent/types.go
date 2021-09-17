@@ -70,17 +70,19 @@ type SubscriptionSettings struct {
 	CheckpointAfterInMs   int32
 }
 
-var DefaultSubscriptionSettings = SubscriptionSettings{
-	ResolveLinks:          false,
-	ExtraStatistics:       false,
-	MaxRetryCount:         10,
-	MinCheckpointCount:    10,
-	MaxCheckpointCount:    10 * 1000,
-	MaxSubscriberCount:    SUBSCRIBER_COUNT_UNLIMITED,
-	LiveBufferSize:        500,
-	ReadBatchSize:         20,
-	HistoryBufferSize:     500,
-	NamedConsumerStrategy: ConsumerStrategy_RoundRobin,
-	MessageTimeoutInMs:    30 * 1000,
-	CheckpointAfterInMs:   2 * 1000,
+func SubscriptionSettingsDefault() SubscriptionSettings {
+	return SubscriptionSettings{
+		ResolveLinks:          false,
+		ExtraStatistics:       false,
+		MaxRetryCount:         10,
+		MinCheckpointCount:    10,
+		MaxCheckpointCount:    10 * 1000,
+		MaxSubscriberCount:    SUBSCRIBER_COUNT_UNLIMITED,
+		LiveBufferSize:        500,
+		ReadBatchSize:         20,
+		HistoryBufferSize:     500,
+		NamedConsumerStrategy: ConsumerStrategy_RoundRobin,
+		MessageTimeoutInMs:    30 * 1000,
+		CheckpointAfterInMs:   2 * 1000,
+	}
 }

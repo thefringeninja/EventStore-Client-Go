@@ -13,7 +13,7 @@ type PersistentStreamSubscriptionOptions struct {
 
 func PersistentStreamSubscriptionOptionsDefault() PersistentStreamSubscriptionOptions {
 	return PersistentStreamSubscriptionOptions{
-		settings: persistent.DefaultSubscriptionSettings,
+		settings: persistent.SubscriptionSettingsDefault(),
 		position: stream_position.End(),
 	}
 }
@@ -44,7 +44,7 @@ type PersistentAllSubscriptionOptions struct {
 
 func PersistentAllSubscriptionOptionsDefault() PersistentAllSubscriptionOptions {
 	return PersistentAllSubscriptionOptions{
-		settings: persistent.DefaultSubscriptionSettings,
+		settings: persistent.SubscriptionSettingsDefault(),
 		position: stream_position.End(),
 		filter:   []filtering.SubscriptionFilterOptions{},
 	}

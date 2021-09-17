@@ -48,7 +48,7 @@ func Test_CreatePersistentStreamSubscription_MessageTimeoutZero(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	settings := persistent.DefaultSubscriptionSettings
+	settings := persistent.SubscriptionSettingsDefault()
 	settings.MessageTimeoutInMs = 0
 
 	options := options.PersistentStreamSubscriptionOptionsDefault().Settings(settings)
@@ -170,7 +170,7 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 
 	require.NoError(t, err)
 
-	settings := persistent.DefaultSubscriptionSettings
+	settings := persistent.SubscriptionSettingsDefault()
 
 	settings.HistoryBufferSize = settings.HistoryBufferSize + 1
 	settings.NamedConsumerStrategy = persistent.ConsumerStrategy_DispatchToSingle
