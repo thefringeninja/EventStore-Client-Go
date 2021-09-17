@@ -2,11 +2,8 @@ package persistent
 
 import (
 	"context"
-	"math"
 
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/position"
 )
 
 type (
@@ -19,41 +16,11 @@ const SUBSCRIBER_COUNT_UNLIMITED = 0
 type ConsumerStrategy int32
 
 const (
-	ConsumerStrategy_RoundRobin       ConsumerStrategy = 0
-	ConsumerStrategy_DispatchToSingle ConsumerStrategy = 1
-	ConsumerStrategy_Pinned           ConsumerStrategy = 2
+	ConsumerStrategy_RoundRobin          ConsumerStrategy = 0
+	ConsumerStrategy_DispatchToSingle    ConsumerStrategy = 1
+	ConsumerStrategy_Pinned              ConsumerStrategy = 2
+	ConsumerStrategy_PinnedByCorrelation ConsumerStrategy = 3
 )
-
-type Revision uint64
-
-const (
-	Revision_Start Revision = 0
-	Revision_End   Revision = math.MaxUint64
-)
-
-type SubscriptionStreamConfig struct {
-	StreamOption StreamSettings
-	GroupName    string
-	Settings     SubscriptionSettings
-}
-
-type SubscriptionAllOptionConfig struct {
-	Position  position.Position
-	Filter    *filtering.SubscriptionFilterOptions
-	GroupName string
-	Settings  SubscriptionSettings
-}
-
-type SubscriptionUpdateAllOptionConfig struct {
-	Position  position.Position
-	GroupName string
-	Settings  SubscriptionSettings
-}
-
-type StreamSettings struct {
-	StreamName []byte
-	Revision   Revision
-}
 
 type SubscriptionSettings struct {
 	ResolveLinks          bool

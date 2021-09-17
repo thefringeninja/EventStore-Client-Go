@@ -137,6 +137,7 @@ func updateRequestConsumerStrategyProto(
 		return persistent.UpdateReq_DispatchToSingle
 	case ConsumerStrategy_Pinned:
 		return persistent.UpdateReq_Pinned
+	// FIXME: support Pinned by correlation case ConsumerStrategy_PinnedByCorrelation:
 	case ConsumerStrategy_RoundRobin:
 		return persistent.UpdateReq_RoundRobin
 	default:
