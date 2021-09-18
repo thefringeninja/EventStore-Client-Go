@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/errors"
@@ -164,4 +165,82 @@ func ReadFromAllStream(db *client.Client) {
 		fmt.Printf("Event> %v", event)
 	}
 	// endregion read-from-all-stream-iterate
+}
+
+func IgnoreSystemEvents(db *client.Client) {
+	// region ignore-system-events
+	ropts := options.ReadAllEventsOptionsDefault()
+
+	stream, err := db.ReadAllEvents(context.Background(), &ropts, 100)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer stream.Close()
+
+	for {
+		event, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("Event> %v", event)
+
+		if strings.HasPrefix(event.GetOriginalEvent().EventType, "$") {
+			continue
+		}
+
+		fmt.Printf("Event> %v", event)
+	}
+	// endregion ignore-system-events
+}
+
+func ReadFromAllBackwards(db *client.Client) {
+	// region read-from-all-stream-backwards
+	ropts := options.ReadAllEventsOptionsDefault().
+		Position(stream_position.End()).
+		Backwards()
+
+	stream, err := db.ReadAllEvents(context.Background(), &ropts, 100)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer stream.Close()
+	// endregion read-from-all-stream-backwards
+	// region read-from-all-stream-backwards-iterate
+	for {
+		event, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("Event> %v", event)
+	}
+	// endregion read-from-all-stream-backwards-iterate
+}
+
+func ReadFromStreamResolvingLinkToS(db *client.Client) {
+	// region read-from-all-stream-resolving-link-tos
+	ropts := options.ReadAllEventsOptionsDefault().ResolveLinks()
+	stream, err := db.ReadAllEvents(context.Background(), &ropts, 100)
+	// endregion read-from-all-stream-resolving-link-tos
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer stream.Close()
 }
