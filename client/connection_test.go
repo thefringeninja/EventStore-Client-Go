@@ -7,7 +7,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,16 +24,17 @@ func Test_CloseConnection(t *testing.T) {
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
-	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(stream_revision.NoStream())
-	_, err := client.AppendToStream(context, streamID.String(), &opts, testEvent)
+	opts := options.AppendToStreamOptions{}
+	opts.SetExpectNoStream()
+	_, err := client.AppendToStream(context, streamID.String(), opts, testEvent)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
 	}
 
 	client.Close()
-	opts = options.AppendToStreamOptionsDefault()
-	_, err = client.AppendToStream(context, streamID.String(), &opts, testEvent)
+	opts.SetDefaults()
+	_, err = client.AppendToStream(context, streamID.String(), opts, testEvent)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "esdb connection is closed", err.Error())

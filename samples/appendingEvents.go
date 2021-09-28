@@ -8,7 +8,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
-	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 )
 
 type TestEvent struct {
@@ -29,9 +28,10 @@ func AppendToStream(db *client.Client) {
 		panic(err)
 	}
 
-	options := options.AppendToStreamOptionsDefault()
+	options := options.AppendToStreamOptions{}
+	options.SetDefaults()
 
-	result, err := db.AppendToStream(context.Background(), "some-stream", &options, event)
+	result, err := db.AppendToStream(context.Background(), "some-stream", options, event)
 	// endregion append-to-stream
 
 	log.Printf("Result: %v", result)
@@ -50,15 +50,16 @@ func AppendWithSameId(db *client.Client) {
 		panic(err)
 	}
 
-	options := options.AppendToStreamOptionsDefault()
+	options := options.AppendToStreamOptions{}
+	options.SetDefaults()
 
-	_, err = db.AppendToStream(context.Background(), "some-stream", &options, event)
+	_, err = db.AppendToStream(context.Background(), "some-stream", options, event)
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.AppendToStream(context.Background(), "some-stream", &options, event)
+	_, err = db.AppendToStream(context.Background(), "some-stream", options, event)
 
 	if err != nil {
 		panic(err)
@@ -80,9 +81,10 @@ func AppendWithNoStream(db *client.Client) {
 		panic(err)
 	}
 
-	options := options.AppendToStreamOptionsDefault().ExpectedRevision(streamrevision.NoStream())
+	options := options.AppendToStreamOptions{}
+	options.SetExpectNoStream()
 
-	_, err = db.AppendToStream(context.Background(), "same-event-stream", &options, event)
+	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
 
 	if err != nil {
 		panic(err)
@@ -93,7 +95,7 @@ func AppendWithNoStream(db *client.Client) {
 		importantData: "some other value",
 	}
 
-	_, err = db.AppendToStream(context.Background(), "same-event-stream", &options, event)
+	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
 	// noregion append-with-no-stream
 }
 
@@ -128,15 +130,16 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		panic(err)
 	}
 
-	aopts := options.AppendToStreamOptionsDefault().ExpectedRevision(streamrevision.Exact(lastEvent.GetOriginalEvent().EventNumber))
+	aopts := options.AppendToStreamOptions{}
+	aopts.SetExpectRevision(lastEvent.GetOriginalEvent().EventNumber)
 
-	_, err = db.AppendToStream(context.Background(), "concurrency-stream", &aopts, event)
+	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
 
 	data = TestEvent{
 		id:            "1",
 		importantData: "clientTwo",
 	}
 
-	_, err = db.AppendToStream(context.Background(), "concurrency-stream", &aopts, event)
+	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
 	// endregion append-with-concurrency-check
 }

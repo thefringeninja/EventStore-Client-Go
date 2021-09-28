@@ -36,9 +36,10 @@ func Run() {
 		panic(err)
 	}
 
-	aopts := options.AppendToStreamOptionsDefault()
+	aopts := options.AppendToStreamOptions{}
+	aopts.SetDefaults()
 
-	_, err = db.AppendToStream(context.Background(), "some-stream", &aopts, data)
+	_, err = db.AppendToStream(context.Background(), "some-stream", aopts, data)
 
 	if err != nil {
 		panic(err)

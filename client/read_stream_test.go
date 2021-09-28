@@ -12,7 +12,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
-	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
@@ -168,8 +167,9 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 		proposedEvents = append(proposedEvents, createTestEvent())
 	}
 
-	opts := options.AppendToStreamOptionsDefault().ExpectedRevision(streamrevision.NoStream())
-	_, err := client.AppendToStream(context.Background(), "testing-closing", &opts, proposedEvents...)
+	opts := options.AppendToStreamOptions{}
+	opts.SetExpectNoStream()
+	_, err := client.AppendToStream(context.Background(), "testing-closing", opts, proposedEvents...)
 	require.NoError(t, err)
 
 	ropts := options.ReadStreamEventsOptionsDefault()

@@ -45,7 +45,9 @@ func TestCanTombstoneStream(t *testing.T) {
 	assert.True(t, deleteResult.Position.Commit > 0)
 	assert.True(t, deleteResult.Position.Prepare > 0)
 
-	opts2 := options.AppendToStreamOptionsDefault()
-	_, err = client.AppendToStream(context.Background(), "dataset20M-1800", &opts2, createTestEvent())
+	opts2 := options.AppendToStreamOptions{}
+	opts2.SetDefaults()
+
+	_, err = client.AppendToStream(context.Background(), "dataset20M-1800", opts2, createTestEvent())
 	require.Error(t, err)
 }

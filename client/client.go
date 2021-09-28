@@ -50,7 +50,7 @@ func (client *Client) Close() error {
 func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
-	opts *options.AppendToStreamOptions,
+	opts options.AppendToStreamOptions,
 	events ...messages.ProposedEvent,
 ) (*WriteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
@@ -66,7 +66,7 @@ func (client *Client) AppendToStream(
 		return nil, fmt.Errorf("Could not construct append operation. Reason: %v", err)
 	}
 
-	header := protoutils.ToAppendHeader(streamID, opts.GetExpectedRevision())
+	header := protoutils.ToAppendHeader(streamID, opts.ExpectedRevision())
 
 	if err := appendOperation.Send(header); err != nil {
 		err = client.grpcClient.HandleError(handle, headers, trailers, err)
@@ -134,7 +134,7 @@ func (client *Client) AppendToStream(
 func (client *Client) SetStreamMetadata(
 	context context.Context,
 	streamID string,
-	opts *options.AppendToStreamOptions,
+	opts options.AppendToStreamOptions,
 	metadata esdb_metadata.StreamMetadata,
 ) (*WriteResult, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
