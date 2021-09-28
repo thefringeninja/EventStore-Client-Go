@@ -46,8 +46,10 @@ func Run() {
 	}
 
 	// region readStream
-	ropts := options.ReadStreamEventsOptionsDefault()
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", &ropts, 10)
+	ropts := options.ReadStreamEventsOptions{}
+	ropts.SetDefaults()
+
+	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 10)
 
 	if err != nil {
 		panic(err)

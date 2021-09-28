@@ -11,7 +11,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
@@ -65,11 +64,12 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 
 	streamId := "dataset20M-1800"
 
-	opts := options.ReadStreamEventsOptionsDefault().
-		Forwards().
-		ResolveLinks()
+	opts := options.ReadStreamEventsOptions{}
+	opts.SetDefaults()
+	opts.SetForwards()
+	opts.SetResolveLinks()
 
-	stream, err := client.ReadStreamEvents(context, streamId, &opts, numberOfEvents)
+	stream, err := client.ReadStreamEvents(context, streamId, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -119,12 +119,13 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 	numberOfEvents := uint64(numberOfEventsToRead)
 
 	streamId := "dataset20M-1800"
-	opts := options.ReadStreamEventsOptionsDefault().
-		Backwards().
-		Position(stream_position.End()).
-		ResolveLinks()
+	opts := options.ReadStreamEventsOptions{}
+	opts.SetDefaults()
+	opts.SetBackwards()
+	opts.SetFromEnd()
+	opts.SetResolveLinks()
 
-	stream, err := client.ReadStreamEvents(context, streamId, &opts, numberOfEvents)
+	stream, err := client.ReadStreamEvents(context, streamId, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -172,8 +173,9 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 	_, err := client.AppendToStream(context.Background(), "testing-closing", opts, proposedEvents...)
 	require.NoError(t, err)
 
-	ropts := options.ReadStreamEventsOptionsDefault()
-	stream, err := client.ReadStreamEvents(context.Background(), "testing-closing", &ropts, 1_024)
+	ropts := options.ReadStreamEventsOptions{}
+	ropts.SetDefaults()
+	stream, err := client.ReadStreamEvents(context.Background(), "testing-closing", ropts, 1_024)
 
 	require.NoError(t, err)
 	_, err = collectStreamEvents(stream)

@@ -2,6 +2,7 @@ package options
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/direction"
+	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
@@ -11,49 +12,54 @@ type ReadStreamEventsOptions struct {
 	resolveLinks bool
 }
 
-func ReadStreamEventsOptionsDefault() ReadStreamEventsOptions {
-	return ReadStreamEventsOptions{
-		direction:    direction.Forwards,
-		position:     stream_position.RevisionStart{},
-		resolveLinks: false,
-	}
+func (o *ReadStreamEventsOptions) SetDefaults() {
+	o.direction = direction.Forwards
+	o.position = stream_position.RevisionStart{}
+	o.resolveLinks = false
 }
 
-func (opts ReadStreamEventsOptions) Forwards() ReadStreamEventsOptions {
-	opts.direction = direction.Forwards
-	return opts
+func (o *ReadStreamEventsOptions) SetForwards() {
+	o.direction = direction.Forwards
 }
 
-func (opts ReadStreamEventsOptions) Backwards() ReadStreamEventsOptions {
-	opts.direction = direction.Backwards
-	return opts
+func (o *ReadStreamEventsOptions) SetBackwards() {
+	o.direction = direction.Backwards
 }
 
-func (opts ReadStreamEventsOptions) Direction(dir direction.Direction) ReadStreamEventsOptions {
-	opts.direction = dir
-	return opts
+func (o *ReadStreamEventsOptions) SetDirection(dir direction.Direction) {
+	o.direction = dir
 }
 
-func (opts ReadStreamEventsOptions) Position(position stream_position.StreamPosition) ReadStreamEventsOptions {
-	opts.position = position
-	return opts
+func (o *ReadStreamEventsOptions) SetFrom(position stream_position.StreamPosition) {
+	o.position = position
 }
 
-func (opts ReadStreamEventsOptions) ResolveLinks() ReadStreamEventsOptions {
-	opts.resolveLinks = true
-	return opts
+func (o *ReadStreamEventsOptions) SetFromStart() {
+	o.position = stream_position.RevisionStart{}
 }
 
-func (opts ReadStreamEventsOptions) GetDirection() direction.Direction {
-	return opts.direction
+func (o *ReadStreamEventsOptions) SetFromEnd() {
+	o.position = stream_position.RevisionEnd{}
 }
 
-func (opts ReadStreamEventsOptions) GetPosition() stream_position.StreamPosition {
-	return opts.position
+func (o *ReadStreamEventsOptions) SetFromRevision(value uint64) {
+	o.position = stream_position.RevisionExact{Value: value}
 }
 
-func (opts ReadStreamEventsOptions) GetResolveLinks() bool {
-	return opts.resolveLinks
+func (o *ReadStreamEventsOptions) SetResolveLinks() {
+	o.resolveLinks = true
+}
+
+func (o *ReadStreamEventsOptions) GetDirection() direction.Direction {
+	return o.direction
+}
+
+func (o *ReadStreamEventsOptions) GetPosition() stream_position.StreamPosition {
+	return o.position
+}
+
+func (o *ReadStreamEventsOptions) GetResolveLinks() bool {
+	return o.resolveLinks
 }
 
 type ReadAllEventsOptions struct {
@@ -62,47 +68,52 @@ type ReadAllEventsOptions struct {
 	resolveLinks bool
 }
 
-func ReadAllEventsOptionsDefault() ReadAllEventsOptions {
-	return ReadAllEventsOptions{
-		direction:    direction.Forwards,
-		position:     stream_position.RevisionStart{},
-		resolveLinks: false,
-	}
+func (o *ReadAllEventsOptions) SetDefaults() {
+	o.direction = direction.Forwards
+	o.position = stream_position.RevisionStart{}
+	o.resolveLinks = false
 }
 
-func (opts ReadAllEventsOptions) Forwards() ReadAllEventsOptions {
-	opts.direction = direction.Forwards
-	return opts
+func (o *ReadAllEventsOptions) SetForwards() {
+	o.direction = direction.Forwards
 }
 
-func (opts ReadAllEventsOptions) Backwards() ReadAllEventsOptions {
-	opts.direction = direction.Backwards
-	return opts
+func (o *ReadAllEventsOptions) SetBackwards() {
+	o.direction = direction.Backwards
 }
 
-func (opts ReadAllEventsOptions) Direction(dir direction.Direction) ReadAllEventsOptions {
-	opts.direction = dir
-	return opts
+func (o *ReadAllEventsOptions) SetDirection(dir direction.Direction) {
+	o.direction = dir
 }
 
-func (opts ReadAllEventsOptions) Position(position stream_position.AllStreamPosition) ReadAllEventsOptions {
-	opts.position = position
-	return opts
+func (o *ReadAllEventsOptions) SetFromStart() {
+	o.position = stream_position.RevisionStart{}
 }
 
-func (opts ReadAllEventsOptions) ResolveLinks() ReadAllEventsOptions {
-	opts.resolveLinks = true
-	return opts
+func (o *ReadAllEventsOptions) SetFromEnd() {
+	o.position = stream_position.RevisionEnd{}
 }
 
-func (opts ReadAllEventsOptions) GetDirection() direction.Direction {
-	return opts.direction
+func (o *ReadAllEventsOptions) SetFromPosition(pos position.Position) {
+	o.position = stream_position.Position(pos)
 }
 
-func (opts ReadAllEventsOptions) GetPosition() stream_position.AllStreamPosition {
-	return opts.position
+func (o *ReadAllEventsOptions) SetFrom(position stream_position.AllStreamPosition) {
+	o.position = position
 }
 
-func (opts ReadAllEventsOptions) GetResolveLinks() bool {
-	return opts.resolveLinks
+func (o *ReadAllEventsOptions) SetResolveLinks() {
+	o.resolveLinks = true
+}
+
+func (o *ReadAllEventsOptions) GetDirection() direction.Direction {
+	return o.direction
+}
+
+func (o *ReadAllEventsOptions) GetPosition() stream_position.AllStreamPosition {
+	return o.position
+}
+
+func (o *ReadAllEventsOptions) GetResolveLinks() bool {
+	return o.resolveLinks
 }

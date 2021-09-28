@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	"github.com/EventStore/EventStore-Client-Go/options"
 
 	"github.com/stretchr/testify/assert"
@@ -33,12 +32,13 @@ func TestTLSDefaults(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
@@ -69,12 +69,13 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -94,12 +95,13 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -119,12 +121,13 @@ func TestTLSWithoutCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
@@ -155,12 +158,13 @@ func TestTLSWithCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -186,12 +190,13 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -211,12 +216,13 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.NoError(t, err)
 }
 
@@ -246,12 +252,13 @@ func TestTLSWithInvalidCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Start()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	_, err = c.ReadAllEvents(context.Background(), &opts, numberOfEvents)
+	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }

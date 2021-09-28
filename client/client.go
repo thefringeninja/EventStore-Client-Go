@@ -162,7 +162,7 @@ func (client *Client) SetStreamMetadata(
 func (client *Client) GetStreamMetadata(
 	context context.Context,
 	streamID string,
-	opts *options.ReadStreamEventsOptions,
+	opts options.ReadStreamEventsOptions,
 ) (*esdb_metadata.StreamMetadata, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 
@@ -249,7 +249,7 @@ func (client *Client) TombstoneStream(
 func (client *Client) ReadStreamEvents(
 	context context.Context,
 	streamID string,
-	opts *options.ReadStreamEventsOptions,
+	opts options.ReadStreamEventsOptions,
 	count uint64,
 ) (*ReadStream, error) {
 	readRequest := protoutils.ToReadStreamRequest(streamID, opts.GetDirection(), opts.GetPosition(), count, opts.GetResolveLinks())
@@ -265,7 +265,7 @@ func (client *Client) ReadStreamEvents(
 // ReadAllEvents ...
 func (client *Client) ReadAllEvents(
 	context context.Context,
-	opts *options.ReadAllEventsOptions,
+	opts options.ReadAllEventsOptions,
 	count uint64,
 ) (*ReadStream, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()

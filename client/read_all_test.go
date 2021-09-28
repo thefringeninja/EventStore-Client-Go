@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/options"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/stretchr/testify/assert"
@@ -35,8 +34,10 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptionsDefault().ResolveLinks()
-	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetResolveLinks()
+	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -83,11 +84,12 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Position(position.Position{Commit: 1788, Prepare: 1788})).
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromPosition(position.Position{Commit: 1788, Prepare: 1788})
+	opts.SetResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
+	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -134,12 +136,13 @@ func TestReadAllEventsBackwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.End()).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromEnd()
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
+	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -186,12 +189,13 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptionsDefault().
-		Position(stream_position.Position(position.Position{Commit: 3_386, Prepare: 3_386})).
-		Backwards().
-		ResolveLinks()
+	opts := options.ReadAllEventsOptions{}
+	opts.SetDefaults()
+	opts.SetFromPosition(position.Position{Commit: 3_386, Prepare: 3_386})
+	opts.SetBackwards()
+	opts.SetResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, &opts, numberOfEvents)
+	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)

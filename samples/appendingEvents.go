@@ -7,7 +7,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
 type TestEvent struct {
@@ -101,11 +100,12 @@ func AppendWithNoStream(db *client.Client) {
 
 func AppendWithConcurrencyCheck(db *client.Client) {
 	// region append-with-concurrency-check
-	ropts := options.ReadStreamEventsOptionsDefault().
-		Backwards().
-		Position(stream_position.End())
+	ropts := options.ReadStreamEventsOptions{}
+	ropts.SetDefaults()
+	ropts.SetBackwards()
+	ropts.SetFromEnd()
 
-	stream, err := db.ReadStreamEvents(context.Background(), "concurrency-stream", &ropts, 1)
+	stream, err := db.ReadStreamEvents(context.Background(), "concurrency-stream", ropts, 1)
 
 	if err != nil {
 		panic(err)
