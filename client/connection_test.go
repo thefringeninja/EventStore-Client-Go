@@ -23,7 +23,6 @@ func Test_CloseConnection(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := client.AppendToStreamOptions{}
-	opts.SetDefaults()
 	opts.SetExpectNoStream()
 	_, err := db.AppendToStream(context, streamID.String(), opts, testEvent)
 
@@ -32,7 +31,7 @@ func Test_CloseConnection(t *testing.T) {
 	}
 
 	db.Close()
-	opts.SetDefaults()
+	opts.SetExpectAny()
 	_, err = db.AppendToStream(context, streamID.String(), opts, testEvent)
 
 	assert.NotNil(t, err)

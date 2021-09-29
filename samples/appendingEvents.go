@@ -28,10 +28,7 @@ func AppendToStream(db *client.Client) {
 		panic(err)
 	}
 
-	options := client.AppendToStreamOptions{}
-	options.SetDefaults()
-
-	result, err := db.AppendToStream(context.Background(), "some-stream", options, event)
+	result, err := db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
 	// endregion append-to-stream
 
 	log.Printf("Result: %v", result)
@@ -52,16 +49,13 @@ func AppendWithSameId(db *client.Client) {
 		panic(err)
 	}
 
-	options := client.AppendToStreamOptions{}
-	options.SetDefaults()
-
-	_, err = db.AppendToStream(context.Background(), "some-stream", options, event)
+	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.AppendToStream(context.Background(), "some-stream", options, event)
+	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
 
 	if err != nil {
 		panic(err)
@@ -110,7 +104,6 @@ func AppendWithNoStream(db *client.Client) {
 func AppendWithConcurrencyCheck(db *client.Client) {
 	// region append-with-concurrency-check
 	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetDefaults()
 	ropts.SetBackwards()
 	ropts.SetFromEnd()
 

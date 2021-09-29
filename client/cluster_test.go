@@ -13,15 +13,13 @@ func Test_NotLeaderExceptionButWorkAfterRetry(t *testing.T) {
 
 	// We purposely connect to a follower node so we can trigger on not leader exception.
 	db := CreateClient("esdb://admin:changeit@localhost:2111,localhost:2112,localhost:2113?nodepreference=follower&tlsverifycert=false", t)
-	options := client.PersistentStreamSubscriptionOptions{}
-	options.SetDefaults()
 
-	err := db.CreatePersistentSubscription(ctx, "myfoobar_123456", "a_group", options)
+	err := db.CreatePersistentSubscription(ctx, "myfoobar_123456", "a_group", client.PersistentStreamSubscriptionOptions{})
 
 	assert.NotNil(t, err)
 
 	// It should work now as the db automatically reconnected to the leader node.
-	err = db.CreatePersistentSubscription(ctx, "myfoobar_123456", "a_group", options)
+	err = db.CreatePersistentSubscription(ctx, "myfoobar_123456", "a_group", client.PersistentStreamSubscriptionOptions{})
 
 	if err != nil {
 		t.Fatalf("Failed to create persistent subscription: %v", err)

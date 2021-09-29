@@ -12,10 +12,10 @@ type ReadStreamEventsOptions struct {
 	resolveLinks bool
 }
 
-func (o *ReadStreamEventsOptions) SetDefaults() {
-	o.direction = direction.Forwards
-	o.position = stream_position.RevisionStart{}
-	o.resolveLinks = false
+func (o *ReadStreamEventsOptions) setDefaults() {
+	if o.position == nil {
+		o.position = stream_position.Start()
+	}
 }
 
 func (o *ReadStreamEventsOptions) SetForwards() {
@@ -68,10 +68,10 @@ type ReadAllEventsOptions struct {
 	resolveLinks bool
 }
 
-func (o *ReadAllEventsOptions) SetDefaults() {
-	o.direction = direction.Forwards
-	o.position = stream_position.RevisionStart{}
-	o.resolveLinks = false
+func (o *ReadAllEventsOptions) setDefaults() {
+	if o.position == nil {
+		o.position = stream_position.Start()
+	}
 }
 
 func (o *ReadAllEventsOptions) SetForwards() {

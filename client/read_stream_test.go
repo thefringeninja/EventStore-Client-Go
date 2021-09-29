@@ -64,7 +64,6 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 	streamId := "dataset20M-1800"
 
 	opts := client.ReadStreamEventsOptions{}
-	opts.SetDefaults()
 	opts.SetForwards()
 	opts.SetResolveLinks()
 
@@ -119,7 +118,6 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 
 	streamId := "dataset20M-1800"
 	opts := client.ReadStreamEventsOptions{}
-	opts.SetDefaults()
 	opts.SetBackwards()
 	opts.SetFromEnd()
 	opts.SetResolveLinks()
@@ -172,9 +170,7 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 	_, err := db.AppendToStream(context.Background(), "testing-closing", opts, proposedEvents...)
 	require.NoError(t, err)
 
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetDefaults()
-	stream, err := db.ReadStreamEvents(context.Background(), "testing-closing", ropts, 1_024)
+	stream, err := db.ReadStreamEvents(context.Background(), "testing-closing", client.ReadStreamEventsOptions{}, 1_024)
 
 	require.NoError(t, err)
 	_, err = collectStreamEvents(stream)

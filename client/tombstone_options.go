@@ -8,8 +8,10 @@ type TombstoneStreamOptions struct {
 	expectedRevision stream_revision.ExpectedRevision
 }
 
-func (o *TombstoneStreamOptions) SetDefaults() {
-	o.expectedRevision = stream_revision.Any()
+func (o *TombstoneStreamOptions) setDefaults() {
+	if o.expectedRevision == nil {
+		o.expectedRevision = stream_revision.Any()
+	}
 }
 
 func (o *TombstoneStreamOptions) SetExpectedRevision(revision stream_revision.ExpectedRevision) {

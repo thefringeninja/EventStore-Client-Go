@@ -8,8 +8,10 @@ type AppendToStreamOptions struct {
 	revision stream_revision.ExpectedRevision
 }
 
-func (o *AppendToStreamOptions) SetDefaults() {
-	o.revision = stream_revision.Any()
+func (o *AppendToStreamOptions) setDefaults() {
+	if o.revision == nil {
+		o.revision = stream_revision.Any()
+	}
 }
 
 func (o *AppendToStreamOptions) SetExpectedRevision(revision stream_revision.ExpectedRevision) {

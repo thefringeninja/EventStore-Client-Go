@@ -28,7 +28,6 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	var appendedEvents sync.WaitGroup
 
 	opts := client.SubscribeToStreamOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 
 	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", opts)
@@ -105,7 +104,6 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	filterOptions := filtering.SubscriptionFilterOptionsDefault(filter)
 
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetFilter(filterOptions)
 
@@ -146,7 +144,6 @@ func TestConnectionClosing(t *testing.T) {
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
 	opts := client.SubscribeToStreamOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 
 	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", opts)

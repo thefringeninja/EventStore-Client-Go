@@ -11,9 +11,10 @@ type SubscribeToStreamOptions struct {
 	resolveLinks bool
 }
 
-func (o *SubscribeToStreamOptions) SetDefaults() {
-	o.position = stream_position.End()
-	o.resolveLinks = false
+func (o *SubscribeToStreamOptions) setDefaults() {
+	if o.position == nil {
+		o.position = stream_position.End()
+	}
 }
 
 func (o *SubscribeToStreamOptions) SetFrom(value stream_position.StreamPosition) {
@@ -50,10 +51,14 @@ type SubscribeToAllOptions struct {
 	filter       []filtering.SubscriptionFilterOptions
 }
 
-func (o *SubscribeToAllOptions) SetDefaults() {
-	o.position = stream_position.End()
-	o.resolveLinks = false
-	o.filter = []filtering.SubscriptionFilterOptions{}
+func (o *SubscribeToAllOptions) setDefaults() {
+	if o.position == nil {
+		o.position = stream_position.End()
+	}
+
+	if o.filter == nil {
+		o.filter = []filtering.SubscriptionFilterOptions{}
+	}
 }
 
 func (o *SubscribeToAllOptions) SetFrom(value stream_position.AllStreamPosition) {

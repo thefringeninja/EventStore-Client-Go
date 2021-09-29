@@ -8,8 +8,10 @@ type DeleteStreamOptions struct {
 	expectedRevision stream_revision.ExpectedRevision
 }
 
-func (o *DeleteStreamOptions) SetDefaults() {
-	o.expectedRevision = stream_revision.Any()
+func (o *DeleteStreamOptions) setDefaults() {
+	if o.expectedRevision == nil {
+		o.expectedRevision = stream_revision.Any()
+	}
 }
 
 func (o *DeleteStreamOptions) SetExpectedRevision(revision stream_revision.ExpectedRevision) {

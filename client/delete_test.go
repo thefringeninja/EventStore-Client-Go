@@ -17,7 +17,6 @@ func TestCanDeleteStream(t *testing.T) {
 	defer db.Close()
 
 	opts := client.DeleteStreamOptions{}
-	opts.SetDefaults()
 	opts.SetExpectRevision(1_999)
 
 	deleteResult, err := db.DeleteStream(context.Background(), "dataset20M-1800", opts)
@@ -38,7 +37,6 @@ func TestCanTombstoneStream(t *testing.T) {
 	defer db.Close()
 
 	opts := client.TombstoneStreamOptions{}
-	opts.SetDefaults()
 	opts.SetExpectRevision(1_999)
 
 	deleteResult, err := db.TombstoneStream(context.Background(), "dataset20M-1800", opts)
@@ -50,9 +48,6 @@ func TestCanTombstoneStream(t *testing.T) {
 	assert.True(t, deleteResult.Position.Commit > 0)
 	assert.True(t, deleteResult.Position.Prepare > 0)
 
-	opts2 := client.AppendToStreamOptions{}
-	opts2.SetDefaults()
-
-	_, err = db.AppendToStream(context.Background(), "dataset20M-1800", opts2, createTestEvent())
+	_, err = db.AppendToStream(context.Background(), "dataset20M-1800", client.AppendToStreamOptions{}, createTestEvent())
 	require.Error(t, err)
 }

@@ -37,20 +37,14 @@ func Run() {
 		panic(err)
 	}
 
-	aopts := client.AppendToStreamOptions{}
-	aopts.SetDefaults()
-
-	_, err = db.AppendToStream(context.Background(), "some-stream", aopts, event)
+	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
 
 	if err != nil {
 		panic(err)
 	}
 
 	// region readStream
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetDefaults()
-
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 10)
+	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", client.ReadStreamEventsOptions{}, 10)
 
 	if err != nil {
 		panic(err)

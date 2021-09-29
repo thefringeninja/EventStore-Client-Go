@@ -31,7 +31,6 @@ func TestTLSDefaults(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -68,7 +67,6 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -94,7 +92,6 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -120,7 +117,6 @@ func TestTLSWithoutCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -157,7 +153,6 @@ func TestTLSWithCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -189,7 +184,6 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -215,7 +209,6 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
@@ -251,7 +244,6 @@ func TestTLSWithInvalidCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllEventsOptions{}
-	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
 	opts.SetResolveLinks()

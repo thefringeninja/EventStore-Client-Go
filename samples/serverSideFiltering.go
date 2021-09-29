@@ -12,7 +12,6 @@ func ExcludeSystemEvents(db *client.Client) {
 	// region exclude-system
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnEventType().Regex("/^[^\\$].*/"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
@@ -45,7 +44,6 @@ func EventTypePrefix(db *client.Client) {
 	// region event-type-prefix
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnEventType().AddPrefixes("customer-"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
@@ -78,7 +76,6 @@ func EventTypeRegex(db *client.Client) {
 	// region event-type-regex
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnEventType().Regex("^user|^company"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
@@ -111,7 +108,6 @@ func StreamPrefix(db *client.Client) {
 	// region stream-prefix
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnStreamName().AddPrefixes("user-"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
@@ -144,7 +140,6 @@ func StreamRegex(db *client.Client) {
 	// region stream-regex
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnStreamName().Regex("^user|^company"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
@@ -177,7 +172,6 @@ func CheckpointCallbackWithInterval(db *client.Client) {
 	// region checkpoint-with-interval
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnEventType().Regex("/^[^\\$].*/"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)

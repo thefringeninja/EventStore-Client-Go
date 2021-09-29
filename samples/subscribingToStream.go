@@ -12,9 +12,8 @@ import (
 func SubscribeToStream(db *client.Client) {
 	// region subscribe-to-stream
 	opts := client.SubscribeToStreamOptions{}
-	opts.SetDefaults()
 
-	stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
+	stream, err := db.SubscribeToStream(context.Background(), "some-stream", client.SubscribeToStreamOptions{})
 
 	if err != nil {
 		panic(err)
@@ -55,7 +54,6 @@ func SubscribeToStream(db *client.Client) {
 	// endregion subscribe-to-stream-resolving-linktos
 
 	// region subscribe-to-stream-subscription-dropped
-	opts.SetDefaults()
 	opts.SetFromStart()
 
 	for {
@@ -88,9 +86,7 @@ func SubscribeToStream(db *client.Client) {
 
 func SubscribeToAll(db *client.Client) {
 	// region subscribe-to-all
-	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
-	stream, err := db.SubscribeToAll(context.Background(), opts)
+	stream, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{})
 
 	if err != nil {
 		panic(err)
@@ -112,6 +108,7 @@ func SubscribeToAll(db *client.Client) {
 	// endregion subscribe-to-all
 
 	// region subscribe-to-all-from-position
+	opts := client.SubscribeToAllOptions{}
 	opts.SetFromPosition(position.Position{
 		Commit:  1_056,
 		Prepare: 1_056,
@@ -159,7 +156,6 @@ func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnStreamName().AddPrefixes("test-"))
 	opts := client.SubscribeToAllOptions{}
-	opts.SetDefaults()
 	opts.SetFilter(filter)
 
 	db.SubscribeToAll(context.Background(), opts)

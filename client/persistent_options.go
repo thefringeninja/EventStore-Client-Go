@@ -8,17 +8,22 @@ import (
 )
 
 type PersistentStreamSubscriptionOptions struct {
-	settings persistent.SubscriptionSettings
+	settings []persistent.SubscriptionSettings
 	position stream_position.StreamPosition
 }
 
-func (o *PersistentStreamSubscriptionOptions) SetDefaults() {
-	o.settings = persistent.SubscriptionSettingsDefault()
-	o.position = stream_position.End()
+func (o *PersistentStreamSubscriptionOptions) setDefaults() {
+	if o.settings == nil {
+		o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
+	}
+
+	if o.position == nil {
+		o.position = stream_position.End()
+	}
 }
 
 func (o *PersistentStreamSubscriptionOptions) SetSettings(settings persistent.SubscriptionSettings) {
-	o.settings = settings
+	o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
 }
 
 func (o *PersistentStreamSubscriptionOptions) SetFrom(position stream_position.StreamPosition) {
@@ -37,8 +42,12 @@ func (o *PersistentStreamSubscriptionOptions) SetFromRevision(value uint64) {
 	o.position = stream_position.Revision(value)
 }
 
-func (o *PersistentStreamSubscriptionOptions) Settings() persistent.SubscriptionSettings {
-	return o.settings
+func (o *PersistentStreamSubscriptionOptions) Settings() *persistent.SubscriptionSettings {
+	if len(o.settings) == 0 {
+		return nil
+	}
+
+	return &o.settings[0]
 }
 
 func (o *PersistentStreamSubscriptionOptions) From() stream_position.StreamPosition {
@@ -46,19 +55,27 @@ func (o *PersistentStreamSubscriptionOptions) From() stream_position.StreamPosit
 }
 
 type PersistentAllSubscriptionOptions struct {
-	settings persistent.SubscriptionSettings
+	settings []persistent.SubscriptionSettings
 	position stream_position.AllStreamPosition
 	filter   []filtering.SubscriptionFilterOptions
 }
 
-func (o *PersistentAllSubscriptionOptions) SetDefaults() {
-	o.settings = persistent.SubscriptionSettingsDefault()
-	o.position = stream_position.End()
-	o.filter = []filtering.SubscriptionFilterOptions{}
+func (o *PersistentAllSubscriptionOptions) setDefaults() {
+	if o.settings == nil {
+		o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
+	}
+
+	if o.position == nil {
+		o.position = stream_position.End()
+	}
+
+	if o.filter == nil {
+		o.filter = []filtering.SubscriptionFilterOptions{}
+	}
 }
 
 func (o *PersistentAllSubscriptionOptions) SetSettings(settings persistent.SubscriptionSettings) {
-	o.settings = settings
+	o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
 }
 
 func (o *PersistentAllSubscriptionOptions) SetFrom(position stream_position.AllStreamPosition) {
@@ -81,8 +98,12 @@ func (o *PersistentAllSubscriptionOptions) SetFilter(filter filtering.Subscripti
 	o.filter = []filtering.SubscriptionFilterOptions{filter}
 }
 
-func (o *PersistentAllSubscriptionOptions) Settings() persistent.SubscriptionSettings {
-	return o.settings
+func (o *PersistentAllSubscriptionOptions) Settings() *persistent.SubscriptionSettings {
+	if len(o.settings) == 0 {
+		return nil
+	}
+
+	return &o.settings[0]
 }
 
 func (o *PersistentAllSubscriptionOptions) From() stream_position.AllStreamPosition {
@@ -98,17 +119,19 @@ func (o *PersistentAllSubscriptionOptions) Filter() *filtering.SubscriptionFilte
 }
 
 type ConnectToPersistentSubscriptionOptions struct {
-	batchSize int32
+	batchSize uint32
 }
 
-func (o *ConnectToPersistentSubscriptionOptions) SetDefaults() {
-	o.batchSize = 10
+func (o *ConnectToPersistentSubscriptionOptions) setDefaults() {
+	if o.batchSize == 0 {
+		o.batchSize = 10
+	}
 }
 
-func (o *ConnectToPersistentSubscriptionOptions) SetBatchSize(value int32) {
+func (o *ConnectToPersistentSubscriptionOptions) SetBatchSize(value uint32) {
 	o.batchSize = value
 }
 
-func (o *ConnectToPersistentSubscriptionOptions) BatchSize() int32 {
+func (o *ConnectToPersistentSubscriptionOptions) BatchSize() uint32 {
 	return o.batchSize
 }

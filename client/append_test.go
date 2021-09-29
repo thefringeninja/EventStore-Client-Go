@@ -68,9 +68,7 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 		t.Fatalf("Unexpected failure %+v", err)
 	}
 
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetDefaults()
-	stream, err := db.ReadStreamEvents(context, streamID.String(), ropts, 1)
+	stream, err := db.ReadStreamEvents(context, streamID.String(), client.ReadStreamEventsOptions{}, 1)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -184,9 +182,7 @@ func TestMetadataOperation(t *testing.T) {
 	assert.Nil(t, err, "no error from writing stream metadata")
 	assert.NotNil(t, result, "defined write result after writing metadata")
 
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetDefaults()
-	metaActual, err := db.GetStreamMetadata(context, streamID.String(), ropts)
+	metaActual, err := db.GetStreamMetadata(context, streamID.String(), client.ReadStreamEventsOptions{})
 
 	assert.Nil(t, err, "no error when reading stream metadata")
 
