@@ -8,8 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
-
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
@@ -31,9 +29,11 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
 
-	opts := options.SubscribeToStreamOptionsDefault().Position(stream_position.Start())
+	opts := options.SubscribeToStreamOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
 
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", &opts)
+	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", opts)
 
 	go func() {
 		current := 0
@@ -106,11 +106,12 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	filter := filtering.FilterOnEventType().AddPrefixes("eventType-194")
 	filterOptions := filtering.SubscriptionFilterOptionsDefault(filter)
 
-	opts := options.SubscribeToAllOptionsDefault().
-		Position(stream_position.Start()).
-		Filter(filterOptions)
+	opts := options.SubscribeToAllOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+	opts.SetFilter(filterOptions)
 
-	subscription, err := client.SubscribeToAll(context.Background(), &opts)
+	subscription, err := client.SubscribeToAll(context.Background(), opts)
 
 	go func() {
 		current := 0
@@ -146,8 +147,11 @@ func TestConnectionClosing(t *testing.T) {
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
-	opts := options.SubscribeToStreamOptionsDefault().Position(stream_position.Start())
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", &opts)
+	opts := options.SubscribeToStreamOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
+
+	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", opts)
 
 	go func() {
 		current := 1

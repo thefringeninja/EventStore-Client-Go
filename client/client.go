@@ -281,7 +281,7 @@ func (client *Client) ReadAllEvents(
 func (client *Client) SubscribeToStream(
 	ctx context.Context,
 	streamID string,
-	opts *options.SubscribeToStreamOptions,
+	opts options.SubscribeToStreamOptions,
 ) (*Subscription, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -289,7 +289,7 @@ func (client *Client) SubscribeToStream(
 	}
 	var headers, trailers metadata.MD
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.GetPosition(), opts.GetResolveLinks(), nil)
+	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.Position(), opts.ResolveLinks(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to construct subscription. Reason: %v", err)
 	}
@@ -325,7 +325,7 @@ func (client *Client) SubscribeToStream(
 // SubscribeToAll ...
 func (client *Client) SubscribeToAll(
 	ctx context.Context,
-	opts *options.SubscribeToAllOptions,
+	opts options.SubscribeToAllOptions,
 ) (*Subscription, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -333,7 +333,7 @@ func (client *Client) SubscribeToAll(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.GetPosition(), opts.GetResolveLinks(), opts.GetFilter())
+	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.Position(), opts.ResolveLinks(), opts.Filter())
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %v", err)
 	}

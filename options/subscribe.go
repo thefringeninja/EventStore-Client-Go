@@ -2,80 +2,96 @@ package options
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
+	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
 type SubscribeToStreamOptions struct {
-	position stream_position.StreamPosition
-	resolveLinks    bool
+	position     stream_position.StreamPosition
+	resolveLinks bool
 }
 
-func SubscribeToStreamOptionsDefault() SubscribeToStreamOptions {
-	return SubscribeToStreamOptions{
-		position: stream_position.End(),
-		resolveLinks:    false,
-	}
+func (o *SubscribeToStreamOptions) SetDefaults() {
+	o.position = stream_position.End()
+	o.resolveLinks = false
 }
 
-func (opts SubscribeToStreamOptions) Position(value stream_position.StreamPosition) SubscribeToStreamOptions {
-	opts.position = value
-	return opts
+func (o *SubscribeToStreamOptions) SetFrom(value stream_position.StreamPosition) {
+	o.position = value
 }
 
-func (opts SubscribeToStreamOptions) ResolveLinks() SubscribeToStreamOptions {
-	opts.resolveLinks = true
-	return opts
+func (o *SubscribeToStreamOptions) SetFromStart() {
+	o.position = stream_position.Start()
 }
 
-func (opts SubscribeToStreamOptions) GetPosition() stream_position.StreamPosition {
-	return opts.position
+func (o *SubscribeToStreamOptions) SetFromEnd() {
+	o.position = stream_position.End()
 }
 
-func (opts SubscribeToStreamOptions) GetResolveLinks() bool {
-	return opts.resolveLinks
+func (o *SubscribeToStreamOptions) SetFromRevision(value uint64) {
+	o.position = stream_position.Revision(value)
+}
+
+func (o *SubscribeToStreamOptions) SetResolveLinks() {
+	o.resolveLinks = true
+}
+
+func (o *SubscribeToStreamOptions) Position() stream_position.StreamPosition {
+	return o.position
+}
+
+func (o *SubscribeToStreamOptions) ResolveLinks() bool {
+	return o.resolveLinks
 }
 
 type SubscribeToAllOptions struct {
-	position stream_position.AllStreamPosition
-	resolveLinks    bool
-	filter   []filtering.SubscriptionFilterOptions
+	position     stream_position.AllStreamPosition
+	resolveLinks bool
+	filter       []filtering.SubscriptionFilterOptions
 }
 
-func SubscribeToAllOptionsDefault() SubscribeToAllOptions {
-	return SubscribeToAllOptions{
-		position: stream_position.End(),
-		resolveLinks:    false,
-		filter:   []filtering.SubscriptionFilterOptions{},
-	}
+func (o *SubscribeToAllOptions) SetDefaults() {
+	o.position = stream_position.End()
+	o.resolveLinks = false
+	o.filter = []filtering.SubscriptionFilterOptions{}
 }
 
-func (opts SubscribeToAllOptions) Position(value stream_position.AllStreamPosition) SubscribeToAllOptions {
-	opts.position = value
-	return opts
+func (o *SubscribeToAllOptions) SetFrom(value stream_position.AllStreamPosition) {
+	o.position = value
 }
 
-func (opts SubscribeToAllOptions) ResolveLinks() SubscribeToAllOptions {
-	opts.resolveLinks = true
-	return opts
+func (o *SubscribeToAllOptions) SetFromStart() {
+	o.position = stream_position.Start()
 }
 
-func (opts SubscribeToAllOptions) Filter(value filtering.SubscriptionFilterOptions) SubscribeToAllOptions {
-	opts.filter = []filtering.SubscriptionFilterOptions{ value }
-	return opts
+func (o *SubscribeToAllOptions) SetFromEnd() {
+	o.position = stream_position.End()
 }
 
-func (opts SubscribeToAllOptions) GetPosition() stream_position.AllStreamPosition {
-	return opts.position
+func (o *SubscribeToAllOptions) SetFromPosition(value position.Position) {
+	o.position = stream_position.Position(value)
 }
 
-func (opts SubscribeToAllOptions) GetResolveLinks() bool {
-	return opts.resolveLinks
+func (o *SubscribeToAllOptions) SetResolveLinks() {
+	o.resolveLinks = true
 }
 
-func (opts SubscribeToAllOptions) GetFilter() *filtering.SubscriptionFilterOptions {
-	if len(opts.filter) == 0 {
+func (o *SubscribeToAllOptions) SetFilter(value filtering.SubscriptionFilterOptions) {
+	o.filter = []filtering.SubscriptionFilterOptions{value}
+}
+
+func (o *SubscribeToAllOptions) Position() stream_position.AllStreamPosition {
+	return o.position
+}
+
+func (o *SubscribeToAllOptions) ResolveLinks() bool {
+	return o.resolveLinks
+}
+
+func (o *SubscribeToAllOptions) Filter() *filtering.SubscriptionFilterOptions {
+	if len(o.filter) == 0 {
 		return nil
 	}
 
-	return &opts.filter[0]
+	return &o.filter[0]
 }

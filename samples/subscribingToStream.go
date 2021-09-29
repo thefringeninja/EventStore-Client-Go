@@ -8,14 +8,14 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/position"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
 func SubscribeToStream(db *client.Client) {
 	// region subscribe-to-stream
-	opts := options.SubscribeToStreamOptionsDefault()
+	opts := options.SubscribeToStreamOptions{}
+	opts.SetDefaults()
 
-	stream, err := db.SubscribeToStream(context.Background(), "some-stream", &opts)
+	stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
 
 	if err != nil {
 		panic(err)
@@ -37,34 +37,36 @@ func SubscribeToStream(db *client.Client) {
 	// endregion subscribe-to-stream
 
 	// region subscribe-to-stream-from-position
-	opts = options.SubscribeToStreamOptionsDefault().Position(stream_position.Revision(20))
+	opts.SetFromRevision(20)
 
-	db.SubscribeToStream(context.Background(), "some-stream", &opts)
+	db.SubscribeToStream(context.Background(), "some-stream", opts)
 	// endregion subscribe-to-stream-from-position
 
 	// region subscribe-to-stream-live
-	opts = options.SubscribeToStreamOptionsDefault().Position(stream_position.End())
+	opts.SetFromEnd()
 
-	db.SubscribeToStream(context.Background(), "some-stream", &opts)
+	db.SubscribeToStream(context.Background(), "some-stream", opts)
 	// endregion subscribe-to-stream-live
 
 	// region subscribe-to-stream-resolving-linktos
-	opts = options.SubscribeToStreamOptionsDefault().Position(stream_position.Start()).ResolveLinks()
+	opts.SetFromStart()
+	opts.SetResolveLinks()
 
-	db.SubscribeToStream(context.Background(), "$et-myEventType", &opts)
+	db.SubscribeToStream(context.Background(), "$et-myEventType", opts)
 	// endregion subscribe-to-stream-resolving-linktos
 
 	// region subscribe-to-stream-subscription-dropped
-	var offset stream_position.StreamPosition = stream_position.Start()
+	opts.SetDefaults()
+	opts.SetFromStart()
+
 	for {
 		var stream *client.Subscription = nil
 
 		if stream == nil {
-			opts := options.SubscribeToStreamOptionsDefault().Position(offset)
-			stream, err := db.SubscribeToStream(context.Background(), "some-stream", &opts)
+			stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
 
 			if err != nil {
-				 time.Sleep(1 * time.Second)
+				time.Sleep(1 * time.Second)
 			}
 
 			for {
@@ -77,7 +79,7 @@ func SubscribeToStream(db *client.Client) {
 
 				if event.EventAppeared != nil {
 					// handles the event...
-					offset = stream_position.Revision(event.EventAppeared.GetOriginalEvent().EventNumber)
+					opts.SetFromRevision(event.EventAppeared.GetOriginalEvent().EventNumber)
 				}
 			}
 		}
@@ -87,8 +89,9 @@ func SubscribeToStream(db *client.Client) {
 
 func SubscribeToAll(db *client.Client) {
 	// region subscribe-to-all
-	opts := options.SubscribeToAllOptionsDefault()
-	stream, err := db.SubscribeToAll(context.Background(), &opts)
+	opts := options.SubscribeToAllOptions{}
+	opts.SetDefaults()
+	stream, err := db.SubscribeToAll(context.Background(), opts)
 
 	if err != nil {
 		panic(err)
@@ -110,30 +113,29 @@ func SubscribeToAll(db *client.Client) {
 	// endregion subscribe-to-all
 
 	// region subscribe-to-all-from-position
-	opts = options.SubscribeToAllOptionsDefault().Position(stream_position.Position(position.Position{
-		Commit: 1_056,
+	opts.SetFromPosition(position.Position{
+		Commit:  1_056,
 		Prepare: 1_056,
-	}))
+	})
 
-	db.SubscribeToAll(context.Background(), &opts)
+	db.SubscribeToAll(context.Background(), opts)
 	// endregion subscribe-to-all-from-position
 
 	// region suscribe-to-all-live
-	opts = options.SubscribeToAllOptionsDefault().Position(stream_position.End())
-	db.SubscribeToAll(context.Background(), &opts)
+	opts.SetFromEnd()
+	db.SubscribeToAll(context.Background(), opts)
 	// endregion suscribe-to-all-live
 
 	// region subscribe-to-all-subscription-dropped
-	var offset stream_position.AllStreamPosition = stream_position.Start()
+	opts.SetFromStart()
 	for {
 		var stream *client.Subscription = nil
 
 		if stream == nil {
-			opts := options.SubscribeToAllOptionsDefault().Position(offset)
-			stream, err := db.SubscribeToAll(context.Background(), &opts)
+			stream, err := db.SubscribeToAll(context.Background(), opts)
 
 			if err != nil {
-				 time.Sleep(1 * time.Second)
+				time.Sleep(1 * time.Second)
 			}
 
 			for {
@@ -146,7 +148,7 @@ func SubscribeToAll(db *client.Client) {
 
 				if event.EventAppeared != nil {
 					// handles the event...
-					offset = stream_position.Position(event.EventAppeared.GetOriginalEvent().Position)
+					opts.SetFromPosition(event.EventAppeared.GetOriginalEvent().Position)
 				}
 			}
 		}
@@ -157,9 +159,11 @@ func SubscribeToAll(db *client.Client) {
 func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnStreamName().AddPrefixes("test-"))
-	opts := options.SubscribeToAllOptionsDefault().Filter(filter)
+	opts := options.SubscribeToAllOptions{}
+	opts.SetDefaults()
+	opts.SetFilter(filter)
 
-	db.SubscribeToAll(context.Background(), &opts)
+	db.SubscribeToAll(context.Background(), opts)
 	// endregion stream-prefix-filtered-subscription
 	// region stream-regex-filtered-subscription
 	filter = filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnStreamName().Regex("/invoice-\\d\\d\\d/g"))
