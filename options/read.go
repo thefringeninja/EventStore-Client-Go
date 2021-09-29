@@ -50,15 +50,15 @@ func (o *ReadStreamEventsOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *ReadStreamEventsOptions) GetDirection() direction.Direction {
+func (o *ReadStreamEventsOptions) Direction() direction.Direction {
 	return o.direction
 }
 
-func (o *ReadStreamEventsOptions) GetPosition() stream_position.StreamPosition {
+func (o *ReadStreamEventsOptions) Position() stream_position.StreamPosition {
 	return o.position
 }
 
-func (o *ReadStreamEventsOptions) GetResolveLinks() bool {
+func (o *ReadStreamEventsOptions) ResolveLinks() bool {
 	return o.resolveLinks
 }
 
@@ -106,14 +106,14 @@ func (o *ReadAllEventsOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *ReadAllEventsOptions) GetDirection() direction.Direction {
+func (o *ReadAllEventsOptions) Direction() direction.Direction {
 	return o.direction
 }
 
-func (o *ReadAllEventsOptions) GetPosition() stream_position.AllStreamPosition {
+func (o *ReadAllEventsOptions) Position() stream_position.AllStreamPosition {
 	return o.position
 }
 
-func (o *ReadAllEventsOptions) GetResolveLinks() bool {
+func (o *ReadAllEventsOptions) ResolveLinks() bool {
 	return o.resolveLinks
 }

@@ -252,7 +252,7 @@ func (client *Client) ReadStreamEvents(
 	opts options.ReadStreamEventsOptions,
 	count uint64,
 ) (*ReadStream, error) {
-	readRequest := protoutils.ToReadStreamRequest(streamID, opts.GetDirection(), opts.GetPosition(), count, opts.GetResolveLinks())
+	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction(), opts.Position(), count, opts.ResolveLinks())
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
 		return nil, err
@@ -273,7 +273,7 @@ func (client *Client) ReadAllEvents(
 		return nil, err
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	readRequest := protoutils.ToReadAllRequest(opts.GetDirection(), opts.GetPosition(), count, opts.GetResolveLinks())
+	readRequest := protoutils.ToReadAllRequest(opts.Direction(), opts.Position(), count, opts.ResolveLinks())
 	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest)
 }
 
