@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
@@ -17,14 +16,14 @@ func Test_CloseConnection(t *testing.T) {
 
 	client := CreateTestClient(container, t)
 
-	testEvent := messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
-		EventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")).
-		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
+	testEvent := createTestEvent()
+	testEvent.SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872"))
 
-	streamID, _ := uuid.NewV4()
+	streamID := uuid.Must(uuid.NewV4())
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := options.AppendToStreamOptions{}
+	opts.SetDefaults()
 	opts.SetExpectNoStream()
 	_, err := client.AppendToStream(context, streamID.String(), opts, testEvent)
 

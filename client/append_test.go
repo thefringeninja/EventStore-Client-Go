@@ -18,9 +18,13 @@ import (
 )
 
 func createTestEvent() messages.ProposedEvent {
-	return messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
-		EventID(uuid.Must(uuid.NewV4())).
-		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
+	event := messages.ProposedEvent{}
+	event.SetEventType("TestEvent")
+	event.SetBinaryData([]byte{0xb, 0xe, 0xe, 0xf})
+	event.SetEventID(uuid.Must(uuid.NewV4()))
+	event.SetMetadata([]byte{0xd, 0xe, 0xa, 0xd})
+
+	return event
 }
 
 func collectStreamEvents(stream *client.ReadStream) ([]*messages.ResolvedEvent, error) {
@@ -48,9 +52,9 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 
 	client := CreateTestClient(container, t)
 	defer client.Close()
-	testEvent := messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
-		EventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")).
-		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
+
+	testEvent := createTestEvent()
+	testEvent.SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872"))
 
 	streamID := uuid.Must(uuid.NewV4())
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
@@ -82,11 +86,11 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	}
 
 	assert.Equal(t, int32(1), int32(len(events)), "Expected the correct number of messages to be returned")
-	assert.Equal(t, testEvent.GetEventID(), events[0].GetOriginalEvent().EventID)
-	assert.Equal(t, testEvent.GetEventType(), events[0].GetOriginalEvent().EventType)
+	assert.Equal(t, testEvent.EventID(), events[0].GetOriginalEvent().EventID)
+	assert.Equal(t, testEvent.EventType(), events[0].GetOriginalEvent().EventType)
 	assert.Equal(t, streamID.String(), events[0].GetOriginalEvent().StreamID)
-	assert.Equal(t, testEvent.GetData(), events[0].GetOriginalEvent().Data)
-	assert.Equal(t, testEvent.GetMetadata(), events[0].GetOriginalEvent().UserMetadata)
+	assert.Equal(t, testEvent.Data(), events[0].GetOriginalEvent().Data)
+	assert.Equal(t, testEvent.Metadata(), events[0].GetOriginalEvent().UserMetadata)
 }
 
 func TestAppendWithInvalidStreamRevision(t *testing.T) {

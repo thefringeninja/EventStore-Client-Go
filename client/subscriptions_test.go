@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/require"
@@ -22,9 +21,8 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	defer client.Close()
 
 	streamID := "dataset20M-0"
-	testEvent := messages.NewBinaryProposedEvent("TestEvent", []byte{0xb, 0xe, 0xe, 0xf}).
-		EventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f")).
-		Metadata([]byte{0xd, 0xe, 0xa, 0xd})
+	testEvent := createTestEvent()
+	testEvent.SetEventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f"))
 
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
@@ -48,11 +46,11 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 				}
 
 				event := subEvent.EventAppeared
-				require.Equal(t, testEvent.GetEventID(), event.GetOriginalEvent().EventID)
+				require.Equal(t, testEvent.EventID(), event.GetOriginalEvent().EventID)
 				require.Equal(t, uint64(6_000), event.GetOriginalEvent().EventNumber)
 				require.Equal(t, streamID, event.GetOriginalEvent().StreamID)
-				require.Equal(t, testEvent.GetData(), event.GetOriginalEvent().Data)
-				require.Equal(t, testEvent.GetMetadata(), event.GetOriginalEvent().UserMetadata)
+				require.Equal(t, testEvent.Data(), event.GetOriginalEvent().Data)
+				require.Equal(t, testEvent.Metadata(), event.GetOriginalEvent().UserMetadata)
 				appendedEvents.Done()
 				break
 			}

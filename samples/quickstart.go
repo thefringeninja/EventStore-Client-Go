@@ -30,7 +30,9 @@ func Run() {
 		importantData: "I wrote my first event!",
 	}
 
-	data, err := messages.NewJsonProposedEvent("TestEvent", testEvent)
+	event := messages.ProposedEvent{}
+	event.SetEventType("TestEvent")
+	err = event.SetJsonData(testEvent)
 
 	if err != nil {
 		panic(err)
@@ -39,7 +41,7 @@ func Run() {
 	aopts := options.AppendToStreamOptions{}
 	aopts.SetDefaults()
 
-	_, err = db.AppendToStream(context.Background(), "some-stream", aopts, data)
+	_, err = db.AppendToStream(context.Background(), "some-stream", aopts, event)
 
 	if err != nil {
 		panic(err)

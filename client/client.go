@@ -144,7 +144,9 @@ func (client *Client) SetStreamMetadata(
 		return nil, err
 	}
 
-	event, err := messages.NewJsonProposedEvent("$metadata", props)
+	event := messages.ProposedEvent{}
+	event.SetEventType("$metadata")
+	err = event.SetJsonData(props)
 
 	if err != nil {
 		return nil, err

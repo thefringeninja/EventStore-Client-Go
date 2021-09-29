@@ -72,9 +72,9 @@ func ToAppendHeader(streamID string, streamRevision stream_revision.ExpectedRevi
 // ToProposedMessage ...
 func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMessage {
 	metadata := map[string]string{}
-	metadata[system_metadata.SystemMetadataKeysContentType] = event.GetContentType()
-	metadata[system_metadata.SystemMetadataKeysType] = event.GetEventType()
-	eventId := event.GetEventID()
+	metadata[system_metadata.SystemMetadataKeysContentType] = event.ContentType()
+	metadata[system_metadata.SystemMetadataKeysType] = event.EventType()
+	eventId := event.EventID()
 
 	if eventId == uuid.Nil {
 		eventId = uuid.Must(uuid.NewV4())
@@ -86,8 +86,8 @@ func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMess
 				String_: eventId.String(),
 			},
 		},
-		Data:           event.GetData(),
-		CustomMetadata: event.GetMetadata(),
+		Data:           event.Data(),
+		CustomMetadata: event.Metadata(),
 		Metadata:       metadata,
 	}
 }

@@ -21,7 +21,9 @@ func AppendToStream(db *client.Client) {
 		importantData: "some value",
 	}
 
-	event, err := messages.NewJsonProposedEvent("some-event", data)
+	event := messages.ProposedEvent{}
+	event.SetEventType("some-event")
+	err := event.SetJsonData(data)
 
 	if err != nil {
 		panic(err)
@@ -43,7 +45,9 @@ func AppendWithSameId(db *client.Client) {
 		importantData: "some value",
 	}
 
-	event, err := messages.NewJsonProposedEvent("some-event", data)
+	event := messages.ProposedEvent{}
+	event.SetEventType("some-event")
+	err := event.SetJsonData(data)
 
 	if err != nil {
 		panic(err)
@@ -74,7 +78,9 @@ func AppendWithNoStream(db *client.Client) {
 		importantData: "some value",
 	}
 
-	event, err := messages.NewJsonProposedEvent("some-event", data)
+	event := messages.ProposedEvent{}
+	event.SetEventType("some-event")
+	err := event.SetJsonData(data)
 
 	if err != nil {
 		panic(err)
@@ -89,9 +95,13 @@ func AppendWithNoStream(db *client.Client) {
 		panic(err)
 	}
 
-	data = TestEvent{
+	err = event.SetJsonData(TestEvent{
 		id:            "2",
 		importantData: "some other value",
+	})
+
+	if err != nil {
+		panic(err)
 	}
 
 	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
@@ -124,7 +134,9 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		importantData: "clientOne",
 	}
 
-	event, err := messages.NewJsonProposedEvent("some-event", data)
+	event := messages.ProposedEvent{}
+	event.SetEventType("some-event")
+	err = event.SetJsonData(data)
 
 	if err != nil {
 		panic(err)

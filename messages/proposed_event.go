@@ -8,101 +8,67 @@ import (
 
 // ProposedEvent ...
 type ProposedEvent struct {
-	eventID      uuid.UUID
-	eventType    string
-	contentType  string
-	data         []byte
-	metadata []byte
+	eventID     uuid.UUID
+	eventType   string
+	contentType string
+	data        []byte
+	metadata    []byte
 }
 
-func NewJsonProposedEvent(eventType string, payload interface{}) (ProposedEvent, error) {
-	event := ProposedEvent {}
+func (e *ProposedEvent) EventID() uuid.UUID {
+	return e.eventID
+}
+
+func (e *ProposedEvent) EventType() string {
+	return e.eventType
+}
+
+func (e *ProposedEvent) ContentType() string {
+	return e.contentType
+}
+
+func (e *ProposedEvent) Data() []byte {
+	return e.data
+}
+
+func (e *ProposedEvent) Metadata() []byte {
+	return e.metadata
+}
+
+func (e *ProposedEvent) SetEventID(value uuid.UUID) {
+	e.eventID = value
+}
+
+func (e *ProposedEvent) SetEventType(value string) {
+	e.eventType = value
+}
+
+func (e *ProposedEvent) SetContentType(value string) {
+	e.contentType = value
+}
+
+func (e *ProposedEvent) SetJsonData(payload interface{}) error {
 	bytes, err := json.Marshal(payload)
 
 	if err != nil {
-		return event, err
+		return err
 	}
 
-	event.eventType = eventType
-	event.contentType = "application/json"
-	event.data = bytes
-	event.metadata = []byte{}
+	e.data = bytes
+	e.contentType = "application/json"
 
-	return event, nil
+	return nil
 }
 
-func NewBinaryProposedEvent(eventType string, bytes []byte) ProposedEvent {
-	event := ProposedEvent {
-		eventType: eventType,
-		contentType: "application/octet-stream",
-		data: bytes,
-		metadata: []byte{},
-	}
-
-	return event
+func (e *ProposedEvent) SetBinaryData(payload []byte) {
+	e.data = payload
+	e.contentType = "application/octet-stream"
 }
 
-func (event ProposedEvent) GetEventID() uuid.UUID {
-	return event.eventID
+func (e *ProposedEvent) SetData(payload []byte) {
+	e.data = payload
 }
 
-func (event ProposedEvent) GetEventType() string {
-	return event.eventType
-}
-
-func (event ProposedEvent) GetContentType() string {
-	return event.contentType
-}
-
-func (event ProposedEvent) GetData() []byte {
-	return event.data
-}
-
-func (event ProposedEvent) GetMetadata() []byte {
-	return event.metadata
-}
-
-func (event ProposedEvent) EventID(value uuid.UUID) ProposedEvent {
-	event.eventID = value
-	return event
-}
-
-func (event ProposedEvent) EventType(value string) ProposedEvent {
-	event.eventType = value
-	return event
-}
-
-func (event ProposedEvent) ContentType(value string) ProposedEvent {
-	event.contentType = value
-	return event
-}
-
-func (event ProposedEvent) JsonData(payload interface{}) (ProposedEvent, error) {
-	bytes, err := json.Marshal(payload)
-
-	if err != nil {
-		return event, err
-	}
-
-	event.data = bytes
-	event.contentType = "application/json"
-
-	return event, nil
-}
-
-func (event ProposedEvent) BinaryData(payload []byte) ProposedEvent {
-	event.data = payload
-	event.contentType = "application/octet-stream"
-
-	return event
-}
-
-func (event ProposedEvent) Data(payload []byte) ProposedEvent {
-	event.data = payload
-	return event
-}
-
-func (event ProposedEvent) Metadata(payload []byte) ProposedEvent {
-	event.metadata = payload
-	return event
+func (e *ProposedEvent) SetMetadata(payload []byte) {
+	e.metadata = payload
 }
