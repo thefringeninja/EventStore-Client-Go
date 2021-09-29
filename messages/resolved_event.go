@@ -6,7 +6,7 @@ type ResolvedEvent struct {
 	Commit *uint64
 }
 
-func (resolved ResolvedEvent) GetOriginalEvent() *RecordedEvent {
+func (resolved ResolvedEvent) OriginalEvent() *RecordedEvent {
 	if resolved.Link != nil {
 		return resolved.Link
 	}

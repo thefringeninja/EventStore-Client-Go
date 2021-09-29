@@ -135,7 +135,7 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 	}
 
 	aopts := client.AppendToStreamOptions{}
-	aopts.SetExpectRevision(lastEvent.GetOriginalEvent().EventNumber)
+	aopts.SetExpectRevision(lastEvent.OriginalEvent().EventNumber)
 
 	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
 

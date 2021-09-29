@@ -60,7 +60,7 @@ func (connection *syncReadConnectionImpl) Ack(messages ...*messages.ResolvedEven
 
 	ids := []uuid.UUID{}
 	for _, event := range messages {
-		ids = append(ids, event.GetOriginalEvent().EventID)
+		ids = append(ids, event.OriginalEvent().EventID)
 	}
 
 	err := connection.client.Send(&persistent.ReadReq{
@@ -85,7 +85,7 @@ func (connection *syncReadConnectionImpl) Nack(reason string, action Nack_Action
 
 	ids := []uuid.UUID{}
 	for _, event := range messages {
-		ids = append(ids, event.GetOriginalEvent().EventID)
+		ids = append(ids, event.OriginalEvent().EventID)
 	}
 
 	err := connection.client.Send(&persistent.ReadReq{

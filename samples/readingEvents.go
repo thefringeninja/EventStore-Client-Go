@@ -180,7 +180,7 @@ func IgnoreSystemEvents(db *client.Client) {
 
 		fmt.Printf("Event> %v", event)
 
-		if strings.HasPrefix(event.GetOriginalEvent().EventType, "$") {
+		if strings.HasPrefix(event.OriginalEvent().EventType, "$") {
 			continue
 		}
 

@@ -76,7 +76,7 @@ func SubscribeToStream(db *client.Client) {
 
 				if event.EventAppeared != nil {
 					// handles the event...
-					opts.SetFromRevision(event.EventAppeared.GetOriginalEvent().EventNumber)
+					opts.SetFromRevision(event.EventAppeared.OriginalEvent().EventNumber)
 				}
 			}
 		}
@@ -144,7 +144,7 @@ func SubscribeToAll(db *client.Client) {
 
 				if event.EventAppeared != nil {
 					// handles the event...
-					opts.SetFromPosition(event.EventAppeared.GetOriginalEvent().Position)
+					opts.SetFromPosition(event.EventAppeared.OriginalEvent().Position)
 				}
 			}
 		}

@@ -26,8 +26,8 @@ func ExcludeSystemEvents(db *client.Client) {
 		event := sub.Recv()
 
 		if event.EventAppeared != nil {
-			streamId := event.EventAppeared.GetOriginalEvent().StreamID
-			revision := event.EventAppeared.GetOriginalEvent().EventNumber
+			streamId := event.EventAppeared.OriginalEvent().StreamID
+			revision := event.EventAppeared.OriginalEvent().EventNumber
 
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
@@ -58,8 +58,8 @@ func EventTypePrefix(db *client.Client) {
 		event := sub.Recv()
 
 		if event.EventAppeared != nil {
-			streamId := event.EventAppeared.GetOriginalEvent().StreamID
-			revision := event.EventAppeared.GetOriginalEvent().EventNumber
+			streamId := event.EventAppeared.OriginalEvent().StreamID
+			revision := event.EventAppeared.OriginalEvent().EventNumber
 
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
@@ -90,8 +90,8 @@ func EventTypeRegex(db *client.Client) {
 		event := sub.Recv()
 
 		if event.EventAppeared != nil {
-			streamId := event.EventAppeared.GetOriginalEvent().StreamID
-			revision := event.EventAppeared.GetOriginalEvent().EventNumber
+			streamId := event.EventAppeared.OriginalEvent().StreamID
+			revision := event.EventAppeared.OriginalEvent().EventNumber
 
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
@@ -122,8 +122,8 @@ func StreamPrefix(db *client.Client) {
 		event := sub.Recv()
 
 		if event.EventAppeared != nil {
-			streamId := event.EventAppeared.GetOriginalEvent().StreamID
-			revision := event.EventAppeared.GetOriginalEvent().EventNumber
+			streamId := event.EventAppeared.OriginalEvent().StreamID
+			revision := event.EventAppeared.OriginalEvent().EventNumber
 
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
@@ -154,8 +154,8 @@ func StreamRegex(db *client.Client) {
 		event := sub.Recv()
 
 		if event.EventAppeared != nil {
-			streamId := event.EventAppeared.GetOriginalEvent().StreamID
-			revision := event.EventAppeared.GetOriginalEvent().EventNumber
+			streamId := event.EventAppeared.OriginalEvent().StreamID
+			revision := event.EventAppeared.OriginalEvent().EventNumber
 
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
@@ -186,8 +186,8 @@ func CheckpointCallbackWithInterval(db *client.Client) {
 		event := sub.Recv()
 
 		if event.EventAppeared != nil {
-			streamId := event.EventAppeared.GetOriginalEvent().StreamID
-			revision := event.EventAppeared.GetOriginalEvent().EventNumber
+			streamId := event.EventAppeared.OriginalEvent().StreamID
+			revision := event.EventAppeared.OriginalEvent().EventNumber
 
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}

@@ -83,11 +83,11 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	}
 
 	assert.Equal(t, int32(1), int32(len(events)), "Expected the correct number of messages to be returned")
-	assert.Equal(t, testEvent.EventID(), events[0].GetOriginalEvent().EventID)
-	assert.Equal(t, testEvent.EventType(), events[0].GetOriginalEvent().EventType)
-	assert.Equal(t, streamID.String(), events[0].GetOriginalEvent().StreamID)
-	assert.Equal(t, testEvent.Data(), events[0].GetOriginalEvent().Data)
-	assert.Equal(t, testEvent.Metadata(), events[0].GetOriginalEvent().UserMetadata)
+	assert.Equal(t, testEvent.EventID(), events[0].OriginalEvent().EventID)
+	assert.Equal(t, testEvent.EventType(), events[0].OriginalEvent().EventType)
+	assert.Equal(t, streamID.String(), events[0].OriginalEvent().StreamID)
+	assert.Equal(t, testEvent.Data(), events[0].OriginalEvent().Data)
+	assert.Equal(t, testEvent.Metadata(), events[0].OriginalEvent().UserMetadata)
 }
 
 func TestAppendWithInvalidStreamRevision(t *testing.T) {

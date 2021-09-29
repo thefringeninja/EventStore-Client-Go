@@ -187,7 +187,7 @@ func (client *Client) GetStreamMetadata(
 
 	var props map[string]interface{}
 
-	err = json.Unmarshal(event.GetOriginalEvent().Data, &props)
+	err = json.Unmarshal(event.OriginalEvent().Data, &props)
 
 	if err != nil {
 		return nil, err
