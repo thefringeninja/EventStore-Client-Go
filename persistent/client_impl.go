@@ -3,15 +3,15 @@ package persistent
 import (
 	"context"
 
-	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
+	"github.com/EventStore/EventStore-Client-Go/connection"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
+	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
-type ClientImpl struct {
+type Client struct {
 	inner                        connection.GrpcClient
 	persistentSubscriptionClient persistentProto.PersistentSubscriptionsClient
 	syncReadConnectionFactory    SyncReadConnectionFactory
@@ -25,7 +25,7 @@ const (
 	SubscribeToStreamSync_NoSubscriptionConfirmationErr               ErrorCode = "SubscribeToStreamSync_NoSubscriptionConfirmationErr"
 )
 
-func (client ClientImpl) SubscribeToStreamSync(
+func (client Client) SubscribeToStreamSync(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	bufferSize int32,
@@ -71,7 +71,7 @@ func (client ClientImpl) SubscribeToStreamSync(
 
 const CreateStreamSubscription_FailedToCreatePermanentSubscriptionErr ErrorCode = "CreateStreamSubscription_FailedToCreatePermanentSubscriptionErr"
 
-func (client ClientImpl) CreateStreamSubscription(
+func (client Client) CreateStreamSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	streamName string,
@@ -96,7 +96,7 @@ const (
 	CreateAllSubscription_CanSetOnlyRegexOrPrefixErr             ErrorCode = "CreateAllSubscription_CanSetOnlyRegexOrPrefixErr"
 )
 
-func (client ClientImpl) CreateAllSubscription(
+func (client Client) CreateAllSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	groupName string,
@@ -130,7 +130,7 @@ func (client ClientImpl) CreateAllSubscription(
 
 const UpdateStreamSubscription_FailedToUpdateErr ErrorCode = "UpdateStreamSubscription_FailedToUpdateErr"
 
-func (client ClientImpl) UpdateStreamSubscription(
+func (client Client) UpdateStreamSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	streamName string,
@@ -151,7 +151,7 @@ func (client ClientImpl) UpdateStreamSubscription(
 
 const UpdateAllSubscription_FailedToUpdateErr ErrorCode = "UpdateAllSubscription_FailedToUpdateErr"
 
-func (client ClientImpl) UpdateAllSubscription(
+func (client Client) UpdateAllSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	groupName string,
@@ -172,7 +172,7 @@ func (client ClientImpl) UpdateAllSubscription(
 
 const DeleteStreamSubscription_FailedToDeleteErr ErrorCode = "DeleteStreamSubscription_FailedToDeleteErr"
 
-func (client ClientImpl) DeleteStreamSubscription(
+func (client Client) DeleteStreamSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	streamName string,
@@ -191,7 +191,7 @@ func (client ClientImpl) DeleteStreamSubscription(
 
 const DeleteAllSubscription_FailedToDeleteErr ErrorCode = "DeleteAllSubscription_FailedToDeleteErr"
 
-func (client ClientImpl) DeleteAllSubscription(ctx context.Context, handle connection.ConnectionHandle, groupName string) error {
+func (client Client) DeleteAllSubscription(ctx context.Context, handle connection.ConnectionHandle, groupName string) error {
 	deleteSubscriptionOptions := deleteRequestAllOptionsProto(groupName)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
@@ -203,8 +203,8 @@ func (client ClientImpl) DeleteAllSubscription(ctx context.Context, handle conne
 	return nil
 }
 
-func NewClient(inner connection.GrpcClient, client persistentProto.PersistentSubscriptionsClient) ClientImpl {
-	return ClientImpl{
+func NewClient(inner connection.GrpcClient, client persistentProto.PersistentSubscriptionsClient) Client {
+	return Client{
 		inner:                        inner,
 		persistentSubscriptionClient: client,
 		syncReadConnectionFactory:    SyncReadConnectionFactoryImpl{},

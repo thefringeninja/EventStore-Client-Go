@@ -100,7 +100,7 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 	// endregion checking-for-stream-presence
 }
 
-func ReadSreamBackwards(db *client.Client) {
+func ReadStreamBackwards(db *client.Client) {
 	// region reading-backwards
 	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetBackwards()
