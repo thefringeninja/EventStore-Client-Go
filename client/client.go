@@ -368,7 +368,7 @@ func (client *Client) ConnectToPersistentSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
-	options *options.ConnectToPersistentSubscriptionOptions,
+	options options.ConnectToPersistentSubscriptionOptions,
 ) (persistent.SyncReadConnection, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -379,7 +379,7 @@ func (client *Client) ConnectToPersistentSubscription(
 	return persistentSubscriptionClient.SubscribeToStreamSync(
 		ctx,
 		handle,
-		options.GetBatchSize(),
+		options.BatchSize(),
 		streamName,
 		groupName,
 	)
@@ -389,7 +389,7 @@ func (client *Client) CreatePersistentSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
-	options *options.PersistentStreamSubscriptionOptions,
+	options options.PersistentStreamSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -397,13 +397,13 @@ func (client *Client) CreatePersistentSubscription(
 	}
 	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.GetPosition(), options.GetSettings())
+	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From(), options.Settings())
 }
 
 func (client *Client) CreatePersistentSubscriptionAll(
 	ctx context.Context,
 	groupName string,
-	options *options.PersistentAllSubscriptionOptions,
+	options options.PersistentAllSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -415,9 +415,9 @@ func (client *Client) CreatePersistentSubscriptionAll(
 		ctx,
 		handle,
 		groupName,
-		options.GetPosition(),
-		options.GetSettings(),
-		options.GetFilter(),
+		options.From(),
+		options.Settings(),
+		options.Filter(),
 	)
 }
 
@@ -425,7 +425,7 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
-	options *options.PersistentStreamSubscriptionOptions,
+	options options.PersistentStreamSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -433,13 +433,13 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	}
 	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.GetPosition(), options.GetSettings())
+	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From(), options.Settings())
 }
 
 func (client *Client) UpdatePersistentSubscriptionAll(
 	ctx context.Context,
 	groupName string,
-	options *options.PersistentAllSubscriptionOptions,
+	options options.PersistentAllSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -447,7 +447,7 @@ func (client *Client) UpdatePersistentSubscriptionAll(
 	}
 	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.GetPosition(), options.GetSettings())
+	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From(), options.Settings())
 }
 
 func (client *Client) DeletePersistentSubscription(

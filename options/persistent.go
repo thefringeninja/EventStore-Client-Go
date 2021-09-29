@@ -3,6 +3,7 @@ package options
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
+	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
@@ -11,29 +12,37 @@ type PersistentStreamSubscriptionOptions struct {
 	position stream_position.StreamPosition
 }
 
-func PersistentStreamSubscriptionOptionsDefault() PersistentStreamSubscriptionOptions {
-	return PersistentStreamSubscriptionOptions{
-		settings: persistent.SubscriptionSettingsDefault(),
-		position: stream_position.End(),
-	}
+func (o *PersistentStreamSubscriptionOptions) SetDefaults() {
+	o.settings = persistent.SubscriptionSettingsDefault()
+	o.position = stream_position.End()
 }
 
-func (opts PersistentStreamSubscriptionOptions) Settings(settings persistent.SubscriptionSettings) PersistentStreamSubscriptionOptions {
-	opts.settings = settings
-	return opts
+func (o *PersistentStreamSubscriptionOptions) SetSettings(settings persistent.SubscriptionSettings) {
+	o.settings = settings
 }
 
-func (opts PersistentStreamSubscriptionOptions) Position(position stream_position.StreamPosition) PersistentStreamSubscriptionOptions {
-	opts.position = position
-	return opts
+func (o *PersistentStreamSubscriptionOptions) SetFrom(position stream_position.StreamPosition) {
+	o.position = position
 }
 
-func (opts PersistentStreamSubscriptionOptions) GetSettings() persistent.SubscriptionSettings {
-	return opts.settings
+func (o *PersistentStreamSubscriptionOptions) SetFromStart() {
+	o.position = stream_position.Start()
 }
 
-func (opts PersistentStreamSubscriptionOptions) GetPosition() stream_position.StreamPosition {
-	return opts.position
+func (o *PersistentStreamSubscriptionOptions) SetFromEnd() {
+	o.position = stream_position.End()
+}
+
+func (o *PersistentStreamSubscriptionOptions) SetFromRevision(value uint64) {
+	o.position = stream_position.Revision(value)
+}
+
+func (o *PersistentStreamSubscriptionOptions) Settings() persistent.SubscriptionSettings {
+	return o.settings
+}
+
+func (o *PersistentStreamSubscriptionOptions) From() stream_position.StreamPosition {
+	return o.position
 }
 
 type PersistentAllSubscriptionOptions struct {
@@ -42,60 +51,64 @@ type PersistentAllSubscriptionOptions struct {
 	filter   []filtering.SubscriptionFilterOptions
 }
 
-func PersistentAllSubscriptionOptionsDefault() PersistentAllSubscriptionOptions {
-	return PersistentAllSubscriptionOptions{
-		settings: persistent.SubscriptionSettingsDefault(),
-		position: stream_position.End(),
-		filter:   []filtering.SubscriptionFilterOptions{},
-	}
+func (o *PersistentAllSubscriptionOptions) SetDefaults() {
+	o.settings = persistent.SubscriptionSettingsDefault()
+	o.position = stream_position.End()
+	o.filter = []filtering.SubscriptionFilterOptions{}
 }
 
-func (opts PersistentAllSubscriptionOptions) Settings(settings persistent.SubscriptionSettings) PersistentAllSubscriptionOptions {
-	opts.settings = settings
-	return opts
+func (o *PersistentAllSubscriptionOptions) SetSettings(settings persistent.SubscriptionSettings) {
+	o.settings = settings
 }
 
-func (opts PersistentAllSubscriptionOptions) Position(position stream_position.AllStreamPosition) PersistentAllSubscriptionOptions {
-	opts.position = position
-	return opts
+func (o *PersistentAllSubscriptionOptions) SetFrom(position stream_position.AllStreamPosition) {
+	o.position = position
 }
 
-func (opts PersistentAllSubscriptionOptions) Filter(filter filtering.SubscriptionFilterOptions) PersistentAllSubscriptionOptions {
-	opts.filter = []filtering.SubscriptionFilterOptions{filter}
-	return opts
+func (o *PersistentAllSubscriptionOptions) SetFromStart() {
+	o.position = stream_position.Start()
 }
 
-func (opts PersistentAllSubscriptionOptions) GetSettings() persistent.SubscriptionSettings {
-	return opts.settings
+func (o *PersistentAllSubscriptionOptions) SetFromEnd() {
+	o.position = stream_position.End()
 }
 
-func (opts PersistentAllSubscriptionOptions) GetPosition() stream_position.AllStreamPosition {
-	return opts.position
+func (o *PersistentAllSubscriptionOptions) SetFromPosition(value position.Position) {
+	o.position = stream_position.Position(value)
 }
 
-func (opts PersistentAllSubscriptionOptions) GetFilter() *filtering.SubscriptionFilterOptions {
-	if len(opts.filter) == 0 {
+func (o *PersistentAllSubscriptionOptions) SetFilter(filter filtering.SubscriptionFilterOptions) {
+	o.filter = []filtering.SubscriptionFilterOptions{filter}
+}
+
+func (o *PersistentAllSubscriptionOptions) Settings() persistent.SubscriptionSettings {
+	return o.settings
+}
+
+func (o *PersistentAllSubscriptionOptions) From() stream_position.AllStreamPosition {
+	return o.position
+}
+
+func (o *PersistentAllSubscriptionOptions) Filter() *filtering.SubscriptionFilterOptions {
+	if len(o.filter) == 0 {
 		return nil
 	}
 
-	return &opts.filter[0]
+	return &o.filter[0]
 }
 
 type ConnectToPersistentSubscriptionOptions struct {
 	batchSize int32
 }
 
-func ConnectToPersistentSubscriptionOptionsDefault() ConnectToPersistentSubscriptionOptions {
-	return ConnectToPersistentSubscriptionOptions{
-		batchSize: 10,
-	}
+func (o *ConnectToPersistentSubscriptionOptions) SetDefaults() {
+	o.batchSize = 10
 }
 
-func (opts ConnectToPersistentSubscriptionOptions) BatchSize(value int32) ConnectToPersistentSubscriptionOptions {
-	opts.batchSize = value
-	return opts
+func (o *ConnectToPersistentSubscriptionOptions) SetBatchSize(value int32) {
+	o.batchSize = value
 }
 
-func (opts ConnectToPersistentSubscriptionOptions) GetBatchSize() int32 {
-	return opts.batchSize
+func (o *ConnectToPersistentSubscriptionOptions) BatchSize() int32 {
+	return o.batchSize
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,12 +24,13 @@ func Test_CreatePersistentStreamSubscription(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -50,12 +50,14 @@ func Test_CreatePersistentStreamSubscription_MessageTimeoutZero(t *testing.T) {
 	settings := persistent.SubscriptionSettingsDefault()
 	settings.MessageTimeoutInMs = 0
 
-	options := options.PersistentStreamSubscriptionOptionsDefault().Settings(settings)
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
+	options.SetSettings(settings)
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -71,12 +73,13 @@ func Test_CreatePersistentStreamSubscription_StreamNotExits(t *testing.T) {
 
 	streamID := "someStream"
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -93,12 +96,13 @@ func Test_CreatePersistentStreamSubscription_FailsIfAlreadyExists(t *testing.T) 
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -107,7 +111,7 @@ func Test_CreatePersistentStreamSubscription_FailsIfAlreadyExists(t *testing.T) 
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.Error(t, err)
@@ -124,12 +128,13 @@ func Test_CreatePersistentStreamSubscription_AfterDeleting(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -142,7 +147,7 @@ func Test_CreatePersistentStreamSubscription_AfterDeleting(t *testing.T) {
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -159,12 +164,13 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -184,8 +190,8 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 	settings.ExtraStatistics = !settings.ExtraStatistics
 	settings.ResolveLinks = !settings.ResolveLinks
 
-	options = options.Settings(settings)
-	err = clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", &options)
+	options.SetSettings(settings)
+	err = clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", options)
 
 	require.NoError(t, err)
 }
@@ -200,9 +206,10 @@ func Test_UpdatePersistentStreamSubscription_ErrIfSubscriptionDoesNotExist(t *te
 
 	streamID := "someStream"
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 
-	err := clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", &options)
+	err := clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", options)
 
 	require.Error(t, err)
 }
@@ -218,12 +225,13 @@ func Test_DeletePersistentStreamSubscription(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptionsDefault()
+	options := options.PersistentStreamSubscriptionOptions{}
+	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		&options,
+		options,
 	)
 
 	require.NoError(t, err)
@@ -286,18 +294,22 @@ func TestPersistentSubscriptionClosing(t *testing.T) {
 	streamID := "dataset20M-0"
 	groupName := "Group 1"
 
-	opts := options.PersistentStreamSubscriptionOptionsDefault().Position(stream_position.Start())
+	opts := options.PersistentStreamSubscriptionOptions{}
+	opts.SetDefaults()
+	opts.SetFromStart()
 
-	err := client.CreatePersistentSubscription(context.Background(), streamID, groupName, &opts)
+	err := client.CreatePersistentSubscription(context.Background(), streamID, groupName, opts)
 
 	require.NoError(t, err)
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
 
-	optsC := options.ConnectToPersistentSubscriptionOptionsDefault().BatchSize(2)
+	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC.SetDefaults()
+	optsC.SetBatchSize(2)
 	subscription, err := client.ConnectToPersistentSubscription(
-		context.Background(), streamID, groupName, &optsC)
+		context.Background(), streamID, groupName, optsC)
 
 	require.NoError(t, err)
 
