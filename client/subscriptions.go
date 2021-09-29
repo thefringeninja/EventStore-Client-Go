@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"log"
 	"sync"
 
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/position"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	"github.com/EventStore/EventStore-Client-Go/subscription"

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
@@ -12,8 +14,6 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/EventStore/EventStore-Client-Go/errors"
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	esdb_metadata "github.com/EventStore/EventStore-Client-Go/metadata"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 )

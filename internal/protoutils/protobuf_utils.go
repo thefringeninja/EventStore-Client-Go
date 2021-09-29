@@ -2,6 +2,7 @@ package protoutils
 
 import (
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 	"log"
 	"strconv"
 	"time"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	direction "github.com/EventStore/EventStore-Client-Go/direction"
-	messages "github.com/EventStore/EventStore-Client-Go/messages"
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	shared "github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
@@ -71,10 +71,22 @@ func ToAppendHeader(streamID string, streamRevision stream_revision.ExpectedRevi
 
 // ToProposedMessage ...
 func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMessage {
+	if event.ContentType() == "" {
+		event.SetContentType("application/octet-stream")
+	}
+
 	metadata := map[string]string{}
 	metadata[system_metadata.SystemMetadataKeysContentType] = event.ContentType()
 	metadata[system_metadata.SystemMetadataKeysType] = event.EventType()
 	eventId := event.EventID()
+
+	if event.Data() == nil {
+		event.SetData([]byte{})
+	}
+
+	if event.Metadata() == nil {
+		event.SetMetadata([]byte{})
+	}
 
 	if eventId == uuid.Nil {
 		eventId = uuid.Must(uuid.NewV4())

@@ -2,10 +2,10 @@ package samples
 
 import (
 	"context"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 	"log"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 )
 
 type TestEvent struct {

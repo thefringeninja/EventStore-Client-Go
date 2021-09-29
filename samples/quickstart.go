@@ -3,10 +3,10 @@ package samples
 import (
 	"context"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 	"io"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 )
 
 func Run() {

@@ -3,10 +3,10 @@ package client_test
 import (
 	"context"
 	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
 	"github.com/stretchr/testify/require"
 )

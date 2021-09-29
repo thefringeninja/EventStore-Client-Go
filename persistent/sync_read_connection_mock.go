@@ -5,9 +5,9 @@
 package persistent
 
 import (
+	"github.com/EventStore/EventStore-Client-Go/messages"
 	reflect "reflect"
 
-	messages "github.com/EventStore/EventStore-Client-Go/messages"
 	uuid "github.com/gofrs/uuid"
 	gomock "github.com/golang/mock/gomock"
 )

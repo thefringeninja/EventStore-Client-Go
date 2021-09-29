@@ -3,13 +3,13 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 	"io"
 	"sync"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/errors"
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	"google.golang.org/grpc/metadata"
 )
