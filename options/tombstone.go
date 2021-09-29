@@ -8,18 +8,26 @@ type TombstoneStreamOptions struct {
 	expectedRevision stream_revision.ExpectedRevision
 }
 
-func TombstoneStreamOptionsDefault() TombstoneStreamOptions {
-	return TombstoneStreamOptions {
-		expectedRevision: stream_revision.Any(),
-	}
+func (o *TombstoneStreamOptions) SetDefaults() {
+	o.expectedRevision = stream_revision.Any()
 }
 
-func (options TombstoneStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) TombstoneStreamOptions {
-	options.expectedRevision = revision
-
-	return options
+func (o *TombstoneStreamOptions) SetExpectedRevision(revision stream_revision.ExpectedRevision) {
+	o.expectedRevision = revision
 }
 
-func (options TombstoneStreamOptions) GetExpectedRevision() stream_revision.ExpectedRevision {
-	return options.expectedRevision
+func (o *TombstoneStreamOptions) SetExpectNoStream() {
+	o.expectedRevision = stream_revision.NoStream()
+}
+
+func (o *TombstoneStreamOptions) SetExpectStreamExists() {
+	o.expectedRevision = stream_revision.StreamExists()
+}
+
+func (o *TombstoneStreamOptions) SetExpectRevision(value uint64) {
+	o.expectedRevision = stream_revision.Exact(value)
+}
+
+func (o *TombstoneStreamOptions) ExpectedRevision() stream_revision.ExpectedRevision {
+	return o.expectedRevision
 }

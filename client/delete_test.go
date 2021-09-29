@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/EventStore/EventStore-Client-Go/options"
-	"github.com/EventStore/EventStore-Client-Go/streamrevision"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,8 +16,11 @@ func TestCanDeleteStream(t *testing.T) {
 	client := CreateTestClient(container, t)
 	defer client.Close()
 
-	opts := options.DeleteStreamOptionsDefault().ExpectedRevision(streamrevision.Exact(1_999))
-	deleteResult, err := client.DeleteStream(context.Background(), "dataset20M-1800", &opts)
+	opts := options.DeleteStreamOptions{}
+	opts.SetDefaults()
+	opts.SetExpectRevision(1_999)
+
+	deleteResult, err := client.DeleteStream(context.Background(), "dataset20M-1800", opts)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -35,8 +37,11 @@ func TestCanTombstoneStream(t *testing.T) {
 	client := CreateTestClient(container, t)
 	defer client.Close()
 
-	opts := options.TombstoneStreamOptionsDefault().ExpectedRevision(streamrevision.Exact(1_999))
-	deleteResult, err := client.TombstoneStream(context.Background(), "dataset20M-1800", &opts)
+	opts := options.TombstoneStreamOptions{}
+	opts.SetDefaults()
+	opts.SetExpectRevision(1_999)
+
+	deleteResult, err := client.TombstoneStream(context.Background(), "dataset20M-1800", opts)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)

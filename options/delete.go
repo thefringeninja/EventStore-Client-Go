@@ -8,18 +8,26 @@ type DeleteStreamOptions struct {
 	expectedRevision stream_revision.ExpectedRevision
 }
 
-func DeleteStreamOptionsDefault() DeleteStreamOptions {
-	return DeleteStreamOptions {
-		expectedRevision: stream_revision.Any(),
-	}
+func (o *DeleteStreamOptions) SetDefaults() {
+	o.expectedRevision = stream_revision.Any()
 }
 
-func (options DeleteStreamOptions) ExpectedRevision(revision stream_revision.ExpectedRevision) DeleteStreamOptions {
-	options.expectedRevision = revision
-
-	return options
+func (o *DeleteStreamOptions) SetExpectedRevision(revision stream_revision.ExpectedRevision) {
+	o.expectedRevision = revision
 }
 
-func (options DeleteStreamOptions) GetExpectedRevision() stream_revision.ExpectedRevision {
-	return options.expectedRevision
+func (o *DeleteStreamOptions) SetExpectNoStream() {
+	o.expectedRevision = stream_revision.NoStream()
+}
+
+func (o *DeleteStreamOptions) SetExpectStreamExists() {
+	o.expectedRevision = stream_revision.StreamExists()
+}
+
+func (o *DeleteStreamOptions) SetExpectRevision(value uint64) {
+	o.expectedRevision = stream_revision.Exact(value)
+}
+
+func (o *DeleteStreamOptions) ExpectedRevision() stream_revision.ExpectedRevision {
+	return o.expectedRevision
 }
