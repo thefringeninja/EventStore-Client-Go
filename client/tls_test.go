@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EventStore/EventStore-Client-Go/options"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -32,7 +30,7 @@ func TestTLSDefaults(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -69,7 +67,7 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -95,7 +93,7 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -121,7 +119,7 @@ func TestTLSWithoutCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -158,7 +156,7 @@ func TestTLSWithCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -190,7 +188,7 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -216,7 +214,7 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()
@@ -252,7 +250,7 @@ func TestTLSWithInvalidCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetBackwards()

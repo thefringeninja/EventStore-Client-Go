@@ -2,8 +2,8 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
@@ -14,7 +14,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/errors"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/options"
 	esdb_metadata "github.com/EventStore/EventStore-Client-Go/metadata"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 )
@@ -50,7 +49,7 @@ func (client *Client) Close() error {
 func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
-	opts options.AppendToStreamOptions,
+	opts AppendToStreamOptions,
 	events ...messages.ProposedEvent,
 ) (*WriteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
@@ -134,7 +133,7 @@ func (client *Client) AppendToStream(
 func (client *Client) SetStreamMetadata(
 	context context.Context,
 	streamID string,
-	opts options.AppendToStreamOptions,
+	opts AppendToStreamOptions,
 	metadata esdb_metadata.StreamMetadata,
 ) (*WriteResult, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
@@ -164,7 +163,7 @@ func (client *Client) SetStreamMetadata(
 func (client *Client) GetStreamMetadata(
 	context context.Context,
 	streamID string,
-	opts options.ReadStreamEventsOptions,
+	opts ReadStreamEventsOptions,
 ) (*esdb_metadata.StreamMetadata, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 
@@ -206,7 +205,7 @@ func (client *Client) GetStreamMetadata(
 func (client *Client) DeleteStream(
 	context context.Context,
 	streamID string,
-	opts options.DeleteStreamOptions,
+	opts DeleteStreamOptions,
 ) (*DeleteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -228,7 +227,7 @@ func (client *Client) DeleteStream(
 func (client *Client) TombstoneStream(
 	context context.Context,
 	streamID string,
-	opts options.TombstoneStreamOptions,
+	opts TombstoneStreamOptions,
 ) (*DeleteResult, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -251,7 +250,7 @@ func (client *Client) TombstoneStream(
 func (client *Client) ReadStreamEvents(
 	context context.Context,
 	streamID string,
-	opts options.ReadStreamEventsOptions,
+	opts ReadStreamEventsOptions,
 	count uint64,
 ) (*ReadStream, error) {
 	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction(), opts.Position(), count, opts.ResolveLinks())
@@ -267,7 +266,7 @@ func (client *Client) ReadStreamEvents(
 // ReadAllEvents ...
 func (client *Client) ReadAllEvents(
 	context context.Context,
-	opts options.ReadAllEventsOptions,
+	opts ReadAllEventsOptions,
 	count uint64,
 ) (*ReadStream, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
@@ -283,7 +282,7 @@ func (client *Client) ReadAllEvents(
 func (client *Client) SubscribeToStream(
 	ctx context.Context,
 	streamID string,
-	opts options.SubscribeToStreamOptions,
+	opts SubscribeToStreamOptions,
 ) (*Subscription, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -327,7 +326,7 @@ func (client *Client) SubscribeToStream(
 // SubscribeToAll ...
 func (client *Client) SubscribeToAll(
 	ctx context.Context,
-	opts options.SubscribeToAllOptions,
+	opts SubscribeToAllOptions,
 ) (*Subscription, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -368,7 +367,7 @@ func (client *Client) ConnectToPersistentSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
-	options options.ConnectToPersistentSubscriptionOptions,
+	options ConnectToPersistentSubscriptionOptions,
 ) (persistent.SyncReadConnection, error) {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -389,7 +388,7 @@ func (client *Client) CreatePersistentSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
-	options options.PersistentStreamSubscriptionOptions,
+	options PersistentStreamSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -403,7 +402,7 @@ func (client *Client) CreatePersistentSubscription(
 func (client *Client) CreatePersistentSubscriptionAll(
 	ctx context.Context,
 	groupName string,
-	options options.PersistentAllSubscriptionOptions,
+	options PersistentAllSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -425,7 +424,7 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
-	options options.PersistentStreamSubscriptionOptions,
+	options PersistentStreamSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -439,7 +438,7 @@ func (client *Client) UpdatePersistentStreamSubscription(
 func (client *Client) UpdatePersistentSubscriptionAll(
 	ctx context.Context,
 	groupName string,
-	options options.PersistentAllSubscriptionOptions,
+	options PersistentAllSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {

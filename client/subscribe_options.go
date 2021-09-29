@@ -1,4 +1,4 @@
-package options
+package client
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"

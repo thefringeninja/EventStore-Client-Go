@@ -2,11 +2,11 @@ package client_test
 
 import (
 	"context"
+	"github.com/EventStore/EventStore-Client-Go/client"
 	"testing"
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
 	"github.com/stretchr/testify/require"
 )
@@ -27,7 +27,7 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
-	optsP := options.PersistentStreamSubscriptionOptions{}
+	optsP := client.PersistentStreamSubscriptionOptions{}
 	optsP.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -39,7 +39,7 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 
 	var bufferSize int32 = 2
 	// optsC := options.Conn
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetBatchSize(bufferSize)
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -76,14 +76,14 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 
 	streamID := "someStream"
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 	require.NoError(t, err)
 	// create persistent stream connection with Revision set to Start
 	groupName := "Group 1"
-	optsP := options.PersistentStreamSubscriptionOptions{}
+	optsP := client.PersistentStreamSubscriptionOptions{}
 	optsP.SetDefaults()
 	err = clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -93,7 +93,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 	)
 	require.NoError(t, err)
 	// read one event
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -123,7 +123,7 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 	// create persistent stream connection with Revision set to Start
 	streamID := "someStream"
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromStart()
 	err := clientInstance.CreatePersistentSubscription(
@@ -134,13 +134,13 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 	)
 	require.NoError(t, err)
 	// append events to StreamsClient.AppendToStreamAsync(Stream, stream_revision.StreamRevisionNoStream, Events);
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 	require.NoError(t, err)
 	// read one event
 
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -170,13 +170,13 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
 	streamID := "someStream"
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
 	require.NoError(t, err)
 	// create persistent stream connection with Revision set to End
 	groupName := "Group 1"
-	optO := options.PersistentStreamSubscriptionOptions{}
+	optO := client.PersistentStreamSubscriptionOptions{}
 	optO.SetDefaults()
 	optO.SetFromEnd()
 	err = clientInstance.CreatePersistentSubscription(
@@ -188,13 +188,13 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 	require.NoError(t, err)
 
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, new StreamRevision(9), event[10])
-	opts2 := options.AppendToStreamOptions{}
+	opts2 := client.AppendToStreamOptions{}
 	opts2.SetExpectRevision(9)
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts2, events[10:]...)
 	require.NoError(t, err)
 
 	// read one event
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -224,14 +224,14 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
 	streamID := "someStream"
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
 	require.NoError(t, err)
 	// create persistent stream connection with position set to End
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromEnd()
 	err = clientInstance.CreatePersistentSubscription(
@@ -244,7 +244,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 
 	// reading one event after 10 seconds timeout will return no events
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		ctx, streamID, groupName, optsC)
@@ -292,7 +292,7 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 	// create persistent stream connection with position set to Position(2)
 	streamID := "someStream"
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromRevision(2)
 
@@ -304,12 +304,12 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 	)
 	require.NoError(t, err)
 	// append 3 event to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events)
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 	require.NoError(t, err)
 	// read one event
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -338,7 +338,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 	events := testCreateEvents(11)
 
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
@@ -346,7 +346,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 
 	// create persistent stream connection with start position set to Position(10)
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromRevision(10)
 	err = clientInstance.CreatePersistentSubscription(
@@ -358,13 +358,13 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 	require.NoError(t, err)
 
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(9), events[10:)
-	opts = options.AppendToStreamOptions{}
+	opts = client.AppendToStreamOptions{}
 	opts.SetExpectRevision(9)
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[10:]...)
 	require.NoError(t, err)
 
 	// read one event
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -393,7 +393,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 	events := testCreateEvents(11)
 
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
@@ -401,7 +401,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 
 	// create persistent stream connection with start position set to Position(4)
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromRevision(4)
 
@@ -414,13 +414,13 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 	require.NoError(t, err)
 
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(9), events)
-	opts = options.AppendToStreamOptions{}
+	opts = client.AppendToStreamOptions{}
 	opts.SetExpectRevision(9)
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[10:]...)
 	require.NoError(t, err)
 
 	// read one event
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -451,14 +451,14 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	// append 11 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:11]);
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
 	streamID := "someStream"
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:11]...)
 	require.NoError(t, err)
 
 	// create persistent stream connection with start position set to Position(11)
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromRevision(11)
 	err = clientInstance.CreatePersistentSubscription(
@@ -470,13 +470,13 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	require.NoError(t, err)
 
 	// append event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(10), events[11:])
-	opts = options.AppendToStreamOptions{}
+	opts = client.AppendToStreamOptions{}
 	opts.SetExpectRevision(10)
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[11:]...)
 	require.NoError(t, err)
 
 	// read one event
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
@@ -507,7 +507,7 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
-	optsO := options.PersistentStreamSubscriptionOptions{}
+	optsO := client.PersistentStreamSubscriptionOptions{}
 	optsO.SetDefaults()
 	optsO.SetFromStart()
 	err := clientInstance.CreatePersistentSubscription(
@@ -517,7 +517,7 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 		optsO,
 	)
 
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	optsC.SetBatchSize(2)
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(

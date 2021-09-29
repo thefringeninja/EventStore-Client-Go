@@ -8,7 +8,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/persistent"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +23,7 @@ func Test_CreatePersistentStreamSubscription(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -50,7 +49,7 @@ func Test_CreatePersistentStreamSubscription_MessageTimeoutZero(t *testing.T) {
 	settings := persistent.SubscriptionSettingsDefault()
 	settings.MessageTimeoutInMs = 0
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	options.SetSettings(settings)
 	err := clientInstance.CreatePersistentSubscription(
@@ -73,7 +72,7 @@ func Test_CreatePersistentStreamSubscription_StreamNotExits(t *testing.T) {
 
 	streamID := "someStream"
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -96,7 +95,7 @@ func Test_CreatePersistentStreamSubscription_FailsIfAlreadyExists(t *testing.T) 
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -128,7 +127,7 @@ func Test_CreatePersistentStreamSubscription_AfterDeleting(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -164,7 +163,7 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -206,7 +205,7 @@ func Test_UpdatePersistentStreamSubscription_ErrIfSubscriptionDoesNotExist(t *te
 
 	streamID := "someStream"
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 
 	err := clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", options)
@@ -225,7 +224,7 @@ func Test_DeletePersistentStreamSubscription(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	options := options.PersistentStreamSubscriptionOptions{}
+	options := client.PersistentStreamSubscriptionOptions{}
 	options.SetDefaults()
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
@@ -278,7 +277,7 @@ func pushEventsToStream(t *testing.T,
 	streamID string,
 	events []messages.ProposedEvent) {
 
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 
@@ -288,27 +287,27 @@ func pushEventsToStream(t *testing.T,
 func TestPersistentSubscriptionClosing(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	streamID := "dataset20M-0"
 	groupName := "Group 1"
 
-	opts := options.PersistentStreamSubscriptionOptions{}
+	opts := client.PersistentStreamSubscriptionOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 
-	err := client.CreatePersistentSubscription(context.Background(), streamID, groupName, opts)
+	err := db.CreatePersistentSubscription(context.Background(), streamID, groupName, opts)
 
 	require.NoError(t, err)
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
 
-	optsC := options.ConnectToPersistentSubscriptionOptions{}
+	optsC := client.ConnectToPersistentSubscriptionOptions{}
 	optsC.SetDefaults()
 	optsC.SetBatchSize(2)
-	subscription, err := client.ConnectToPersistentSubscription(
+	subscription, err := db.ConnectToPersistentSubscription(
 		context.Background(), streamID, groupName, optsC)
 
 	require.NoError(t, err)

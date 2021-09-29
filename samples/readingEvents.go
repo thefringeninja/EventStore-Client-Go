@@ -8,12 +8,11 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/errors"
-	"github.com/EventStore/EventStore-Client-Go/options"
 )
 
 func ReadFromStream(db *client.Client) {
 	// region read-from-stream
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
 
 	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 100)
@@ -43,7 +42,7 @@ func ReadFromStream(db *client.Client) {
 
 func ReadFromStreamPosition(db *client.Client) {
 	// region read-from-position
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
 	ropts.SetFromRevision(10)
 
@@ -74,7 +73,7 @@ func ReadFromStreamPosition(db *client.Client) {
 
 func ReadFromStreamPositionCheck(db *client.Client) {
 	// region checking-for-stream-presence
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
 	ropts.SetFromRevision(10)
 
@@ -108,7 +107,7 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 
 func ReadSreamBackwards(db *client.Client) {
 	// region reading-backwards
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
 	ropts.SetBackwards()
 	ropts.SetFromEnd()
@@ -139,7 +138,7 @@ func ReadSreamBackwards(db *client.Client) {
 
 func ReadFromAllStream(db *client.Client) {
 	// region read-from-all-stream
-	ropts := options.ReadAllEventsOptions{}
+	ropts := client.ReadAllEventsOptions{}
 	ropts.SetDefaults()
 
 	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
@@ -169,7 +168,7 @@ func ReadFromAllStream(db *client.Client) {
 
 func IgnoreSystemEvents(db *client.Client) {
 	// region ignore-system-events
-	ropts := options.ReadAllEventsOptions{}
+	ropts := client.ReadAllEventsOptions{}
 	ropts.SetDefaults()
 
 	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
@@ -204,7 +203,7 @@ func IgnoreSystemEvents(db *client.Client) {
 
 func ReadFromAllBackwards(db *client.Client) {
 	// region read-from-all-stream-backwards
-	ropts := options.ReadAllEventsOptions{}
+	ropts := client.ReadAllEventsOptions{}
 	ropts.SetDefaults()
 	ropts.SetFromEnd()
 	ropts.SetBackwards()
@@ -236,7 +235,7 @@ func ReadFromAllBackwards(db *client.Client) {
 
 func ReadFromStreamResolvingLinkToS(db *client.Client) {
 	// region read-from-all-stream-resolving-link-tos
-	ropts := options.ReadAllEventsOptions{}
+	ropts := client.ReadAllEventsOptions{}
 	ropts.SetDefaults()
 	ropts.SetResolveLinks()
 

@@ -3,13 +3,13 @@ package client_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/EventStore/EventStore-Client-Go/client"
 	"io/ioutil"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/options"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -17,8 +17,8 @@ import (
 func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	streamID := "dataset20M-0"
 	testEvent := createTestEvent()
@@ -27,11 +27,11 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
 
-	opts := options.SubscribeToStreamOptions{}
+	opts := client.SubscribeToStreamOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", opts)
+	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", opts)
 
 	go func() {
 		current := 0
@@ -64,9 +64,9 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	require.False(t, timedOut, "Timed out waiting for initial set of events")
 
 	// Write a new event
-	opts2 := options.AppendToStreamOptions{}
+	opts2 := client.AppendToStreamOptions{}
 	opts2.SetExpectRevision(5_999)
-	writeResult, err := client.AppendToStream(context.Background(), streamID, opts2, testEvent)
+	writeResult, err := db.AppendToStream(context.Background(), streamID, opts2, testEvent)
 	require.NoError(t, err)
 	require.Equal(t, uint64(6_000), writeResult.NextExpectedVersion)
 
@@ -95,8 +95,8 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	var receivedEvents sync.WaitGroup
 	receivedEvents.Add(len(positions))
@@ -104,12 +104,12 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	filter := filtering.FilterOnEventType().AddPrefixes("eventType-194")
 	filterOptions := filtering.SubscriptionFilterOptionsDefault(filter)
 
-	opts := options.SubscribeToAllOptions{}
+	opts := client.SubscribeToAllOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 	opts.SetFilter(filterOptions)
 
-	subscription, err := client.SubscribeToAll(context.Background(), opts)
+	subscription, err := db.SubscribeToAll(context.Background(), opts)
 
 	go func() {
 		current := 0
@@ -140,16 +140,16 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 func TestConnectionClosing(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
-	opts := options.SubscribeToStreamOptions{}
+	opts := client.SubscribeToStreamOptions{}
 	opts.SetDefaults()
 	opts.SetFromStart()
 
-	subscription, err := client.SubscribeToStream(context.Background(), "dataset20M-0", opts)
+	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", opts)
 
 	go func() {
 		current := 1

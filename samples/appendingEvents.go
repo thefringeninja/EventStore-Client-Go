@@ -6,7 +6,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/options"
 )
 
 type TestEvent struct {
@@ -29,7 +28,7 @@ func AppendToStream(db *client.Client) {
 		panic(err)
 	}
 
-	options := options.AppendToStreamOptions{}
+	options := client.AppendToStreamOptions{}
 	options.SetDefaults()
 
 	result, err := db.AppendToStream(context.Background(), "some-stream", options, event)
@@ -53,7 +52,7 @@ func AppendWithSameId(db *client.Client) {
 		panic(err)
 	}
 
-	options := options.AppendToStreamOptions{}
+	options := client.AppendToStreamOptions{}
 	options.SetDefaults()
 
 	_, err = db.AppendToStream(context.Background(), "some-stream", options, event)
@@ -86,7 +85,7 @@ func AppendWithNoStream(db *client.Client) {
 		panic(err)
 	}
 
-	options := options.AppendToStreamOptions{}
+	options := client.AppendToStreamOptions{}
 	options.SetExpectNoStream()
 
 	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
@@ -110,7 +109,7 @@ func AppendWithNoStream(db *client.Client) {
 
 func AppendWithConcurrencyCheck(db *client.Client) {
 	// region append-with-concurrency-check
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
 	ropts.SetBackwards()
 	ropts.SetFromEnd()
@@ -142,7 +141,7 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		panic(err)
 	}
 
-	aopts := options.AppendToStreamOptions{}
+	aopts := client.AppendToStreamOptions{}
 	aopts.SetExpectRevision(lastEvent.GetOriginalEvent().EventNumber)
 
 	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)

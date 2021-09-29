@@ -2,9 +2,9 @@ package client_test
 
 import (
 	"context"
+	"github.com/EventStore/EventStore-Client-Go/client"
 	"testing"
 
-	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -13,14 +13,14 @@ func TestCanDeleteStream(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
-	opts := options.DeleteStreamOptions{}
+	opts := client.DeleteStreamOptions{}
 	opts.SetDefaults()
 	opts.SetExpectRevision(1_999)
 
-	deleteResult, err := client.DeleteStream(context.Background(), "dataset20M-1800", opts)
+	deleteResult, err := db.DeleteStream(context.Background(), "dataset20M-1800", opts)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -34,14 +34,14 @@ func TestCanTombstoneStream(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
-	opts := options.TombstoneStreamOptions{}
+	opts := client.TombstoneStreamOptions{}
 	opts.SetDefaults()
 	opts.SetExpectRevision(1_999)
 
-	deleteResult, err := client.TombstoneStream(context.Background(), "dataset20M-1800", opts)
+	deleteResult, err := db.TombstoneStream(context.Background(), "dataset20M-1800", opts)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -50,9 +50,9 @@ func TestCanTombstoneStream(t *testing.T) {
 	assert.True(t, deleteResult.Position.Commit > 0)
 	assert.True(t, deleteResult.Position.Prepare > 0)
 
-	opts2 := options.AppendToStreamOptions{}
+	opts2 := client.AppendToStreamOptions{}
 	opts2.SetDefaults()
 
-	_, err = client.AppendToStream(context.Background(), "dataset20M-1800", opts2, createTestEvent())
+	_, err = db.AppendToStream(context.Background(), "dataset20M-1800", opts2, createTestEvent())
 	require.Error(t, err)
 }

@@ -12,7 +12,6 @@ import (
 	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	messages "github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/metadata"
-	"github.com/EventStore/EventStore-Client-Go/options"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,8 +49,8 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	container := GetEmptyDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	testEvent := createTestEvent()
 	testEvent.SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872"))
@@ -60,18 +59,18 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()
 
-	_, err := client.AppendToStream(context, streamID.String(), opts, testEvent)
+	_, err := db.AppendToStream(context, streamID.String(), opts, testEvent)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
 	}
 
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
-	stream, err := client.ReadStreamEvents(context, streamID.String(), ropts, 1)
+	stream, err := db.ReadStreamEvents(context, streamID.String(), ropts, 1)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -97,17 +96,17 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 	container := GetEmptyDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectStreamExists()
 
-	_, err := client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+	_, err := db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
 	if !errors.Is(err, client_errors.ErrWrongExpectedStreamRevision) {
 		t.Fatalf("Expected WrongExpectedVersion, got %+v", err)
@@ -124,21 +123,21 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 		t.Fatalf("Unexpected configuration error: %s", err.Error())
 	}
 
-	client, err := client.NewClient(config)
+	db, err := client.NewClient(config)
 	if err != nil {
 		t.Fatalf("Unexpected failure setting up test connection: %s", err.Error())
 	}
 
-	defer client.Close()
+	defer db.Close()
 
 	streamID, _ := uuid.NewV4()
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectAny()
 
-	_, err = client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
 	if !errors.Is(err, client_errors.ErrUnauthenticated) {
 		t.Fatalf("Expected Unauthenticated, got %+v", err)
@@ -156,22 +155,22 @@ func TestMetadataOperation(t *testing.T) {
 		t.Fatalf("Unexpected configuration error: %s", err.Error())
 	}
 
-	client, err := client.NewClient(config)
+	db, err := client.NewClient(config)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure setting up test connection: %s", err.Error())
 	}
 
-	defer client.Close()
+	defer db.Close()
 
 	streamID := uuid.Must(uuid.NewV4())
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := options.AppendToStreamOptions{}
+	opts := client.AppendToStreamOptions{}
 	opts.SetExpectAny()
 
-	_, err = client.AppendToStream(context, streamID.String(), opts, createTestEvent())
+	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
 	assert.Nil(t, err, "error when writing an event")
 
@@ -180,14 +179,14 @@ func TestMetadataOperation(t *testing.T) {
 		MaxAge(2 * time.Second).
 		Acl(acl)
 
-	result, err := client.SetStreamMetadata(context, streamID.String(), opts, meta)
+	result, err := db.SetStreamMetadata(context, streamID.String(), opts, meta)
 
 	assert.Nil(t, err, "no error from writing stream metadata")
 	assert.NotNil(t, result, "defined write result after writing metadata")
 
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
-	metaActual, err := client.GetStreamMetadata(context, streamID.String(), ropts)
+	metaActual, err := db.GetStreamMetadata(context, streamID.String(), ropts)
 
 	assert.Nil(t, err, "no error when reading stream metadata")
 

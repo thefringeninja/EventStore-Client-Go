@@ -6,13 +6,12 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/options"
 	"github.com/EventStore/EventStore-Client-Go/position"
 )
 
 func SubscribeToStream(db *client.Client) {
 	// region subscribe-to-stream
-	opts := options.SubscribeToStreamOptions{}
+	opts := client.SubscribeToStreamOptions{}
 	opts.SetDefaults()
 
 	stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
@@ -89,7 +88,7 @@ func SubscribeToStream(db *client.Client) {
 
 func SubscribeToAll(db *client.Client) {
 	// region subscribe-to-all
-	opts := options.SubscribeToAllOptions{}
+	opts := client.SubscribeToAllOptions{}
 	opts.SetDefaults()
 	stream, err := db.SubscribeToAll(context.Background(), opts)
 
@@ -159,7 +158,7 @@ func SubscribeToAll(db *client.Client) {
 func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
 	filter := filtering.SubscriptionFilterOptionsDefault(filtering.FilterOnStreamName().AddPrefixes("test-"))
-	opts := options.SubscribeToAllOptions{}
+	opts := client.SubscribeToAllOptions{}
 	opts.SetDefaults()
 	opts.SetFilter(filter)
 

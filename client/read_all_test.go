@@ -3,11 +3,10 @@ package client_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/EventStore/EventStore-Client-Go/client"
 	"io/ioutil"
 	"testing"
 	"time"
-
-	"github.com/EventStore/EventStore-Client-Go/options"
 
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/stretchr/testify/assert"
@@ -25,8 +24,8 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
@@ -34,10 +33,10 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetResolveLinks()
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -75,8 +74,8 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
@@ -84,12 +83,12 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromPosition(position.Position{Commit: 1788, Prepare: 1788})
 	opts.SetResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -127,8 +126,8 @@ func TestReadAllEventsBackwardsFromZeroPosition(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
@@ -136,13 +135,13 @@ func TestReadAllEventsBackwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromEnd()
 	opts.SetBackwards()
 	opts.SetResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -180,8 +179,8 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 	container := GetPrePopulatedDatabase()
 	defer container.Close()
 
-	client := CreateTestClient(container, t)
-	defer client.Close()
+	db := CreateTestClient(container, t)
+	defer db.Close()
 
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
@@ -189,13 +188,13 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := options.ReadAllEventsOptions{}
+	opts := client.ReadAllEventsOptions{}
 	opts.SetDefaults()
 	opts.SetFromPosition(position.Position{Commit: 3_386, Prepare: 3_386})
 	opts.SetBackwards()
 	opts.SetResolveLinks()
 
-	stream, err := client.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)

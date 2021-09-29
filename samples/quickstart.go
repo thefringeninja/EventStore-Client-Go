@@ -7,7 +7,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/options"
 )
 
 func Run() {
@@ -38,7 +37,7 @@ func Run() {
 		panic(err)
 	}
 
-	aopts := options.AppendToStreamOptions{}
+	aopts := client.AppendToStreamOptions{}
 	aopts.SetDefaults()
 
 	_, err = db.AppendToStream(context.Background(), "some-stream", aopts, event)
@@ -48,7 +47,7 @@ func Run() {
 	}
 
 	// region readStream
-	ropts := options.ReadStreamEventsOptions{}
+	ropts := client.ReadStreamEventsOptions{}
 	ropts.SetDefaults()
 
 	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 10)

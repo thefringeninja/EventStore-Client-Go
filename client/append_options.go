@@ -1,4 +1,4 @@
-package options
+package client
 
 import (
 	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
