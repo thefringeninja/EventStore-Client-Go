@@ -25,8 +25,8 @@ func Run() {
 	}
 
 	testEvent := TestEvent{
-		id:            "some id",
-		importantData: "I wrote my first event!",
+		Id:            "some Id",
+		ImportantData: "I wrote my first event!",
 	}
 
 	event := messages.ProposedEvent{}

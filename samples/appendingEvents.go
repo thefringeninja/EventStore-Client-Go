@@ -9,15 +9,15 @@ import (
 )
 
 type TestEvent struct {
-	id            string
-	importantData string
+	Id            string
+	ImportantData string
 }
 
 func AppendToStream(db *client.Client) {
 	// region append-to-stream
 	data := TestEvent{
-		id:            "1",
-		importantData: "some value",
+		Id:            "1",
+		ImportantData: "some value",
 	}
 
 	event := messages.ProposedEvent{}
@@ -37,8 +37,8 @@ func AppendToStream(db *client.Client) {
 func AppendWithSameId(db *client.Client) {
 	// region append-duplicate-event
 	data := TestEvent{
-		id:            "1",
-		importantData: "some value",
+		Id:            "1",
+		ImportantData: "some value",
 	}
 
 	event := messages.ProposedEvent{}
@@ -67,8 +67,8 @@ func AppendWithSameId(db *client.Client) {
 func AppendWithNoStream(db *client.Client) {
 	// region append-with-no-stream
 	data := TestEvent{
-		id:            "1",
-		importantData: "some value",
+		Id:            "1",
+		ImportantData: "some value",
 	}
 
 	event := messages.ProposedEvent{}
@@ -89,8 +89,8 @@ func AppendWithNoStream(db *client.Client) {
 	}
 
 	err = event.SetJsonData(TestEvent{
-		id:            "2",
-		importantData: "some other value",
+		Id:            "2",
+		ImportantData: "some other value",
 	})
 
 	if err != nil {
@@ -122,8 +122,8 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 	}
 
 	data := TestEvent{
-		id:            "1",
-		importantData: "clientOne",
+		Id:            "1",
+		ImportantData: "clientOne",
 	}
 
 	event := messages.ProposedEvent{}
@@ -140,8 +140,8 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
 
 	data = TestEvent{
-		id:            "1",
-		importantData: "clientTwo",
+		Id:            "1",
+		ImportantData: "clientTwo",
 	}
 
 	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
