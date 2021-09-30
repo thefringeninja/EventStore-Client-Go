@@ -96,36 +96,36 @@ func (m *StreamMetadata) AddCustomProperty(name string, value interface{}) {
 	m.customProperties[name] = value
 }
 
-func (m *StreamMetadata) MaxCount() (uint64, bool) {
+func (m *StreamMetadata) MaxCount() *uint64 {
 	if len(m.maxCount) == 0 {
-		return 0, false
+		return nil
 	}
 
-	return m.maxCount[0], true
+	return &m.maxCount[0]
 }
 
-func (m *StreamMetadata) MaxAge() (time.Duration, bool) {
+func (m *StreamMetadata) MaxAge() *time.Duration {
 	if len(m.maxAge) == 0 {
-		return 0, false
+		return nil
 	}
 
-	return m.maxAge[0], true
+	return &m.maxAge[0]
 }
 
-func (m *StreamMetadata) TruncateBefore() (uint64, bool) {
+func (m *StreamMetadata) TruncateBefore() *uint64 {
 	if len(m.truncateBefore) == 0 {
-		return 0, false
+		return nil
 	}
 
-	return m.truncateBefore[0], true
+	return &m.truncateBefore[0]
 }
 
-func (m *StreamMetadata) CacheControl() (time.Duration, bool) {
+func (m *StreamMetadata) CacheControl() *time.Duration {
 	if len(m.cacheControl) == 0 {
-		return 0, false
+		return nil
 	}
 
-	return m.cacheControl[0], true
+	return &m.cacheControl[0]
 }
 
 func (m *StreamMetadata) Acl() interface{} {
@@ -267,20 +267,20 @@ func AclFromMap(props map[string]interface{}) (Acl, error) {
 func (m StreamMetadata) ToMap() (map[string]interface{}, error) {
 	props := make(map[string]interface{})
 
-	if maxCount, ok := m.MaxCount(); ok {
-		props["$maxCount"] = maxCount
+	if maxCount := m.MaxCount(); maxCount != nil {
+		props["$maxCount"] = *maxCount
 	}
 
-	if maxAge, ok := m.MaxAge(); ok {
-		props["$maxAge"] = maxAge
+	if maxAge := m.MaxAge(); maxAge != nil {
+		props["$maxAge"] = *maxAge
 	}
 
-	if truncateBefore, ok := m.TruncateBefore(); ok {
-		props["$tb"] = truncateBefore
+	if truncateBefore := m.TruncateBefore(); truncateBefore != nil {
+		props["$tb"] = *truncateBefore
 	}
 
-	if cacheControl, ok := m.CacheControl(); ok {
-		props["$cacheControl"] = cacheControl
+	if cacheControl := m.CacheControl(); cacheControl != nil {
+		props["$cacheControl"] = *cacheControl
 	}
 
 	acl := m.Acl()
