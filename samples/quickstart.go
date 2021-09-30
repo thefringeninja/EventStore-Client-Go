@@ -3,8 +3,9 @@ package samples
 import (
 	"context"
 	"fmt"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"io"
+
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 )

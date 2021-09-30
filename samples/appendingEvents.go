@@ -2,8 +2,9 @@ package samples
 
 import (
 	"context"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"log"
+
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 )

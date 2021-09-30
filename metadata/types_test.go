@@ -1,12 +1,12 @@
 package metadata_test
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
-	"encoding/json"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/EventStore/EventStore-Client-Go/metadata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
@@ -18,8 +18,8 @@ func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
 		AddMetaWriteRoles("admin")
 
 	expected := metadata.StreamMetadataDefault().
-		MaxAge(2 * time.Second).
-		CacheControl(15 * time.Second).
+		MaxAge(2*time.Second).
+		CacheControl(15*time.Second).
 		TruncateBefore(1).
 		MaxCount(12).
 		Acl(acl).
@@ -48,8 +48,8 @@ func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
 
 func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
 	expected := metadata.StreamMetadataDefault().
-		MaxAge(2 * time.Second).
-		CacheControl(15 * time.Second).
+		MaxAge(2*time.Second).
+		CacheControl(15*time.Second).
 		TruncateBefore(1).
 		MaxCount(12).
 		Acl(metadata.UserStreamAcl).
@@ -78,8 +78,8 @@ func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
 
 func TestConsistentMetadataSerializationSystemStreamAcl(t *testing.T) {
 	expected := metadata.StreamMetadataDefault().
-		MaxAge(2 * time.Second).
-		CacheControl(15 * time.Second).
+		MaxAge(2*time.Second).
+		CacheControl(15*time.Second).
 		TruncateBefore(1).
 		MaxCount(12).
 		Acl(metadata.SystemStreamAcl).

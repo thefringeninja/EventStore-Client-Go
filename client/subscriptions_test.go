@@ -3,11 +3,12 @@ package client_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/EventStore/EventStore-Client-Go/client"
 	"io/ioutil"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/EventStore/EventStore-Client-Go/client"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	uuid "github.com/gofrs/uuid"

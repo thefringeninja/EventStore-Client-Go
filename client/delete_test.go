@@ -2,8 +2,9 @@ package client_test
 
 import (
 	"context"
-	"github.com/EventStore/EventStore-Client-Go/client"
 	"testing"
+
+	"github.com/EventStore/EventStore-Client-Go/client"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

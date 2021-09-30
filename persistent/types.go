@@ -2,6 +2,7 @@ package persistent
 
 import (
 	"context"
+
 	"github.com/EventStore/EventStore-Client-Go/messages"
 )
 

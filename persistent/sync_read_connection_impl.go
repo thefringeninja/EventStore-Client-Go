@@ -3,9 +3,10 @@ package persistent
 import (
 	"context"
 	"fmt"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"log"
 	"sync"
+
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"

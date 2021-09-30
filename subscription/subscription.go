@@ -2,9 +2,10 @@ package subscription
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"io"
 
 	"github.com/EventStore/EventStore-Client-Go/position"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"

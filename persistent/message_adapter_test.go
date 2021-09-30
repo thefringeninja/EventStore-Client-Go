@@ -1,10 +1,11 @@
 package persistent
 
 import (
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"

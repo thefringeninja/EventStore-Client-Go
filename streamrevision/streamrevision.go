@@ -1,8 +1,8 @@
 package streamrevision
 
-type RevisionAny struct {}
-type RevisionStreamExists struct {}
-type RevisionNoStream struct {}
+type RevisionAny struct{}
+type RevisionStreamExists struct{}
+type RevisionNoStream struct{}
 type RevisionExact struct {
 	value uint64
 }
@@ -47,5 +47,5 @@ func NoStream() ExpectedRevision {
 }
 
 func Exact(value uint64) ExpectedRevision {
-	return RevisionExact { value: value }
+	return RevisionExact{value: value}
 }

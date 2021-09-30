@@ -69,13 +69,13 @@ func End() RevisionEnd {
 }
 
 func Position(value pos.Position) AllStreamPosition {
-	return RevisionPosition {
+	return RevisionPosition{
 		Value: value,
 	}
 }
 
 func Revision(value uint64) StreamPosition {
-	return RevisionExact {
+	return RevisionExact{
 		Value: value,
 	}
 }

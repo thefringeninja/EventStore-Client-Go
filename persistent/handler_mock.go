@@ -6,8 +6,9 @@ package persistent
 
 import (
 	context "context"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	reflect "reflect"
+
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	gomock "github.com/golang/mock/gomock"
 )

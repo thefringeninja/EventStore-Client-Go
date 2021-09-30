@@ -2,10 +2,11 @@ package protoutils
 
 import (
 	"fmt"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/stream_position"
 

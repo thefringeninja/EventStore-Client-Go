@@ -3,13 +3,14 @@ package client_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"io"
 	"io/ioutil"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"

@@ -3,10 +3,11 @@ package client_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/EventStore/EventStore-Client-Go/client"
 	"io/ioutil"
 	"testing"
 	"time"
+
+	"github.com/EventStore/EventStore-Client-Go/client"
 
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/stretchr/testify/assert"
