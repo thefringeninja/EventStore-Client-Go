@@ -10,20 +10,20 @@ import (
 )
 
 func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
-	acl := metadata.AclDefault().
-		AddReadRoles("admin").
-		AddWriteRoles("admin").
-		AddDeleteRoles("admin").
-		AddMetaReadRoles("admin").
-		AddMetaWriteRoles("admin")
+	acl := metadata.Acl{}
+	acl.AddReadRoles("admin")
+	acl.AddWriteRoles("admin")
+	acl.AddDeleteRoles("admin")
+	acl.AddMetaReadRoles("admin")
+	acl.AddMetaWriteRoles("admin")
 
-	expected := metadata.StreamMetadataDefault().
-		MaxAge(2*time.Second).
-		CacheControl(15*time.Second).
-		TruncateBefore(1).
-		MaxCount(12).
-		Acl(acl).
-		AddCustomProperty("foo", "bar")
+	expected := metadata.StreamMetadata{}
+	expected.SetMaxAge(2 * time.Second)
+	expected.SetCacheControl(15 * time.Second)
+	expected.SetTruncateBefore(1)
+	expected.SetMaxCount(12)
+	expected.SetAcl(acl)
+	expected.AddCustomProperty("foo", "bar")
 
 	props, err := expected.ToMap()
 
@@ -47,13 +47,13 @@ func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
 }
 
 func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
-	expected := metadata.StreamMetadataDefault().
-		MaxAge(2*time.Second).
-		CacheControl(15*time.Second).
-		TruncateBefore(1).
-		MaxCount(12).
-		Acl(metadata.UserStreamAcl).
-		AddCustomProperty("foo", "bar")
+	expected := metadata.StreamMetadata{}
+	expected.SetMaxAge(2 * time.Second)
+	expected.SetCacheControl(15 * time.Second)
+	expected.SetTruncateBefore(1)
+	expected.SetMaxCount(12)
+	expected.SetAcl(metadata.UserStreamAcl)
+	expected.AddCustomProperty("foo", "bar")
 
 	props, err := expected.ToMap()
 
@@ -77,13 +77,13 @@ func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
 }
 
 func TestConsistentMetadataSerializationSystemStreamAcl(t *testing.T) {
-	expected := metadata.StreamMetadataDefault().
-		MaxAge(2*time.Second).
-		CacheControl(15*time.Second).
-		TruncateBefore(1).
-		MaxCount(12).
-		Acl(metadata.SystemStreamAcl).
-		AddCustomProperty("foo", "bar")
+	expected := metadata.StreamMetadata{}
+	expected.SetMaxAge(2 * time.Second)
+	expected.SetCacheControl(15 * time.Second)
+	expected.SetTruncateBefore(1)
+	expected.SetMaxCount(12)
+	expected.SetAcl(metadata.SystemStreamAcl)
+	expected.AddCustomProperty("foo", "bar")
 
 	props, err := expected.ToMap()
 

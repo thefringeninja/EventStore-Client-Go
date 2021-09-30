@@ -19,59 +19,44 @@ type Acl struct {
 	metaWriteRoles []string
 }
 
-func AclDefault() Acl {
-	return Acl{
-		readRoles:      []string{},
-		writeRoles:     []string{},
-		deleteRoles:    []string{},
-		metaReadRoles:  []string{},
-		metaWriteRoles: []string{},
-	}
+func (a *Acl) AddReadRoles(roles ...string) {
+	a.readRoles = append(a.readRoles, roles...)
 }
 
-func (acl Acl) AddReadRoles(roles ...string) Acl {
-	acl.readRoles = append(acl.readRoles, roles...)
-	return acl
+func (a *Acl) AddWriteRoles(roles ...string) {
+	a.writeRoles = append(a.writeRoles, roles...)
 }
 
-func (acl Acl) AddWriteRoles(roles ...string) Acl {
-	acl.writeRoles = append(acl.writeRoles, roles...)
-	return acl
+func (a *Acl) AddDeleteRoles(roles ...string) {
+	a.deleteRoles = append(a.deleteRoles, roles...)
 }
 
-func (acl Acl) AddDeleteRoles(roles ...string) Acl {
-	acl.deleteRoles = append(acl.deleteRoles, roles...)
-	return acl
+func (a *Acl) AddMetaWriteRoles(roles ...string) {
+	a.metaWriteRoles = append(a.metaWriteRoles, roles...)
 }
 
-func (acl Acl) AddMetaWriteRoles(roles ...string) Acl {
-	acl.metaWriteRoles = append(acl.metaWriteRoles, roles...)
-	return acl
+func (a *Acl) ReadRoles() []string {
+	return a.readRoles
 }
 
-func (acl Acl) GetReadRoles() []string {
-	return acl.readRoles
+func (a *Acl) WriteRoles() []string {
+	return a.writeRoles
 }
 
-func (acl Acl) GetWriteRoles() []string {
-	return acl.writeRoles
+func (a *Acl) DeleteRoles() []string {
+	return a.deleteRoles
 }
 
-func (acl Acl) GetDeleteRoles() []string {
-	return acl.deleteRoles
+func (a *Acl) MetaReadRoles() []string {
+	return a.metaReadRoles
 }
 
-func (acl Acl) GetMetaReadRoles() []string {
-	return acl.metaReadRoles
+func (a *Acl) MetaWriteRoles() []string {
+	return a.metaWriteRoles
 }
 
-func (acl Acl) GetMetaWriteRoles() []string {
-	return acl.metaWriteRoles
-}
-
-func (acl Acl) AddMetaReadRoles(roles ...string) Acl {
-	acl.metaReadRoles = append(acl.metaReadRoles, roles...)
-	return acl
+func (a *Acl) AddMetaReadRoles(roles ...string) {
+	a.metaReadRoles = append(a.metaReadRoles, roles...)
 }
 
 type StreamMetadata struct {
@@ -83,99 +68,90 @@ type StreamMetadata struct {
 	customProperties map[string]interface{}
 }
 
-func StreamMetadataDefault() StreamMetadata {
-	return StreamMetadata{
-		maxCount:         []uint64{},
-		maxAge:           []time.Duration{},
-		truncateBefore:   []uint64{},
-		cacheControl:     []time.Duration{},
-		acl:              []interface{}{},
-		customProperties: make(map[string]interface{}),
+func (m *StreamMetadata) SetMaxCount(value uint64) {
+	m.maxCount = []uint64{value}
+}
+
+func (m *StreamMetadata) SetMaxAge(value time.Duration) {
+	m.maxAge = []time.Duration{value}
+}
+
+func (m *StreamMetadata) SetTruncateBefore(value uint64) {
+	m.truncateBefore = []uint64{value}
+}
+
+func (m *StreamMetadata) SetCacheControl(value time.Duration) {
+	m.cacheControl = []time.Duration{value}
+}
+
+func (m *StreamMetadata) SetAcl(value interface{}) {
+	m.acl = []interface{}{value}
+}
+
+func (m *StreamMetadata) AddCustomProperty(name string, value interface{}) {
+	if m.customProperties == nil {
+		m.customProperties = make(map[string]interface{})
 	}
+
+	m.customProperties[name] = value
 }
 
-func (meta StreamMetadata) MaxCount(value uint64) StreamMetadata {
-	meta.maxCount = []uint64{value}
-	return meta
-}
-
-func (meta StreamMetadata) MaxAge(value time.Duration) StreamMetadata {
-	meta.maxAge = []time.Duration{value}
-	return meta
-}
-
-func (meta StreamMetadata) TruncateBefore(value uint64) StreamMetadata {
-	meta.truncateBefore = []uint64{value}
-	return meta
-}
-
-func (meta StreamMetadata) CacheControl(value time.Duration) StreamMetadata {
-	meta.cacheControl = []time.Duration{value}
-	return meta
-}
-
-func (meta StreamMetadata) Acl(value interface{}) StreamMetadata {
-	meta.acl = []interface{}{value}
-	return meta
-}
-
-func (meta StreamMetadata) AddCustomProperty(name string, value interface{}) StreamMetadata {
-	meta.customProperties[name] = value
-	return meta
-}
-
-func (meta StreamMetadata) GetMaxCount() (uint64, bool) {
-	if len(meta.maxCount) == 0 {
+func (m *StreamMetadata) MaxCount() (uint64, bool) {
+	if len(m.maxCount) == 0 {
 		return 0, false
 	}
 
-	return meta.maxCount[0], true
+	return m.maxCount[0], true
 }
 
-func (meta StreamMetadata) GetMaxAge() (time.Duration, bool) {
-	if len(meta.maxAge) == 0 {
+func (m *StreamMetadata) MaxAge() (time.Duration, bool) {
+	if len(m.maxAge) == 0 {
 		return 0, false
 	}
 
-	return meta.maxAge[0], true
+	return m.maxAge[0], true
 }
 
-func (meta StreamMetadata) GetTruncateBefore() (uint64, bool) {
-	if len(meta.truncateBefore) == 0 {
+func (m *StreamMetadata) TruncateBefore() (uint64, bool) {
+	if len(m.truncateBefore) == 0 {
 		return 0, false
 	}
 
-	return meta.truncateBefore[0], true
+	return m.truncateBefore[0], true
 }
 
-func (meta StreamMetadata) GetCacheControl() (time.Duration, bool) {
-	if len(meta.cacheControl) == 0 {
+func (m *StreamMetadata) CacheControl() (time.Duration, bool) {
+	if len(m.cacheControl) == 0 {
 		return 0, false
 	}
 
-	return meta.cacheControl[0], true
+	return m.cacheControl[0], true
 }
 
-func (meta StreamMetadata) GetAcl() (interface{}, bool) {
-	if len(meta.acl) == 0 {
-		return nil, false
+func (m *StreamMetadata) Acl() interface{} {
+	if len(m.acl) == 0 {
+		return nil
 	}
 
-	return meta.acl[0], true
+	return m.acl[0]
 }
 
-func (meta StreamMetadata) GetStreamAcl() (Acl, bool) {
-	if acl, ok := meta.GetAcl(); ok {
+func (m *StreamMetadata) StreamAcl() *Acl {
+	acl := m.Acl()
+
+	if acl != nil {
 		if streamAcl, ok := acl.(Acl); ok {
-			return streamAcl, true
+			return &streamAcl
 		}
 	}
 
-	return AclDefault(), false
+	return nil
 }
 
-func (meta StreamMetadata) IsUserStreamAcl() bool {
-	if acl, ok := meta.GetAcl(); ok {
+func (m *StreamMetadata) IsUserStreamAcl() bool {
+	acl := m.Acl()
+
+	if acl != nil {
 		if str, ok := acl.(string); ok {
 			return str == UserStreamAcl
 		}
@@ -184,15 +160,16 @@ func (meta StreamMetadata) IsUserStreamAcl() bool {
 	return false
 }
 
-func (meta StreamMetadata) IsSystemStreamAcl() bool {
-	if acl, ok := meta.GetAcl(); ok {
+func (m *StreamMetadata) IsSystemStreamAcl() bool {
+	acl := m.Acl()
+
+	if acl != nil {
 		if str, ok := acl.(string); ok {
 			return str == SystemStreamAcl
 		}
 	}
 
 	return false
-
 }
 
 func flattenRoles(props map[string]interface{}, key string, roles []string) {
@@ -222,20 +199,20 @@ func collectRoles(value interface{}) ([]string, error) {
 	}
 }
 
-func (acl Acl) ToMap() map[string]interface{} {
+func (a Acl) ToMap() map[string]interface{} {
 	props := make(map[string]interface{})
 
-	flattenRoles(props, "$r", acl.readRoles)
-	flattenRoles(props, "$w", acl.writeRoles)
-	flattenRoles(props, "$d", acl.deleteRoles)
-	flattenRoles(props, "$mr", acl.metaReadRoles)
-	flattenRoles(props, "$mw", acl.metaWriteRoles)
+	flattenRoles(props, "$r", a.readRoles)
+	flattenRoles(props, "$w", a.writeRoles)
+	flattenRoles(props, "$d", a.deleteRoles)
+	flattenRoles(props, "$mr", a.metaReadRoles)
+	flattenRoles(props, "$mw", a.metaWriteRoles)
 
 	return props
 }
 
 func AclFromMap(props map[string]interface{}) (Acl, error) {
-	acl := AclDefault()
+	acl := Acl{}
 
 	for key, value := range props {
 		switch key {
@@ -287,26 +264,27 @@ func AclFromMap(props map[string]interface{}) (Acl, error) {
 	return acl, nil
 }
 
-func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
+func (m StreamMetadata) ToMap() (map[string]interface{}, error) {
 	props := make(map[string]interface{})
 
-	if maxCount, ok := meta.GetMaxCount(); ok {
+	if maxCount, ok := m.MaxCount(); ok {
 		props["$maxCount"] = maxCount
 	}
 
-	if maxAge, ok := meta.GetMaxAge(); ok {
+	if maxAge, ok := m.MaxAge(); ok {
 		props["$maxAge"] = maxAge
 	}
 
-	if truncateBefore, ok := meta.GetTruncateBefore(); ok {
+	if truncateBefore, ok := m.TruncateBefore(); ok {
 		props["$tb"] = truncateBefore
 	}
 
-	if cacheControl, ok := meta.GetCacheControl(); ok {
+	if cacheControl, ok := m.CacheControl(); ok {
 		props["$cacheControl"] = cacheControl
 	}
 
-	if acl, ok := meta.GetAcl(); ok {
+	acl := m.Acl()
+	if acl != nil {
 		switch value := acl.(type) {
 		case string:
 			if value != UserStreamAcl && value != SystemStreamAcl {
@@ -319,7 +297,7 @@ func (meta StreamMetadata) ToMap() (map[string]interface{}, error) {
 		}
 	}
 
-	for key, value := range meta.customProperties {
+	for key, value := range m.customProperties {
 		// We ignore properties that can conflict with internal metatadata names.
 		if strings.HasPrefix(key, "$") {
 			continue
@@ -348,34 +326,34 @@ func lookForUint64(value interface{}) (uint64, bool) {
 }
 
 func StreamMetadataFromMap(props map[string]interface{}) (StreamMetadata, error) {
-	meta := StreamMetadataDefault()
+	meta := StreamMetadata{}
 
 	for key, value := range props {
 		switch key {
 		case "$maxCount":
 			if i, ok := lookForUint64(value); ok {
-				meta = meta.MaxCount(i)
+				meta.SetMaxCount(i)
 				continue
 			}
 
 			return meta, fmt.Errorf("invalid $maxCount value: %v", value)
 		case "$maxAge":
 			if ms, ok := lookForUint64(value); ok {
-				meta = meta.MaxAge(time.Duration(ms))
+				meta.SetMaxAge(time.Duration(ms))
 				continue
 			}
 
 			return meta, fmt.Errorf("invalid $maxAge value: %v", value)
 		case "$tb":
 			if i, ok := lookForUint64(value); ok {
-				meta = meta.TruncateBefore(i)
+				meta.SetTruncateBefore(i)
 				continue
 			}
 
 			return meta, fmt.Errorf("invalid $tb value: %v", value)
 		case "$cacheControl":
 			if ms, ok := lookForUint64(value); ok {
-				meta = meta.CacheControl(time.Duration(ms))
+				meta.SetCacheControl(time.Duration(ms))
 				continue
 			}
 
@@ -387,7 +365,7 @@ func StreamMetadataFromMap(props map[string]interface{}) (StreamMetadata, error)
 					return meta, fmt.Errorf("invalid string $acl value: %v", aclValue)
 				}
 
-				meta = meta.Acl(value)
+				meta.SetAcl(value)
 			case map[string]interface{}:
 				acl, err := AclFromMap(aclValue)
 
@@ -395,13 +373,13 @@ func StreamMetadataFromMap(props map[string]interface{}) (StreamMetadata, error)
 					return meta, err
 				}
 
-				meta = meta.Acl(acl)
+				meta.SetAcl(acl)
 			default:
 				return meta, fmt.Errorf("invalid $acl object value: %v", value)
 			}
 
 		default:
-			meta.customProperties[key] = value
+			meta.AddCustomProperty(key, value)
 		}
 	}
 

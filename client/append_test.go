@@ -173,10 +173,12 @@ func TestMetadataOperation(t *testing.T) {
 
 	assert.Nil(t, err, "error when writing an event")
 
-	acl := metadata.AclDefault().AddReadRoles("admin")
-	meta := metadata.StreamMetadataDefault().
-		MaxAge(2 * time.Second).
-		Acl(acl)
+	acl := metadata.Acl{}
+	acl.AddReadRoles("admin")
+
+	meta := metadata.StreamMetadata{}
+	meta.SetMaxAge(2 * time.Second)
+	meta.SetAcl(acl)
 
 	result, err := db.SetStreamMetadata(context, streamID.String(), opts, meta)
 

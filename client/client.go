@@ -178,7 +178,7 @@ func (client *Client) GetStreamMetadata(
 	event, err := stream.Recv()
 
 	if err == errors.ErrStreamNotFound {
-		meta := esdb_metadata.StreamMetadataDefault()
+		meta := esdb_metadata.StreamMetadata{}
 		return &meta, nil
 	}
 
