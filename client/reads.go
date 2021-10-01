@@ -80,6 +80,7 @@ func NewReadStream(params ReadStreamParams, firstEvt messages.ResolvedEvent) *Re
 				}
 
 				cachedEvent = nil
+				continue
 			}
 
 			if lastError != nil {
