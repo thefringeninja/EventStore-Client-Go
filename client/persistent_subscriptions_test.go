@@ -313,7 +313,7 @@ func TestPersistentSubscriptionClosing(t *testing.T) {
 				continue
 			}
 
-			if subEvent.Dropped != nil {
+			if subEvent.SubscriptionDropped != nil {
 				droppedEvent.Done()
 				break
 			}

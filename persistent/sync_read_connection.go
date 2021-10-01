@@ -16,7 +16,7 @@ const (
 )
 
 type SyncReadConnection interface {
-	Recv() *subscription.SubscriptionEvent     // this call must block
+	Recv() *subscription.Event                 // this call must block
 	Ack(msgs ...*messages.ResolvedEvent) error // max 2000 messages can be acknowledged
 	Nack(reason string, action Nack_Action, msgs ...*messages.ResolvedEvent) error
 	Close() error

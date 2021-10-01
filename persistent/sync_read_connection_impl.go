@@ -3,6 +3,7 @@ package persistent
 import (
 	"context"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/subscription"
 	"log"
 	"sync"
 
@@ -10,7 +11,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
-	"github.com/EventStore/EventStore-Client-Go/subscription"
 	"github.com/gofrs/uuid"
 )
 
@@ -31,8 +31,8 @@ const (
 	Read_UnknownContentTypeReceived_Err       ErrorCode = "Read_UnknownContentTypeReceived_Err"
 )
 
-func (connection *syncReadConnectionImpl) Recv() *subscription.SubscriptionEvent {
-	channel := make(chan *subscription.SubscriptionEvent)
+func (connection *syncReadConnectionImpl) Recv() *subscription.Event {
+	channel := make(chan *subscription.Event)
 	req := request{
 		channel: channel,
 	}
@@ -117,7 +117,7 @@ func messageIdSliceToProto(messageIds ...uuid.UUID) []*shared.UUID {
 }
 
 type request struct {
-	channel chan *subscription.SubscriptionEvent
+	channel chan *subscription.Event
 }
 
 func newSyncReadConnection(
@@ -143,8 +143,8 @@ func newSyncReadConnection(
 			req := <-channel
 
 			if closed {
-				req.channel <- &subscription.SubscriptionEvent{
-					Dropped: &subscription.SubscriptionDropped{
+				req.channel <- &subscription.Event{
+					SubscriptionDropped: &subscription.Dropped{
 						Error: fmt.Errorf("subscription has been dropped"),
 					},
 				}
@@ -156,12 +156,12 @@ func newSyncReadConnection(
 			if err != nil {
 				log.Printf("[error] subscription has dropped. Reason: %v", err)
 
-				dropped := subscription.SubscriptionDropped{
+				dropped := subscription.Dropped{
 					Error: err,
 				}
 
-				req.channel <- &subscription.SubscriptionEvent{
-					Dropped: &dropped,
+				req.channel <- &subscription.Event{
+					SubscriptionDropped: &dropped,
 				}
 
 				closed = true
@@ -173,7 +173,7 @@ func newSyncReadConnection(
 			case *persistent.ReadResp_Event:
 				{
 					resolvedEvent := messageAdapter.FromProtoResponse(result)
-					req.channel <- &subscription.SubscriptionEvent{
+					req.channel <- &subscription.Event{
 						EventAppeared: resolvedEvent,
 					}
 				}

@@ -115,7 +115,7 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 		for {
 			subEvent := subscription.Recv()
 
-			if subEvent.Dropped != nil {
+			if subEvent.SubscriptionDropped != nil {
 				break
 			}
 
@@ -164,7 +164,7 @@ func TestConnectionClosing(t *testing.T) {
 				continue
 			}
 
-			if subEvent.Dropped != nil {
+			if subEvent.SubscriptionDropped != nil {
 				droppedEvent.Done()
 				break
 			}

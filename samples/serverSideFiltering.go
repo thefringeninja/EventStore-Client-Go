@@ -32,7 +32,7 @@ func ExcludeSystemEvents(db *client.Client) {
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -64,7 +64,7 @@ func EventTypePrefix(db *client.Client) {
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -96,7 +96,7 @@ func EventTypeRegex(db *client.Client) {
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -128,7 +128,7 @@ func StreamPrefix(db *client.Client) {
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -160,7 +160,7 @@ func StreamRegex(db *client.Client) {
 			fmt.Printf("received event %v@%v", revision, streamId)
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -196,7 +196,7 @@ func CheckpointCallbackWithInterval(db *client.Client) {
 			fmt.Printf("checkpoint taken at %v", event.CheckPointReached.Prepare)
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}

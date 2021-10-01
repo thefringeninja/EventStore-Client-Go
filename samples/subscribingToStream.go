@@ -28,7 +28,7 @@ func SubscribeToStream(db *client.Client) {
 			// handles the event...
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -69,7 +69,7 @@ func SubscribeToStream(db *client.Client) {
 			for {
 				event := stream.Recv()
 
-				if event.Dropped != nil {
+				if event.SubscriptionDropped != nil {
 					stream = nil
 					break
 				}
@@ -101,7 +101,7 @@ func SubscribeToAll(db *client.Client) {
 			// handles the event...
 		}
 
-		if event.Dropped != nil {
+		if event.SubscriptionDropped != nil {
 			break
 		}
 	}
@@ -117,10 +117,10 @@ func SubscribeToAll(db *client.Client) {
 	db.SubscribeToAll(context.Background(), opts)
 	// endregion subscribe-to-all-from-position
 
-	// region suscribe-to-all-live
+	// region subscribe-to-all-live
 	opts.SetFromEnd()
 	db.SubscribeToAll(context.Background(), opts)
-	// endregion suscribe-to-all-live
+	// endregion subscribe-to-all-live
 
 	// region subscribe-to-all-subscription-dropped
 	opts.SetFromStart()
@@ -137,7 +137,7 @@ func SubscribeToAll(db *client.Client) {
 			for {
 				event := stream.Recv()
 
-				if event.Dropped != nil {
+				if event.SubscriptionDropped != nil {
 					stream = nil
 					break
 				}

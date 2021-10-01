@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/subscription"
 	"log"
 	"sync"
 
@@ -10,11 +11,10 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/position"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	"github.com/EventStore/EventStore-Client-Go/subscription"
 )
 
 type request struct {
-	channel chan *subscription.SubscriptionEvent
+	channel chan *subscription.Event
 }
 
 type Subscription struct {
@@ -44,8 +44,8 @@ func NewSubscription(client *Client, cancel context.CancelFunc, inner api.Stream
 			req := <-channel
 
 			if closed {
-				req.channel <- &subscription.SubscriptionEvent{
-					Dropped: &subscription.SubscriptionDropped{
+				req.channel <- &subscription.Event{
+					SubscriptionDropped: &subscription.Dropped{
 						Error: fmt.Errorf("subscription has been dropped"),
 					},
 				}
@@ -57,12 +57,12 @@ func NewSubscription(client *Client, cancel context.CancelFunc, inner api.Stream
 			if err != nil {
 				log.Printf("[error] subscription has dropped. Reason: %v", err)
 
-				dropped := subscription.SubscriptionDropped{
+				dropped := subscription.Dropped{
 					Error: err,
 				}
 
-				req.channel <- &subscription.SubscriptionEvent{
-					Dropped: &dropped,
+				req.channel <- &subscription.Event{
+					SubscriptionDropped: &dropped,
 				}
 
 				closed = true
@@ -79,14 +79,14 @@ func NewSubscription(client *Client, cancel context.CancelFunc, inner api.Stream
 						Prepare: checkpoint.PreparePosition,
 					}
 
-					req.channel <- &subscription.SubscriptionEvent{
+					req.channel <- &subscription.Event{
 						CheckPointReached: &position,
 					}
 				}
 			case *api.ReadResp_Event:
 				{
 					resolvedEvent := protoutils.GetResolvedEventFromProto(result.GetEvent())
-					req.channel <- &subscription.SubscriptionEvent{
+					req.channel <- &subscription.Event{
 						EventAppeared: &resolvedEvent,
 					}
 				}
@@ -113,8 +113,8 @@ func (sub *Subscription) Close() error {
 	return nil
 }
 
-func (sub *Subscription) Recv() *subscription.SubscriptionEvent {
-	channel := make(chan *subscription.SubscriptionEvent)
+func (sub *Subscription) Recv() *subscription.Event {
+	channel := make(chan *subscription.Event)
 	req := request{
 		channel: channel,
 	}
