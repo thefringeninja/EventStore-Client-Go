@@ -57,27 +57,25 @@ func SubscribeToStream(db *client.Client) {
 	opts.SetFromStart()
 
 	for {
-		var stream *client.Subscription = nil
 
-		if stream == nil {
-			stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
+		stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
 
-			if err != nil {
-				time.Sleep(1 * time.Second)
+		if err != nil {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		for {
+			event := stream.Recv()
+
+			if event.SubscriptionDropped != nil {
+				stream.Close()
+				break
 			}
 
-			for {
-				event := stream.Recv()
-
-				if event.SubscriptionDropped != nil {
-					stream = nil
-					break
-				}
-
-				if event.EventAppeared != nil {
-					// handles the event...
-					opts.SetFromRevision(event.EventAppeared.OriginalEvent().EventNumber)
-				}
+			if event.EventAppeared != nil {
+				// handles the event...
+				opts.SetFromRevision(event.EventAppeared.OriginalEvent().EventNumber)
 			}
 		}
 	}
@@ -125,27 +123,24 @@ func SubscribeToAll(db *client.Client) {
 	// region subscribe-to-all-subscription-dropped
 	opts.SetFromStart()
 	for {
-		var stream *client.Subscription = nil
+		stream, err := db.SubscribeToAll(context.Background(), opts)
 
-		if stream == nil {
-			stream, err := db.SubscribeToAll(context.Background(), opts)
+		if err != nil {
+			time.Sleep(1 * time.Second)
+			continue
+		}
 
-			if err != nil {
-				time.Sleep(1 * time.Second)
+		for {
+			event := stream.Recv()
+
+			if event.SubscriptionDropped != nil {
+				stream.Close()
+				break
 			}
 
-			for {
-				event := stream.Recv()
-
-				if event.SubscriptionDropped != nil {
-					stream = nil
-					break
-				}
-
-				if event.EventAppeared != nil {
-					// handles the event...
-					opts.SetFromPosition(event.EventAppeared.OriginalEvent().Position)
-				}
+			if event.EventAppeared != nil {
+				// handles the event...
+				opts.SetFromPosition(event.EventAppeared.OriginalEvent().Position)
 			}
 		}
 	}
