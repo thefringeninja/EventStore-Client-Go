@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 )
 
 // ErrWrongExpectedStreamRevision ...
@@ -23,3 +24,11 @@ var ErrUnauthenticated = errors.New("Unauthenticated")
 // }
 // ```
 var ErrStreamNotFound = errors.New("Failed to perform read because the stream was not found")
+
+type StreamDeletedError struct {
+	StreamName string
+}
+
+func (e *StreamDeletedError) Error() string {
+	return fmt.Sprintf("stream '%s' is deleted", e.StreamName)
+}

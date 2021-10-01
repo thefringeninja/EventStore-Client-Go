@@ -10,7 +10,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
-	"github.com/EventStore/EventStore-Client-Go/errors"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	"google.golang.org/grpc/metadata"
 )
@@ -58,7 +57,7 @@ func (stream *ReadStream) Recv() (*messages.ResolvedEvent, error) {
 	return resp.event, nil
 }
 
-func NewReadStream(params ReadStreamParams) *ReadStream {
+func NewReadStream(params ReadStreamParams, firstEvt messages.ResolvedEvent) *ReadStream {
 	channel := make(chan (chan readResp))
 	once := new(sync.Once)
 
@@ -71,8 +70,17 @@ func NewReadStream(params ReadStreamParams) *ReadStream {
 	// among as many goroutines as they want.
 	go func() {
 		var lastError *error
+		cachedEvent := &firstEvt
 		for {
 			resp := <-channel
+
+			if cachedEvent != nil {
+				resp <- readResp{
+					event: cachedEvent,
+				}
+
+				cachedEvent = nil
+			}
 
 			if lastError != nil {
 				resp <- readResp{
@@ -98,21 +106,9 @@ func NewReadStream(params ReadStreamParams) *ReadStream {
 				continue
 			}
 
-			switch result.Content.(type) {
-			case *api.ReadResp_Event:
-				{
-					resolvedEvent := protoutils.GetResolvedEventFromProto(result.GetEvent())
-					resp <- readResp{
-						event: &resolvedEvent,
-					}
-				}
-			case *api.ReadResp_StreamNotFound_:
-				{
-					lastError = &errors.ErrStreamNotFound
-					resp <- readResp{
-						err: lastError,
-					}
-				}
+			resolvedEvent := protoutils.GetResolvedEventFromProto(result.GetEvent())
+			resp <- readResp{
+				event: &resolvedEvent,
 			}
 		}
 

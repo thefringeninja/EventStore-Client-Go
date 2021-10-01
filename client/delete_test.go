@@ -2,6 +2,8 @@ package client_test
 
 import (
 	"context"
+	"errors"
+	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	"testing"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
@@ -51,4 +53,25 @@ func TestCanTombstoneStream(t *testing.T) {
 
 	_, err = db.AppendToStream(context.Background(), "dataset20M-1800", client.AppendToStreamOptions{}, createTestEvent())
 	require.Error(t, err)
+}
+
+func TestDetectStreamDeleted(t *testing.T) {
+	container := GetEmptyDatabase()
+	defer container.Close()
+
+	db := CreateTestClient(container, t)
+	defer db.Close()
+
+	event := createTestEvent()
+
+	_, err := db.AppendToStream(context.Background(), "foobar", client.AppendToStreamOptions{}, event)
+	require.Nil(t, err)
+
+	_, err = db.TombstoneStream(context.Background(), "foobar", client.TombstoneStreamOptions{})
+	require.Nil(t, err)
+
+	_, err = db.ReadStreamEvents(context.Background(), "foobar", client.ReadStreamEventsOptions{}, 1)
+	var streamDeletedError *esdb_errors.StreamDeletedError
+
+	require.True(t, errors.As(err, &streamDeletedError))
 }

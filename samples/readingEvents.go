@@ -2,12 +2,13 @@ package samples
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/errors"
+	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 )
 
 func ReadFromStream(db *client.Client) {
@@ -24,7 +25,7 @@ func ReadFromStream(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -54,7 +55,7 @@ func ReadFromStreamPosition(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -83,11 +84,11 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == errors.ErrStreamNotFound {
+		if errors.Is(err, esdb_errors.ErrStreamNotFound) {
 			fmt.Print("Stream not found")
 		}
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -117,7 +118,7 @@ func ReadStreamBackwards(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -144,7 +145,7 @@ func ReadFromAllStream(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -170,7 +171,7 @@ func IgnoreSystemEvents(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -207,7 +208,7 @@ func ReadFromAllBackwards(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 

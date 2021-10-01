@@ -3,6 +3,7 @@ package client_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"sync"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
+	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	uuid "github.com/gofrs/uuid"
@@ -188,4 +190,16 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 	waitingForError.Add(1)
 	timedOut := waitWithTimeout(&waitingForError, time.Duration(5)*time.Second)
 	require.False(t, timedOut, "Timed out waiting for read stream to return io.EOF on completion")
+}
+
+func TestReadStreamNotFound(t *testing.T) {
+	container := GetEmptyDatabase()
+	defer container.Close()
+
+	db := CreateTestClient(container, t)
+	defer db.Close()
+
+	_, err := db.ReadStreamEvents(context.Background(), "foobar", client.ReadStreamEventsOptions{}, 1)
+
+	require.True(t, errors.Is(err, esdb_errors.ErrStreamNotFound))
 }
