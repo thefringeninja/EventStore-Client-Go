@@ -76,7 +76,7 @@ func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMess
 		event.SetContentType("application/octet-stream")
 	}
 
-	metadata := map[string]string{}
+	metadata := make(map[string]string)
 	metadata[system_metadata.SystemMetadataKeysContentType] = event.ContentType()
 	metadata[system_metadata.SystemMetadataKeysType] = event.EventType()
 	eventId := event.EventID()

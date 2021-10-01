@@ -3,7 +3,9 @@ package client_test
 import (
 	"context"
 	"crypto/x509"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
@@ -72,7 +74,7 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 	opts.SetResolveLinks()
 
 	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
-	require.NoError(t, err)
+	require.True(t, errors.Is(err, io.EOF))
 }
 
 func TestTLSWithoutCertificateAndVerify(t *testing.T) {
@@ -97,7 +99,7 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 	opts.SetResolveLinks()
 
 	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
-	require.NoError(t, err)
+	require.True(t, errors.Is(err, io.EOF))
 }
 
 func TestTLSWithoutCertificate(t *testing.T) {
@@ -158,7 +160,7 @@ func TestTLSWithCertificate(t *testing.T) {
 	opts.SetResolveLinks()
 
 	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
-	require.NoError(t, err)
+	require.True(t, errors.Is(err, io.EOF))
 }
 
 func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
@@ -189,7 +191,7 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 	opts.SetResolveLinks()
 
 	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
-	require.NoError(t, err)
+	require.True(t, errors.Is(err, io.EOF))
 }
 
 func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
@@ -214,7 +216,7 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 	opts.SetResolveLinks()
 
 	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
-	require.NoError(t, err)
+	require.True(t, errors.Is(err, io.EOF))
 }
 
 func TestTLSWithInvalidCertificate(t *testing.T) {

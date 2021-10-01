@@ -523,6 +523,8 @@ func readInternal(
 
 			return nil, &esdb_errors.StreamDeletedError{StreamName: streamName}
 		}
+
+		return nil, err
 	}
 
 	switch msg.Content.(type) {
