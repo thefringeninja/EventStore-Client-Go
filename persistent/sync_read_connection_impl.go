@@ -3,6 +3,7 @@ package persistent
 import (
 	"context"
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"log"
 	"sync"
 
@@ -17,8 +18,18 @@ import (
 
 const MAX_ACK_COUNT = 2000
 
-type syncReadConnectionImpl struct {
-	client         protoClient
+type Nack_Action int32
+
+const (
+	Nack_Unknown Nack_Action = 0
+	Nack_Park    Nack_Action = 1
+	Nack_Retry   Nack_Action = 2
+	Nack_Skip    Nack_Action = 3
+	Nack_Stop    Nack_Action = 4
+)
+
+type PersistentSubscription struct {
+	client         persistent.PersistentSubscriptions_ReadClient
 	subscriptionId string
 	channel        chan request
 	cancel         context.CancelFunc
@@ -31,7 +42,7 @@ const (
 	Read_UnknownContentTypeReceived_Err       ErrorCode = "Read_UnknownContentTypeReceived_Err"
 )
 
-func (connection *syncReadConnectionImpl) Recv() *subscription.Event {
+func (connection *PersistentSubscription) Recv() *subscription.Event {
 	channel := make(chan *subscription.Event)
 	req := request{
 		channel: channel,
@@ -43,14 +54,14 @@ func (connection *syncReadConnectionImpl) Recv() *subscription.Event {
 	return resp
 }
 
-func (connection *syncReadConnectionImpl) Close() error {
+func (connection *PersistentSubscription) Close() error {
 	connection.once.Do(connection.cancel)
 	return nil
 }
 
 var Exceeds_Max_Message_Count_Err ErrorCode = "Exceeds_Max_Message_Count_Err"
 
-func (connection *syncReadConnectionImpl) Ack(messages ...*messages.ResolvedEvent) error {
+func (connection *PersistentSubscription) Ack(messages ...*messages.ResolvedEvent) error {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -79,7 +90,7 @@ func (connection *syncReadConnectionImpl) Ack(messages ...*messages.ResolvedEven
 	return nil
 }
 
-func (connection *syncReadConnectionImpl) Nack(reason string, action Nack_Action, messages ...*messages.ResolvedEvent) error {
+func (connection *PersistentSubscription) Nack(reason string, action Nack_Action, messages ...*messages.ResolvedEvent) error {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -110,7 +121,7 @@ func messageIdSliceToProto(messageIds ...uuid.UUID) []*shared.UUID {
 	result := make([]*shared.UUID, len(messageIds))
 
 	for index, messageId := range messageIds {
-		result[index] = ToProtoUUID(messageId)
+		result[index] = protoutils.ToProtoUUID(messageId)
 	}
 
 	return result
@@ -120,11 +131,11 @@ type request struct {
 	channel chan *subscription.Event
 }
 
-func newSyncReadConnection(
-	client protoClient,
+func NewPersistentSubscription(
+	client persistent.PersistentSubscriptions_ReadClient,
 	subscriptionId string,
 	cancel context.CancelFunc,
-) SyncReadConnection {
+) *PersistentSubscription {
 	channel := make(chan request)
 	once := new(sync.Once)
 
@@ -171,7 +182,7 @@ func newSyncReadConnection(
 			switch result.Content.(type) {
 			case *persistent.ReadResp_Event:
 				{
-					resolvedEvent := FromPersistentProtoResponse(result)
+					resolvedEvent := protoutils.FromPersistentProtoResponse(result)
 					req.channel <- &subscription.Event{
 						EventAppeared: resolvedEvent,
 					}
@@ -180,7 +191,7 @@ func newSyncReadConnection(
 		}
 	}()
 
-	return &syncReadConnectionImpl{
+	return &PersistentSubscription{
 		client:         client,
 		subscriptionId: subscriptionId,
 		channel:        channel,

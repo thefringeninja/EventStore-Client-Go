@@ -378,7 +378,7 @@ func (client *Client) ConnectToPersistentSubscription(
 	streamName string,
 	groupName string,
 	options ConnectToPersistentSubscriptionOptions,
-) (persistent.SyncReadConnection, error) {
+) (*persistent.PersistentSubscription, error) {
 	options.setDefaults()
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
@@ -386,7 +386,7 @@ func (client *Client) ConnectToPersistentSubscription(
 	}
 	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.SubscribeToStreamSync(
+	return persistentSubscriptionClient.ConnectToPersistentSubscription(
 		ctx,
 		handle,
 		int32(options.BatchSize()),

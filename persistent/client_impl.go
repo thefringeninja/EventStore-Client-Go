@@ -14,7 +14,6 @@ import (
 type Client struct {
 	inner                        connection.GrpcClient
 	persistentSubscriptionClient persistentProto.PersistentSubscriptionsClient
-	syncReadConnectionFactory    SyncReadConnectionFactory
 }
 
 const (
@@ -24,13 +23,13 @@ const (
 	SubscribeToStreamSync_NoSubscriptionConfirmationErr               ErrorCode = "SubscribeToStreamSync_NoSubscriptionConfirmationErr"
 )
 
-func (client Client) SubscribeToStreamSync(
+func (client Client) ConnectToPersistentSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	bufferSize int32,
 	streamName string,
 	groupName string,
-) (SyncReadConnection, error) {
+) (*PersistentSubscription, error) {
 	var headers, trailers metadata.MD
 	ctx, cancel := context.WithCancel(ctx)
 	readClient, err := client.persistentSubscriptionClient.Read(ctx, grpc.Header(&headers), grpc.Trailer(&trailers))
@@ -54,7 +53,7 @@ func (client Client) SubscribeToStreamSync(
 	switch readResult.Content.(type) {
 	case *persistentProto.ReadResp_SubscriptionConfirmation_:
 		{
-			asyncConnection := client.syncReadConnectionFactory.NewSyncReadConnection(
+			asyncConnection := NewPersistentSubscription(
 				readClient,
 				readResult.GetSubscriptionConfirmation().SubscriptionId,
 				cancel)
@@ -77,7 +76,7 @@ func (client Client) CreateStreamSubscription(
 	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) error {
-	createSubscriptionConfig := createRequestProto(streamName, groupName, position, settings)
+	createSubscriptionConfig := CreatePersistentRequestProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Create(ctx, createSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
@@ -102,14 +101,14 @@ func (client Client) CreateAllSubscription(
 	settings SubscriptionSettings,
 	filter *filtering.SubscriptionFilterOptions,
 ) error {
-	protoConfig, err := createRequestAllOptionsProto(groupName, position, settings, filter)
+	protoConfig, err := CreatePersistentRequestAllOptionsProto(groupName, position, settings, filter)
 	if err != nil {
 		errorCode, ok := err.(Error)
 
 		if ok {
-			if errorCode.Code() == createRequestFilterOptionsProto_MustProvideRegexOrPrefixErr {
+			if errorCode.Code() == CreateRequestFilterOptionsProto_MustProvideRegexOrPrefixErr {
 				return NewErrorCode(CreateAllSubscription_MustProvideRegexOrPrefixErr)
-			} else if errorCode.Code() == createRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr {
+			} else if errorCode.Code() == CreateRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr {
 				return NewErrorCode(CreateAllSubscription_CanSetOnlyRegexOrPrefixErr)
 			}
 		}
@@ -205,6 +204,5 @@ func NewClient(inner connection.GrpcClient, client persistentProto.PersistentSub
 	return Client{
 		inner:                        inner,
 		persistentSubscriptionClient: client,
-		syncReadConnectionFactory:    SyncReadConnectionFactoryImpl{},
 	}
 }

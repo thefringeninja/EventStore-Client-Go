@@ -10,24 +10,24 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 )
 
-func createRequestProto(
+func CreatePersistentRequestProto(
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.CreateReq {
 	return &persistent.CreateReq{
-		Options: createSubscriptionStreamConfigProto(streamName, groupName, position, settings),
+		Options: CreatePersistentSubscriptionStreamConfigProto(streamName, groupName, position, settings),
 	}
 }
 
-func createRequestAllOptionsProto(
+func CreatePersistentRequestAllOptionsProto(
 	groupName string,
 	position stream.AllStreamPosition,
 	settings SubscriptionSettings,
 	filter *filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq, error) {
-	options, err := createRequestAllOptionsSettingsProto(position, filter)
+	options, err := CreatePersistentRequestAllOptionsSettingsProto(position, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +36,12 @@ func createRequestAllOptionsProto(
 		Options: &persistent.CreateReq_Options{
 			StreamOption: options,
 			GroupName:    groupName,
-			Settings:     createSubscriptionSettingsProto(settings),
+			Settings:     CreatePersistentSubscriptionSettingsProto(settings),
 		},
 	}, nil
 }
 
-func createRequestAllOptionsSettingsProto(
+func CreatePersistentRequestAllOptionsSettingsProto(
 	pos stream.AllStreamPosition,
 	filter *filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
@@ -64,11 +64,11 @@ func createRequestAllOptionsSettingsProto(
 			End: &shared.Empty{},
 		}
 	case stream.RevisionPosition:
-		options.All.AllOption = toCreateRequestAllOptionsFromPosition(value.Value)
+		options.All.AllOption = ToCreatePersistentRequestAllOptionsFromPosition(value.Value)
 	}
 
 	if filter != nil {
-		filter, err := createRequestFilterOptionsProto(*filter)
+		filter, err := CreateRequestFilterOptionsProto(*filter)
 		if err != nil {
 			return nil, err
 		}
@@ -80,24 +80,24 @@ func createRequestAllOptionsSettingsProto(
 	return options, nil
 }
 
-func createSubscriptionStreamConfigProto(
+func CreatePersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.CreateReq_Options {
 	return &persistent.CreateReq_Options{
-		StreamOption: createSubscriptionStreamSettingsProto(streamName, position),
+		StreamOption: CreatePersistentSubscriptionStreamSettingsProto(streamName, position),
 		// backward compatibility
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamName),
 		},
 		GroupName: groupName,
-		Settings:  createSubscriptionSettingsProto(settings),
+		Settings:  CreatePersistentSubscriptionSettingsProto(settings),
 	}
 }
 
-func createSubscriptionStreamSettingsProto(
+func CreatePersistentSubscriptionStreamSettingsProto(
 	streamName string,
 	position stream.StreamPosition,
 ) *persistent.CreateReq_Options_Stream {
@@ -127,7 +127,7 @@ func createSubscriptionStreamSettingsProto(
 	return streamOption
 }
 
-func createSubscriptionSettingsProto(
+func CreatePersistentSubscriptionSettingsProto(
 	settings SubscriptionSettings,
 ) *persistent.CreateReq_Settings {
 	return &persistent.CreateReq_Settings{
@@ -140,13 +140,13 @@ func createSubscriptionSettingsProto(
 		LiveBufferSize:        settings.LiveBufferSize,
 		ReadBatchSize:         settings.ReadBatchSize,
 		HistoryBufferSize:     settings.HistoryBufferSize,
-		NamedConsumerStrategy: consumerStrategyProto(settings.NamedConsumerStrategy),
-		MessageTimeout:        messageTimeOutInMsProto(settings.MessageTimeoutInMs),
-		CheckpointAfter:       checkpointAfterMsProto(settings.CheckpointAfterInMs),
+		NamedConsumerStrategy: ConsumerStrategyProto(settings.NamedConsumerStrategy),
+		MessageTimeout:        MessageTimeOutInMsProto(settings.MessageTimeoutInMs),
+		CheckpointAfter:       CheckpointAfterMsProto(settings.CheckpointAfterInMs),
 	}
 }
 
-func consumerStrategyProto(strategy ConsumerStrategy) persistent.CreateReq_ConsumerStrategy {
+func ConsumerStrategyProto(strategy ConsumerStrategy) persistent.CreateReq_ConsumerStrategy {
 	switch strategy {
 	case ConsumerStrategy_DispatchToSingle:
 		return persistent.CreateReq_DispatchToSingle
@@ -159,33 +159,33 @@ func consumerStrategyProto(strategy ConsumerStrategy) persistent.CreateReq_Consu
 	}
 }
 
-func messageTimeOutInMsProto(timeout int32) *persistent.CreateReq_Settings_MessageTimeoutMs {
+func MessageTimeOutInMsProto(timeout int32) *persistent.CreateReq_Settings_MessageTimeoutMs {
 	return &persistent.CreateReq_Settings_MessageTimeoutMs{
 		MessageTimeoutMs: timeout,
 	}
 }
 
-func checkpointAfterMsProto(checkpointAfterMs int32) *persistent.CreateReq_Settings_CheckpointAfterMs {
+func CheckpointAfterMsProto(checkpointAfterMs int32) *persistent.CreateReq_Settings_CheckpointAfterMs {
 	return &persistent.CreateReq_Settings_CheckpointAfterMs{
 		CheckpointAfterMs: checkpointAfterMs,
 	}
 }
 
 const (
-	createRequestFilterOptionsProto_MustProvideRegexOrPrefixErr ErrorCode = "createRequestFilterOptionsProto_MustProvideRegexOrPrefixErr"
-	createRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr  ErrorCode = "createRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr"
+	CreateRequestFilterOptionsProto_MustProvideRegexOrPrefixErr ErrorCode = "CreateRequestFilterOptionsProto_MustProvideRegexOrPrefixErr"
+	CreateRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr  ErrorCode = "CreateRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr"
 )
 
-// createRequestFilterOptionsProto ...
-func createRequestFilterOptionsProto(
+// CreateRequestFilterOptionsProto ...
+func CreateRequestFilterOptionsProto(
 	options filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq_AllOptions_FilterOptions, error) {
 	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
-		return nil, NewErrorCodeMsg(createRequestFilterOptionsProto_MustProvideRegexOrPrefixErr,
+		return nil, NewErrorCodeMsg(CreateRequestFilterOptionsProto_MustProvideRegexOrPrefixErr,
 			"the subscription filter requires a set of prefixes or a regex")
 	}
 	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
-		return nil, NewErrorCodeMsg(createRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr,
+		return nil, NewErrorCodeMsg(CreateRequestFilterOptionsProto_CanSetOnlyRegexOrPrefixErr,
 			"the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := persistent.CreateReq_AllOptions_FilterOptions{
@@ -219,7 +219,7 @@ func createRequestFilterOptionsProto(
 }
 
 // toUpdateRequestAllOptionsFromPosition ...
-func toCreateRequestAllOptionsFromPosition(
+func ToCreatePersistentRequestAllOptionsFromPosition(
 	position position.Position,
 ) *persistent.CreateReq_AllOptions_Position {
 	return &persistent.CreateReq_AllOptions_Position{

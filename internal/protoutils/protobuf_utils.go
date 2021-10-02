@@ -2,6 +2,7 @@ package protoutils
 
 import (
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	stream_revision "github.com/EventStore/EventStore-Client-Go/stream"
 	"log"
 	"strconv"
@@ -523,5 +524,98 @@ func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) messages.Resolved
 		Event:  event,
 		Link:   link,
 		Commit: commit,
+	}
+}
+
+func EventIDFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) uuid.UUID {
+	id := recordedEvent.GetId()
+	idString := id.GetString_()
+	return uuid.FromStringOrNil(idString)
+}
+
+func ToProtoUUID(id uuid.UUID) *shared.UUID {
+	return &shared.UUID{
+		Value: &shared.UUID_String_{
+			String_: id.String(),
+		},
+	}
+}
+
+func GetContentTypeFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) string {
+	return recordedEvent.Metadata[system_metadata.SystemMetadataKeysContentType]
+}
+
+func CreatedFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) time.Time {
+	timeSinceEpoch, err := strconv.ParseInt(
+		recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated], 10, 64)
+	if err != nil {
+		log.Fatalf("Failed to parse created date as int from %+v",
+			recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated])
+	}
+	// The metadata contains the number of .NET "ticks" (100ns increments) since the UNIX epoch
+	return time.Unix(0, timeSinceEpoch*100).UTC()
+}
+
+func PositionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) position.Position {
+	return position.Position{
+		Commit:  recordedEvent.GetCommitPosition(),
+		Prepare: recordedEvent.GetPreparePosition(),
+	}
+}
+
+func FromPersistentProtoResponse(resp *persistent.ReadResp) *messages.ResolvedEvent {
+	readEvent := resp.GetEvent()
+	positionWire := readEvent.GetPosition()
+	eventWire := readEvent.GetEvent()
+	linkWire := readEvent.GetLink()
+
+	var event *messages.RecordedEvent = nil
+	var link *messages.RecordedEvent = nil
+	var commit *uint64
+
+	if positionWire != nil {
+		switch value := positionWire.(type) {
+		case *persistent.ReadResp_ReadEvent_CommitPosition:
+			{
+				commit = &value.CommitPosition
+			}
+		case *persistent.ReadResp_ReadEvent_NoPosition:
+			{
+				commit = nil
+			}
+		}
+	}
+
+	if eventWire != nil {
+		recordedEvent := NewMessageFromPersistentProto(eventWire)
+		event = &recordedEvent
+	}
+
+	if linkWire != nil {
+		recordedEvent := NewMessageFromPersistentProto(linkWire)
+		link = &recordedEvent
+	}
+
+	return &messages.ResolvedEvent{
+		Event:  event,
+		Link:   link,
+		Commit: commit,
+	}
+}
+
+func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) messages.RecordedEvent {
+	streamIdentifier := recordedEvent.GetStreamIdentifier()
+
+	return messages.RecordedEvent{
+		EventID:        EventIDFromPersistentProto(recordedEvent),
+		EventType:      recordedEvent.Metadata[system_metadata.SystemMetadataKeysType],
+		ContentType:    GetContentTypeFromPersistentProto(recordedEvent),
+		StreamID:       string(streamIdentifier.StreamName),
+		EventNumber:    recordedEvent.GetStreamRevision(),
+		CreatedDate:    CreatedFromPersistentProto(recordedEvent),
+		Position:       PositionFromPersistentProto(recordedEvent),
+		Data:           recordedEvent.GetData(),
+		SystemMetadata: recordedEvent.GetMetadata(),
+		UserMetadata:   recordedEvent.GetCustomMetadata(),
 	}
 }
