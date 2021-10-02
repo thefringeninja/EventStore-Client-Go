@@ -12,13 +12,13 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-func eventIDFromProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) uuid.UUID {
+func EventIDFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) uuid.UUID {
 	id := recordedEvent.GetId()
 	idString := id.GetString_()
 	return uuid.FromStringOrNil(idString)
 }
 
-func toProtoUUID(id uuid.UUID) *shared.UUID {
+func ToProtoUUID(id uuid.UUID) *shared.UUID {
 	return &shared.UUID{
 		Value: &shared.UUID_String_{
 			String_: id.String(),
@@ -26,11 +26,11 @@ func toProtoUUID(id uuid.UUID) *shared.UUID {
 	}
 }
 
-func getContentTypeFromProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) string {
+func GetContentTypeFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) string {
 	return recordedEvent.Metadata[system_metadata.SystemMetadataKeysContentType]
 }
 
-func createdFromProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) time.Time {
+func CreatedFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) time.Time {
 	timeSinceEpoch, err := strconv.ParseInt(
 		recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated], 10, 64)
 	if err != nil {
@@ -41,7 +41,7 @@ func createdFromProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent
 	return time.Unix(0, timeSinceEpoch*100).UTC()
 }
 
-func positionFromProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) position.Position {
+func PositionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) position.Position {
 	return position.Position{
 		Commit:  recordedEvent.GetCommitPosition(),
 		Prepare: recordedEvent.GetPreparePosition(),

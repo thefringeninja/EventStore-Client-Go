@@ -15,7 +15,6 @@ type Client struct {
 	inner                        connection.GrpcClient
 	persistentSubscriptionClient persistentProto.PersistentSubscriptionsClient
 	syncReadConnectionFactory    SyncReadConnectionFactory
-	messageAdapterProvider       messageAdapterProvider
 }
 
 const (
@@ -58,7 +57,6 @@ func (client Client) SubscribeToStreamSync(
 			asyncConnection := client.syncReadConnectionFactory.NewSyncReadConnection(
 				readClient,
 				readResult.GetSubscriptionConfirmation().SubscriptionId,
-				client.messageAdapterProvider.GetMessageAdapter(),
 				cancel)
 
 			return asyncConnection, nil
@@ -208,6 +206,5 @@ func NewClient(inner connection.GrpcClient, client persistentProto.PersistentSub
 		inner:                        inner,
 		persistentSubscriptionClient: client,
 		syncReadConnectionFactory:    SyncReadConnectionFactoryImpl{},
-		messageAdapterProvider:       messageAdapterProviderImpl{},
 	}
 }

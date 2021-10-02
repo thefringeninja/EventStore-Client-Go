@@ -6,13 +6,7 @@ import (
 	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
 )
 
-type messageAdapter interface {
-	FromProtoResponse(resp *persistent.ReadResp) *messages.ResolvedEvent
-}
-
-type messageAdapterImpl struct{}
-
-func (adapter messageAdapterImpl) FromProtoResponse(resp *persistent.ReadResp) *messages.ResolvedEvent {
+func FromPersistentProtoResponse(resp *persistent.ReadResp) *messages.ResolvedEvent {
 	readEvent := resp.GetEvent()
 	positionWire := readEvent.GetPosition()
 	eventWire := readEvent.GetEvent()
@@ -36,12 +30,12 @@ func (adapter messageAdapterImpl) FromProtoResponse(resp *persistent.ReadResp) *
 	}
 
 	if eventWire != nil {
-		recordedEvent := newMessageFromProto(eventWire)
+		recordedEvent := NewMessageFromPersistentProto(eventWire)
 		event = &recordedEvent
 	}
 
 	if linkWire != nil {
-		recordedEvent := newMessageFromProto(linkWire)
+		recordedEvent := NewMessageFromPersistentProto(linkWire)
 		link = &recordedEvent
 	}
 
@@ -52,17 +46,17 @@ func (adapter messageAdapterImpl) FromProtoResponse(resp *persistent.ReadResp) *
 	}
 }
 
-func newMessageFromProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) messages.RecordedEvent {
+func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) messages.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
 
 	return messages.RecordedEvent{
-		EventID:        eventIDFromProto(recordedEvent),
+		EventID:        EventIDFromPersistentProto(recordedEvent),
 		EventType:      recordedEvent.Metadata[system_metadata.SystemMetadataKeysType],
-		ContentType:    getContentTypeFromProto(recordedEvent),
+		ContentType:    GetContentTypeFromPersistentProto(recordedEvent),
 		StreamID:       string(streamIdentifier.StreamName),
 		EventNumber:    recordedEvent.GetStreamRevision(),
-		CreatedDate:    createdFromProto(recordedEvent),
-		Position:       positionFromProto(recordedEvent),
+		CreatedDate:    CreatedFromPersistentProto(recordedEvent),
+		Position:       PositionFromPersistentProto(recordedEvent),
 		Data:           recordedEvent.GetData(),
 		SystemMetadata: recordedEvent.GetMetadata(),
 		UserMetadata:   recordedEvent.GetCustomMetadata(),

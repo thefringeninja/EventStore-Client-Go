@@ -20,7 +20,6 @@ const MAX_ACK_COUNT = 2000
 type syncReadConnectionImpl struct {
 	client         protoClient
 	subscriptionId string
-	messageAdapter messageAdapter
 	channel        chan request
 	cancel         context.CancelFunc
 	once           *sync.Once
@@ -111,7 +110,7 @@ func messageIdSliceToProto(messageIds ...uuid.UUID) []*shared.UUID {
 	result := make([]*shared.UUID, len(messageIds))
 
 	for index, messageId := range messageIds {
-		result[index] = toProtoUUID(messageId)
+		result[index] = ToProtoUUID(messageId)
 	}
 
 	return result
@@ -124,7 +123,6 @@ type request struct {
 func newSyncReadConnection(
 	client protoClient,
 	subscriptionId string,
-	messageAdapter messageAdapter,
 	cancel context.CancelFunc,
 ) SyncReadConnection {
 	channel := make(chan request)
@@ -173,7 +171,7 @@ func newSyncReadConnection(
 			switch result.Content.(type) {
 			case *persistent.ReadResp_Event:
 				{
-					resolvedEvent := messageAdapter.FromProtoResponse(result)
+					resolvedEvent := FromPersistentProtoResponse(result)
 					req.channel <- &subscription.Event{
 						EventAppeared: resolvedEvent,
 					}
@@ -185,7 +183,6 @@ func newSyncReadConnection(
 	return &syncReadConnectionImpl{
 		client:         client,
 		subscriptionId: subscriptionId,
-		messageAdapter: messageAdapter,
 		channel:        channel,
 		once:           once,
 		cancel:         cancel,
