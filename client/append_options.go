@@ -1,7 +1,7 @@
 package client
 
 import (
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
+	stream_revision "github.com/EventStore/EventStore-Client-Go/stream"
 )
 
 type AppendToStreamOptions struct {
@@ -31,7 +31,7 @@ func (o *AppendToStreamOptions) SetExpectAny() {
 }
 
 func (o *AppendToStreamOptions) SetExpectStreamExists() {
-	o.revision = stream_revision.StreamExists()
+	o.revision = stream_revision.Exists()
 }
 
 func (o *AppendToStreamOptions) SetExpectRevision(value uint64) {

@@ -1,4 +1,4 @@
-package stream_position
+package stream
 
 import pos "github.com/EventStore/EventStore-Client-Go/position"
 

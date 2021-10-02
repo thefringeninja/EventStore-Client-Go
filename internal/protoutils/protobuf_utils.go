@@ -2,21 +2,18 @@ package protoutils
 
 import (
 	"fmt"
+	stream_revision "github.com/EventStore/EventStore-Client-Go/stream"
 	"log"
 	"strconv"
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
-
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	direction "github.com/EventStore/EventStore-Client-Go/direction"
 	position "github.com/EventStore/EventStore-Client-Go/position"
 	shared "github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	"github.com/EventStore/EventStore-Client-Go/streamrevision"
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
 	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
 	"github.com/gofrs/uuid"
 )
@@ -118,7 +115,7 @@ func toReadDirectionFromDirection(dir direction.Direction) api.ReadReq_Options_R
 }
 
 // toAllReadOptionsFromPosition ...
-func toAllReadOptionsFromPosition(position stream_position.AllStreamPosition) *api.ReadReq_Options_All {
+func toAllReadOptionsFromPosition(position stream_revision.AllStreamPosition) *api.ReadReq_Options_All {
 	all := &allStream{
 		options: &api.ReadReq_Options_AllOptions{},
 	}
@@ -155,7 +152,7 @@ func (all *allStream) VisitPosition(value position.Position) {
 	}
 }
 
-func toReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamPosition stream_position.StreamPosition) *api.ReadReq_Options_Stream {
+func toReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamPosition stream_revision.StreamPosition) *api.ReadReq_Options_Stream {
 	options := &api.ReadReq_Options_StreamOptions{
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamID),
@@ -261,7 +258,7 @@ func (append *deleteSetOptions) VisitExact(value uint64) {
 	}
 }
 
-func ToDeleteRequest(streamID string, streamRevision streamrevision.ExpectedRevision) *api.DeleteReq {
+func ToDeleteRequest(streamID string, streamRevision stream_revision.ExpectedRevision) *api.DeleteReq {
 	deleteReq := &api.DeleteReq{
 		Options: &api.DeleteReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -307,7 +304,7 @@ func (append *tombstoneSetOptions) VisitExact(value uint64) {
 	}
 }
 
-func ToTombstoneRequest(streamID string, streamRevision streamrevision.ExpectedRevision) *api.TombstoneReq {
+func ToTombstoneRequest(streamID string, streamRevision stream_revision.ExpectedRevision) *api.TombstoneReq {
 	tombstoneReq := &api.TombstoneReq{
 		Options: &api.TombstoneReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -325,7 +322,7 @@ func ToTombstoneRequest(streamID string, streamRevision streamrevision.ExpectedR
 	return tombstoneReq
 }
 
-func ToReadStreamRequest(streamID string, direction direction.Direction, from stream_position.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func ToReadStreamRequest(streamID string, direction direction.Direction, from stream_revision.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -346,7 +343,7 @@ func ToReadStreamRequest(streamID string, direction direction.Direction, from st
 	}
 }
 
-func ToReadAllRequest(direction direction.Direction, from stream_position.AllStreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func ToReadAllRequest(direction direction.Direction, from stream_revision.AllStreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -367,7 +364,7 @@ func ToReadAllRequest(direction direction.Direction, from stream_position.AllStr
 	}
 }
 
-func ToStreamSubscriptionRequest(streamID string, from stream_position.StreamPosition, resolveLinks bool, filterOptions *filtering.SubscriptionFilterOptions) (*api.ReadReq, error) {
+func ToStreamSubscriptionRequest(streamID string, from stream_revision.StreamPosition, resolveLinks bool, filterOptions *filtering.SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -398,7 +395,7 @@ func ToStreamSubscriptionRequest(streamID string, from stream_position.StreamPos
 	return readReq, nil
 }
 
-func ToAllSubscriptionRequest(from stream_position.AllStreamPosition, resolveLinks bool, filterOptions *filtering.SubscriptionFilterOptions) (*api.ReadReq, error) {
+func ToAllSubscriptionRequest(from stream_revision.AllStreamPosition, resolveLinks bool, filterOptions *filtering.SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{

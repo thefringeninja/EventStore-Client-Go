@@ -2,18 +2,18 @@ package persistent
 
 import (
 	"fmt"
+	"github.com/EventStore/EventStore-Client-Go/stream"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 )
 
 func createRequestProto(
 	streamName string,
 	groupName string,
-	position stream_position.StreamPosition,
+	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.CreateReq {
 	return &persistent.CreateReq{
@@ -23,7 +23,7 @@ func createRequestProto(
 
 func createRequestAllOptionsProto(
 	groupName string,
-	position stream_position.AllStreamPosition,
+	position stream.AllStreamPosition,
 	settings SubscriptionSettings,
 	filter *filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq, error) {
@@ -42,7 +42,7 @@ func createRequestAllOptionsProto(
 }
 
 func createRequestAllOptionsSettingsProto(
-	pos stream_position.AllStreamPosition,
+	pos stream.AllStreamPosition,
 	filter *filtering.SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
 	options := &persistent.CreateReq_Options_All{
@@ -55,15 +55,15 @@ func createRequestAllOptionsSettingsProto(
 	}
 
 	switch value := pos.(type) {
-	case stream_position.RevisionStart:
+	case stream.RevisionStart:
 		options.All.AllOption = &persistent.CreateReq_AllOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream_position.RevisionEnd:
+	case stream.RevisionEnd:
 		options.All.AllOption = &persistent.CreateReq_AllOptions_End{
 			End: &shared.Empty{},
 		}
-	case stream_position.RevisionPosition:
+	case stream.RevisionPosition:
 		options.All.AllOption = toCreateRequestAllOptionsFromPosition(value.Value)
 	}
 
@@ -83,7 +83,7 @@ func createRequestAllOptionsSettingsProto(
 func createSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
-	position stream_position.StreamPosition,
+	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.CreateReq_Options {
 	return &persistent.CreateReq_Options{
@@ -99,7 +99,7 @@ func createSubscriptionStreamConfigProto(
 
 func createSubscriptionStreamSettingsProto(
 	streamName string,
-	position stream_position.StreamPosition,
+	position stream.StreamPosition,
 ) *persistent.CreateReq_Options_Stream {
 	streamOption := &persistent.CreateReq_Options_Stream{
 		Stream: &persistent.CreateReq_StreamOptions{
@@ -110,15 +110,15 @@ func createSubscriptionStreamSettingsProto(
 	}
 
 	switch value := position.(type) {
-	case stream_position.RevisionStart:
+	case stream.RevisionStart:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream_position.RevisionEnd:
+	case stream.RevisionEnd:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_End{
 			End: &shared.Empty{},
 		}
-	case stream_position.RevisionExact:
+	case stream.RevisionExact:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_Revision{
 			Revision: value.Value,
 		}

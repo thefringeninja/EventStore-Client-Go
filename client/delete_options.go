@@ -1,35 +1,35 @@
 package client
 
 import (
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
+	"github.com/EventStore/EventStore-Client-Go/stream"
 )
 
 type DeleteStreamOptions struct {
-	expectedRevision stream_revision.ExpectedRevision
+	expectedRevision stream.ExpectedRevision
 }
 
 func (o *DeleteStreamOptions) setDefaults() {
 	if o.expectedRevision == nil {
-		o.expectedRevision = stream_revision.Any()
+		o.expectedRevision = stream.Any()
 	}
 }
 
-func (o *DeleteStreamOptions) SetExpectedRevision(revision stream_revision.ExpectedRevision) {
+func (o *DeleteStreamOptions) SetExpectedRevision(revision stream.ExpectedRevision) {
 	o.expectedRevision = revision
 }
 
 func (o *DeleteStreamOptions) SetExpectNoStream() {
-	o.expectedRevision = stream_revision.NoStream()
+	o.expectedRevision = stream.NoStream()
 }
 
 func (o *DeleteStreamOptions) SetExpectStreamExists() {
-	o.expectedRevision = stream_revision.StreamExists()
+	o.expectedRevision = stream.Exists()
 }
 
 func (o *DeleteStreamOptions) SetExpectRevision(value uint64) {
-	o.expectedRevision = stream_revision.Exact(value)
+	o.expectedRevision = stream.Exact(value)
 }
 
-func (o *DeleteStreamOptions) ExpectedRevision() stream_revision.ExpectedRevision {
+func (o *DeleteStreamOptions) ExpectedRevision() stream.ExpectedRevision {
 	return o.expectedRevision
 }

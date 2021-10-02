@@ -3,41 +3,41 @@ package client
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/position"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
+	"github.com/EventStore/EventStore-Client-Go/stream"
 )
 
 type SubscribeToStreamOptions struct {
-	position     stream_position.StreamPosition
+	position     stream.StreamPosition
 	resolveLinks bool
 }
 
 func (o *SubscribeToStreamOptions) setDefaults() {
 	if o.position == nil {
-		o.position = stream_position.End()
+		o.position = stream.End()
 	}
 }
 
-func (o *SubscribeToStreamOptions) SetFrom(value stream_position.StreamPosition) {
+func (o *SubscribeToStreamOptions) SetFrom(value stream.StreamPosition) {
 	o.position = value
 }
 
 func (o *SubscribeToStreamOptions) SetFromStart() {
-	o.position = stream_position.Start()
+	o.position = stream.Start()
 }
 
 func (o *SubscribeToStreamOptions) SetFromEnd() {
-	o.position = stream_position.End()
+	o.position = stream.End()
 }
 
 func (o *SubscribeToStreamOptions) SetFromRevision(value uint64) {
-	o.position = stream_position.Revision(value)
+	o.position = stream.Revision(value)
 }
 
 func (o *SubscribeToStreamOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *SubscribeToStreamOptions) Position() stream_position.StreamPosition {
+func (o *SubscribeToStreamOptions) Position() stream.StreamPosition {
 	return o.position
 }
 
@@ -46,14 +46,14 @@ func (o *SubscribeToStreamOptions) ResolveLinks() bool {
 }
 
 type SubscribeToAllOptions struct {
-	position     stream_position.AllStreamPosition
+	position     stream.AllStreamPosition
 	resolveLinks bool
 	filter       []filtering.SubscriptionFilterOptions
 }
 
 func (o *SubscribeToAllOptions) setDefaults() {
 	if o.position == nil {
-		o.position = stream_position.End()
+		o.position = stream.End()
 	}
 
 	if o.filter == nil {
@@ -61,20 +61,20 @@ func (o *SubscribeToAllOptions) setDefaults() {
 	}
 }
 
-func (o *SubscribeToAllOptions) SetFrom(value stream_position.AllStreamPosition) {
+func (o *SubscribeToAllOptions) SetFrom(value stream.AllStreamPosition) {
 	o.position = value
 }
 
 func (o *SubscribeToAllOptions) SetFromStart() {
-	o.position = stream_position.Start()
+	o.position = stream.Start()
 }
 
 func (o *SubscribeToAllOptions) SetFromEnd() {
-	o.position = stream_position.End()
+	o.position = stream.End()
 }
 
 func (o *SubscribeToAllOptions) SetFromPosition(value position.Position) {
-	o.position = stream_position.Position(value)
+	o.position = stream.Position(value)
 }
 
 func (o *SubscribeToAllOptions) SetResolveLinks() {
@@ -85,7 +85,7 @@ func (o *SubscribeToAllOptions) SetFilter(value filtering.SubscriptionFilterOpti
 	o.filter = []filtering.SubscriptionFilterOptions{value}
 }
 
-func (o *SubscribeToAllOptions) Position() stream_position.AllStreamPosition {
+func (o *SubscribeToAllOptions) Position() stream.AllStreamPosition {
 	return o.position
 }
 

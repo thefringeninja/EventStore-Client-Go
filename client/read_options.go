@@ -3,18 +3,18 @@ package client
 import (
 	"github.com/EventStore/EventStore-Client-Go/direction"
 	"github.com/EventStore/EventStore-Client-Go/position"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
+	"github.com/EventStore/EventStore-Client-Go/stream"
 )
 
 type ReadStreamEventsOptions struct {
 	direction    direction.Direction
-	position     stream_position.StreamPosition
+	position     stream.StreamPosition
 	resolveLinks bool
 }
 
 func (o *ReadStreamEventsOptions) setDefaults() {
 	if o.position == nil {
-		o.position = stream_position.Start()
+		o.position = stream.Start()
 	}
 }
 
@@ -30,20 +30,20 @@ func (o *ReadStreamEventsOptions) SetDirection(dir direction.Direction) {
 	o.direction = dir
 }
 
-func (o *ReadStreamEventsOptions) SetFrom(position stream_position.StreamPosition) {
+func (o *ReadStreamEventsOptions) SetFrom(position stream.StreamPosition) {
 	o.position = position
 }
 
 func (o *ReadStreamEventsOptions) SetFromStart() {
-	o.position = stream_position.RevisionStart{}
+	o.position = stream.RevisionStart{}
 }
 
 func (o *ReadStreamEventsOptions) SetFromEnd() {
-	o.position = stream_position.RevisionEnd{}
+	o.position = stream.RevisionEnd{}
 }
 
 func (o *ReadStreamEventsOptions) SetFromRevision(value uint64) {
-	o.position = stream_position.RevisionExact{Value: value}
+	o.position = stream.RevisionExact{Value: value}
 }
 
 func (o *ReadStreamEventsOptions) SetResolveLinks() {
@@ -54,7 +54,7 @@ func (o *ReadStreamEventsOptions) Direction() direction.Direction {
 	return o.direction
 }
 
-func (o *ReadStreamEventsOptions) Position() stream_position.StreamPosition {
+func (o *ReadStreamEventsOptions) Position() stream.StreamPosition {
 	return o.position
 }
 
@@ -64,13 +64,13 @@ func (o *ReadStreamEventsOptions) ResolveLinks() bool {
 
 type ReadAllEventsOptions struct {
 	direction    direction.Direction
-	position     stream_position.AllStreamPosition
+	position     stream.AllStreamPosition
 	resolveLinks bool
 }
 
 func (o *ReadAllEventsOptions) setDefaults() {
 	if o.position == nil {
-		o.position = stream_position.Start()
+		o.position = stream.Start()
 	}
 }
 
@@ -87,18 +87,18 @@ func (o *ReadAllEventsOptions) SetDirection(dir direction.Direction) {
 }
 
 func (o *ReadAllEventsOptions) SetFromStart() {
-	o.position = stream_position.RevisionStart{}
+	o.position = stream.RevisionStart{}
 }
 
 func (o *ReadAllEventsOptions) SetFromEnd() {
-	o.position = stream_position.RevisionEnd{}
+	o.position = stream.RevisionEnd{}
 }
 
 func (o *ReadAllEventsOptions) SetFromPosition(pos position.Position) {
-	o.position = stream_position.Position(pos)
+	o.position = stream.Position(pos)
 }
 
-func (o *ReadAllEventsOptions) SetFrom(position stream_position.AllStreamPosition) {
+func (o *ReadAllEventsOptions) SetFrom(position stream.AllStreamPosition) {
 	o.position = position
 }
 
@@ -110,7 +110,7 @@ func (o *ReadAllEventsOptions) Direction() direction.Direction {
 	return o.direction
 }
 
-func (o *ReadAllEventsOptions) Position() stream_position.AllStreamPosition {
+func (o *ReadAllEventsOptions) Position() stream.AllStreamPosition {
 	return o.position
 }
 

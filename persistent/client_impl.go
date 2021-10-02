@@ -2,11 +2,11 @@ package persistent
 
 import (
 	"context"
+	"github.com/EventStore/EventStore-Client-Go/stream"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
-	"github.com/EventStore/EventStore-Client-Go/stream_position"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -76,7 +76,7 @@ func (client Client) CreateStreamSubscription(
 	handle connection.ConnectionHandle,
 	streamName string,
 	groupName string,
-	position stream_position.StreamPosition,
+	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) error {
 	createSubscriptionConfig := createRequestProto(streamName, groupName, position, settings)
@@ -100,7 +100,7 @@ func (client Client) CreateAllSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	groupName string,
-	position stream_position.AllStreamPosition,
+	position stream.AllStreamPosition,
 	settings SubscriptionSettings,
 	filter *filtering.SubscriptionFilterOptions,
 ) error {
@@ -135,7 +135,7 @@ func (client Client) UpdateStreamSubscription(
 	handle connection.ConnectionHandle,
 	streamName string,
 	groupName string,
-	position stream_position.StreamPosition,
+	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) error {
 	updateSubscriptionConfig := updateRequestStreamProto(streamName, groupName, position, settings)
@@ -155,7 +155,7 @@ func (client Client) UpdateAllSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	groupName string,
-	position stream_position.AllStreamPosition,
+	position stream.AllStreamPosition,
 	settings SubscriptionSettings,
 ) error {
 	updateSubscriptionConfig := UpdateRequestAllOptionsProto(groupName, position, settings)

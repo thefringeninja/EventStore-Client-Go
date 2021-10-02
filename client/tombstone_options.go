@@ -1,7 +1,7 @@
 package client
 
 import (
-	stream_revision "github.com/EventStore/EventStore-Client-Go/streamrevision"
+	stream_revision "github.com/EventStore/EventStore-Client-Go/stream"
 )
 
 type TombstoneStreamOptions struct {
@@ -23,7 +23,7 @@ func (o *TombstoneStreamOptions) SetExpectNoStream() {
 }
 
 func (o *TombstoneStreamOptions) SetExpectStreamExists() {
-	o.expectedRevision = stream_revision.StreamExists()
+	o.expectedRevision = stream_revision.Exists()
 }
 
 func (o *TombstoneStreamOptions) SetExpectRevision(value uint64) {

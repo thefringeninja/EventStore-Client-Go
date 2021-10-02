@@ -3,8 +3,9 @@ package client_test
 import (
 	"context"
 	"errors"
-	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	"testing"
+
+	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 

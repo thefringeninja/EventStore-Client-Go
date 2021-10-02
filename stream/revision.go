@@ -1,11 +1,8 @@
-package streamrevision
+package stream
 
 type RevisionAny struct{}
 type RevisionStreamExists struct{}
 type RevisionNoStream struct{}
-type RevisionExact struct {
-	value uint64
-}
 
 type ExpectedRevision interface {
 	AcceptExpectedRevision(visitor RevisionVisitor)
@@ -18,27 +15,27 @@ type RevisionVisitor interface {
 	VisitExact(value uint64)
 }
 
-func (any RevisionAny) AcceptExpectedRevision(visitor RevisionVisitor) {
+func (r RevisionAny) AcceptExpectedRevision(visitor RevisionVisitor) {
 	visitor.VisitAny()
 }
 
-func (streamExist RevisionStreamExists) AcceptExpectedRevision(visitor RevisionVisitor) {
+func (r RevisionStreamExists) AcceptExpectedRevision(visitor RevisionVisitor) {
 	visitor.VisitStreamExists()
 }
 
-func (noStream RevisionNoStream) AcceptExpectedRevision(visitor RevisionVisitor) {
+func (r RevisionNoStream) AcceptExpectedRevision(visitor RevisionVisitor) {
 	visitor.VisitNoStream()
 }
 
-func (exact RevisionExact) AcceptExpectedRevision(visitor RevisionVisitor) {
-	visitor.VisitExact(exact.value)
+func (r RevisionExact) AcceptExpectedRevision(visitor RevisionVisitor) {
+	visitor.VisitExact(r.Value)
 }
 
 func Any() ExpectedRevision {
 	return RevisionAny{}
 }
 
-func StreamExists() ExpectedRevision {
+func Exists() ExpectedRevision {
 	return RevisionStreamExists{}
 }
 
@@ -47,5 +44,5 @@ func NoStream() ExpectedRevision {
 }
 
 func Exact(value uint64) ExpectedRevision {
-	return RevisionExact{value: value}
+	return RevisionExact{Value: value}
 }
