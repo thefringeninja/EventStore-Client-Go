@@ -15,9 +15,17 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
 	"github.com/gofrs/uuid"
 )
+
+// SystemMetadataKeysType ...
+const SystemMetadataKeysType = "type"
+
+// SystemMetadataKeysIsJSON ...
+const SystemMetadataKeysContentType = "content-type"
+
+// SystemMetadataKeysCreated ...
+const SystemMetadataKeysCreated = "created"
 
 type appendSetOptions struct {
 	req *api.AppendReq
@@ -75,8 +83,8 @@ func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMess
 	}
 
 	metadata := make(map[string]string)
-	metadata[system_metadata.SystemMetadataKeysContentType] = event.ContentType()
-	metadata[system_metadata.SystemMetadataKeysType] = event.EventType()
+	metadata[SystemMetadataKeysContentType] = event.ContentType()
+	metadata[SystemMetadataKeysType] = event.EventType()
 	eventId := event.EventID()
 
 	if event.Data() == nil {
@@ -436,9 +444,9 @@ func EventIDFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) uuid.
 
 // CreatedFromProto ...
 func CreatedFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) time.Time {
-	timeSinceEpoch, err := strconv.ParseInt(recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated], 10, 64)
+	timeSinceEpoch, err := strconv.ParseInt(recordedEvent.Metadata[SystemMetadataKeysCreated], 10, 64)
 	if err != nil {
-		log.Fatalf("Failed to parse created date as int from %+v", recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated])
+		log.Fatalf("Failed to parse created date as int from %+v", recordedEvent.Metadata[SystemMetadataKeysCreated])
 	}
 	// The metadata contains the number of .NET "ticks" (100ns increments) since the UNIX epoch
 	return time.Unix(0, timeSinceEpoch*100).UTC()
@@ -464,7 +472,7 @@ func TombstonePositionFromProto(tombstoneResponse *api.TombstoneResp) types.Posi
 
 // GetContentTypeFromProto ...
 func GetContentTypeFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) string {
-	return recordedEvent.Metadata[system_metadata.SystemMetadataKeysContentType]
+	return recordedEvent.Metadata[SystemMetadataKeysContentType]
 }
 
 // RecordedEventFromProto
@@ -476,7 +484,7 @@ func GetRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEve
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
 	return messages.RecordedEvent{
 		EventID:        EventIDFromProto(recordedEvent),
-		EventType:      recordedEvent.Metadata[system_metadata.SystemMetadataKeysType],
+		EventType:      recordedEvent.Metadata[SystemMetadataKeysType],
 		ContentType:    GetContentTypeFromProto(recordedEvent),
 		StreamID:       string(streamIdentifier.StreamName),
 		EventNumber:    recordedEvent.GetStreamRevision(),
@@ -542,15 +550,15 @@ func ToProtoUUID(id uuid.UUID) *shared.UUID {
 }
 
 func GetContentTypeFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) string {
-	return recordedEvent.Metadata[system_metadata.SystemMetadataKeysContentType]
+	return recordedEvent.Metadata[SystemMetadataKeysContentType]
 }
 
 func CreatedFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) time.Time {
 	timeSinceEpoch, err := strconv.ParseInt(
-		recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated], 10, 64)
+		recordedEvent.Metadata[SystemMetadataKeysCreated], 10, 64)
 	if err != nil {
 		log.Fatalf("Failed to parse created date as int from %+v",
-			recordedEvent.Metadata[system_metadata.SystemMetadataKeysCreated])
+			recordedEvent.Metadata[SystemMetadataKeysCreated])
 	}
 	// The metadata contains the number of .NET "ticks" (100ns increments) since the UNIX epoch
 	return time.Unix(0, timeSinceEpoch*100).UTC()
@@ -608,7 +616,7 @@ func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_
 
 	return messages.RecordedEvent{
 		EventID:        EventIDFromPersistentProto(recordedEvent),
-		EventType:      recordedEvent.Metadata[system_metadata.SystemMetadataKeysType],
+		EventType:      recordedEvent.Metadata[SystemMetadataKeysType],
 		ContentType:    GetContentTypeFromPersistentProto(recordedEvent),
 		StreamID:       string(streamIdentifier.StreamName),
 		EventNumber:    recordedEvent.GetStreamRevision(),
