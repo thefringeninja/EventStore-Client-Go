@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
-	position "github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -84,7 +84,7 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEvents := uint64(numberOfEventsToRead)
 
 	opts := client.ReadAllEventsOptions{}
-	opts.SetFromPosition(position.Position{Commit: 1788, Prepare: 1788})
+	opts.SetFromPosition(types.Position{Commit: 1788, Prepare: 1788})
 	opts.SetResolveLinks()
 
 	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
@@ -187,7 +187,7 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEvents := uint64(numberOfEventsToRead)
 
 	opts := client.ReadAllEventsOptions{}
-	opts.SetFromPosition(position.Position{Commit: 3_386, Prepare: 3_386})
+	opts.SetFromPosition(types.Position{Commit: 3_386, Prepare: 3_386})
 	opts.SetBackwards()
 	opts.SetResolveLinks()
 

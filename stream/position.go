@@ -1,13 +1,13 @@
 package stream
 
-import pos "github.com/EventStore/EventStore-Client-Go/position"
+import "github.com/EventStore/EventStore-Client-Go/types"
 
 type RevisionExact struct {
 	Value uint64
 }
 
 type RevisionPosition struct {
-	Value pos.Position
+	Value types.Position
 }
 
 type RevisionStart struct {
@@ -31,7 +31,7 @@ type RegularStreamVisitor interface {
 }
 
 type AllStreamVisitor interface {
-	VisitPosition(value pos.Position)
+	VisitPosition(value types.Position)
 	VisitStart()
 	VisitEnd()
 }
@@ -68,7 +68,7 @@ func End() RevisionEnd {
 	return RevisionEnd{}
 }
 
-func Position(value pos.Position) AllStreamPosition {
+func Position(value types.Position) AllStreamPosition {
 	return RevisionPosition{
 		Value: value,
 	}

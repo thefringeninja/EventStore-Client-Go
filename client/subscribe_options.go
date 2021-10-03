@@ -2,8 +2,8 @@ package client
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type SubscribeToStreamOptions struct {
@@ -81,7 +81,7 @@ func (o *SubscribeToAllOptions) SetFromEnd() {
 	o.position = stream.End()
 }
 
-func (o *SubscribeToAllOptions) SetFromPosition(value position.Position) {
+func (o *SubscribeToAllOptions) SetFromPosition(value types.Position) {
 	o.position = stream.Position(value)
 }
 

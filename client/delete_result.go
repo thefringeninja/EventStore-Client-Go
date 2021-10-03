@@ -1,8 +1,7 @@
 package client
 
-import position "github.com/EventStore/EventStore-Client-Go/position"
+import "github.com/EventStore/EventStore-Client-Go/types"
 
-// DeleteResult ...
 type DeleteResult struct {
-	Position position.Position
+	Position types.Position
 }

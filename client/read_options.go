@@ -2,8 +2,8 @@ package client
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/direction"
-	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream"
+	position "github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type ReadStreamEventsOptions struct {

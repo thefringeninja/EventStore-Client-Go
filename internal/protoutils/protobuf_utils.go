@@ -14,10 +14,10 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	direction "github.com/EventStore/EventStore-Client-Go/direction"
-	position "github.com/EventStore/EventStore-Client-Go/position"
 	shared "github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
+	position "github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/gofrs/uuid"
 )
 

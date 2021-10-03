@@ -6,7 +6,7 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/position"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 func SubscribeToStream(db *client.Client) {
@@ -107,7 +107,7 @@ func SubscribeToAll(db *client.Client) {
 
 	// region subscribe-to-all-from-position
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFromPosition(position.Position{
+	opts.SetFromPosition(types.Position{
 		Commit:  1_056,
 		Prepare: 1_056,
 	})

@@ -2,7 +2,6 @@ package client
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream"
 	"github.com/EventStore/EventStore-Client-Go/types"
 )
@@ -110,7 +109,7 @@ func (o *PersistentAllSubscriptionOptions) SetCheckpointInterval(value int) {
 	o.checkpointInterval = value
 }
 
-func (o *PersistentAllSubscriptionOptions) SetFromPosition(value position.Position) {
+func (o *PersistentAllSubscriptionOptions) SetFromPosition(value types.Position) {
 	o.position = stream.Position(value)
 }
 

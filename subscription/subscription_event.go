@@ -2,13 +2,13 @@ package subscription
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
-	"github.com/EventStore/EventStore-Client-Go/position"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type Event struct {
 	EventAppeared       *messages.ResolvedEvent
 	SubscriptionDropped *Dropped
-	CheckPointReached   *position.Position
+	CheckPointReached   *types.Position
 }
 
 type Dropped struct {

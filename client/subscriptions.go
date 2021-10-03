@@ -6,12 +6,10 @@ import (
 	"log"
 	"sync"
 
-	"github.com/EventStore/EventStore-Client-Go/subscription"
-
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-
-	"github.com/EventStore/EventStore-Client-Go/position"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
+	"github.com/EventStore/EventStore-Client-Go/subscription"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type request struct {
@@ -75,7 +73,7 @@ func NewSubscription(client *Client, cancel context.CancelFunc, inner api.Stream
 			case *api.ReadResp_Checkpoint_:
 				{
 					checkpoint := result.GetCheckpoint()
-					position := position.Position{
+					position := types.Position{
 						Commit:  checkpoint.CommitPosition,
 						Prepare: checkpoint.PreparePosition,
 					}
