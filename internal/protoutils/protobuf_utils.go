@@ -13,11 +13,9 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	direction "github.com/EventStore/EventStore-Client-Go/direction"
-	shared "github.com/EventStore/EventStore-Client-Go/protos/shared"
+	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	system_metadata "github.com/EventStore/EventStore-Client-Go/systemmetadata"
-	position "github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/gofrs/uuid"
 )
 
@@ -106,12 +104,12 @@ func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMess
 }
 
 // toReadDirectionFromDirection ...
-func toReadDirectionFromDirection(dir direction.Direction) api.ReadReq_Options_ReadDirection {
+func toReadDirectionFromDirection(dir types.Direction) api.ReadReq_Options_ReadDirection {
 	var readDirection api.ReadReq_Options_ReadDirection
 	switch dir {
-	case direction.Forwards:
+	case types.Forwards:
 		readDirection = api.ReadReq_Options_Forwards
-	case direction.Backwards:
+	case types.Backwards:
 		readDirection = api.ReadReq_Options_Backwards
 	}
 	return readDirection
@@ -146,7 +144,7 @@ func (all *allStream) VisitEnd() {
 	}
 }
 
-func (all *allStream) VisitPosition(value position.Position) {
+func (all *allStream) VisitPosition(value types.Position) {
 	all.options.AllOption = &api.ReadReq_Options_AllOptions_Position{
 		Position: &api.ReadReq_Options_Position{
 			PreparePosition: value.Prepare,
@@ -325,7 +323,7 @@ func ToTombstoneRequest(streamID string, streamRevision stream.ExpectedRevision)
 	return tombstoneReq
 }
 
-func ToReadStreamRequest(streamID string, direction direction.Direction, from stream.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func ToReadStreamRequest(streamID string, direction types.Direction, from stream.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -346,7 +344,7 @@ func ToReadStreamRequest(streamID string, direction direction.Direction, from st
 	}
 }
 
-func ToReadAllRequest(direction direction.Direction, from stream.AllStreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func ToReadAllRequest(direction types.Direction, from stream.AllStreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -376,7 +374,7 @@ func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, re
 			FilterOption: &api.ReadReq_Options_NoFilter{
 				NoFilter: &shared.Empty{},
 			},
-			ReadDirection: toReadDirectionFromDirection(direction.Forwards),
+			ReadDirection: toReadDirectionFromDirection(types.Forwards),
 			ResolveLinks:  resolveLinks,
 			StreamOption:  toReadStreamOptionsFromStreamAndStreamRevision(streamID, from),
 			UuidOption: &api.ReadReq_Options_UUIDOption{
@@ -407,7 +405,7 @@ func ToAllSubscriptionRequest(from stream.AllStreamPosition, resolveLinks bool, 
 			FilterOption: &api.ReadReq_Options_NoFilter{
 				NoFilter: &shared.Empty{},
 			},
-			ReadDirection: toReadDirectionFromDirection(direction.Forwards),
+			ReadDirection: toReadDirectionFromDirection(types.Forwards),
 			ResolveLinks:  resolveLinks,
 			StreamOption:  toAllReadOptionsFromPosition(from),
 			UuidOption: &api.ReadReq_Options_UUIDOption{
@@ -446,19 +444,19 @@ func CreatedFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) time.
 	return time.Unix(0, timeSinceEpoch*100).UTC()
 }
 
-func PositionFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) position.Position {
-	return position.Position{Commit: recordedEvent.GetCommitPosition(), Prepare: recordedEvent.GetPreparePosition()}
+func PositionFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) types.Position {
+	return types.Position{Commit: recordedEvent.GetCommitPosition(), Prepare: recordedEvent.GetPreparePosition()}
 }
 
-func DeletePositionFromProto(deleteResponse *api.DeleteResp) position.Position {
-	return position.Position{
+func DeletePositionFromProto(deleteResponse *api.DeleteResp) types.Position {
+	return types.Position{
 		Commit:  deleteResponse.GetPosition().CommitPosition,
 		Prepare: deleteResponse.GetPosition().PreparePosition,
 	}
 }
 
-func TombstonePositionFromProto(tombstoneResponse *api.TombstoneResp) position.Position {
-	return position.Position{
+func TombstonePositionFromProto(tombstoneResponse *api.TombstoneResp) types.Position {
+	return types.Position{
 		Commit:  tombstoneResponse.GetPosition().CommitPosition,
 		Prepare: tombstoneResponse.GetPosition().PreparePosition,
 	}
@@ -558,8 +556,8 @@ func CreatedFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_Rec
 	return time.Unix(0, timeSinceEpoch*100).UTC()
 }
 
-func PositionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) position.Position {
-	return position.Position{
+func PositionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) types.Position {
+	return types.Position{
 		Commit:  recordedEvent.GetCommitPosition(),
 		Prepare: recordedEvent.GetPreparePosition(),
 	}
@@ -775,7 +773,7 @@ func UpdatePersistentRequestCheckpointAfterMsProto(
 }
 
 // ToUpdatePersistentRequestAllOptionsFromPosition ...
-func ToUpdatePersistentRequestAllOptionsFromPosition(position position.Position) *persistent.UpdateReq_AllOptions_Position {
+func ToUpdatePersistentRequestAllOptionsFromPosition(position types.Position) *persistent.UpdateReq_AllOptions_Position {
 	return &persistent.UpdateReq_AllOptions_Position{
 		Position: &persistent.UpdateReq_Position{
 			PreparePosition: position.Prepare,
@@ -988,7 +986,7 @@ func CreateRequestFilterOptionsProto(
 
 // ToUpdatePersistentRequestAllOptionsFromPosition ...
 func ToCreatePersistentRequestAllOptionsFromPosition(
-	position position.Position,
+	position types.Position,
 ) *persistent.CreateReq_AllOptions_Position {
 	return &persistent.CreateReq_AllOptions_Position{
 		Position: &persistent.CreateReq_Position{

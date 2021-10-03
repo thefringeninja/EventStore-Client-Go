@@ -11,6 +11,7 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
@@ -18,7 +19,6 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
-	esdb_metadata "github.com/EventStore/EventStore-Client-Go/metadata"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 )
 
@@ -139,7 +139,7 @@ func (client *Client) SetStreamMetadata(
 	context context.Context,
 	streamID string,
 	opts AppendToStreamOptions,
-	metadata esdb_metadata.StreamMetadata,
+	metadata types.StreamMetadata,
 ) (*WriteResult, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 	props, err := metadata.ToMap()
@@ -169,7 +169,7 @@ func (client *Client) GetStreamMetadata(
 	context context.Context,
 	streamID string,
 	opts ReadStreamEventsOptions,
-) (*esdb_metadata.StreamMetadata, error) {
+) (*types.StreamMetadata, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 
 	stream, err := client.ReadStreamEvents(context, streamName, opts, 1)
@@ -186,7 +186,7 @@ func (client *Client) GetStreamMetadata(
 	event, err := stream.Recv()
 
 	if errors.Is(err, io.EOF) {
-		return &esdb_metadata.StreamMetadata{}, nil
+		return &types.StreamMetadata{}, nil
 	}
 
 	if err != nil {
@@ -201,7 +201,7 @@ func (client *Client) GetStreamMetadata(
 		return nil, fmt.Errorf("error when deserializing stream metadata json: %w", err)
 	}
 
-	meta, err := esdb_metadata.StreamMetadataFromMap(props)
+	meta, err := types.StreamMetadataFromMap(props)
 
 	if err != nil {
 		return nil, fmt.Errorf("error when parsing stream metadata json: %w", err)

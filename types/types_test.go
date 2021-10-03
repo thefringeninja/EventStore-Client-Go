@@ -1,23 +1,23 @@
-package metadata_test
+package types_test
 
 import (
 	"encoding/json"
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/metadata"
+	"github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
-	acl := metadata.Acl{}
+	acl := types.Acl{}
 	acl.AddReadRoles("admin")
 	acl.AddWriteRoles("admin")
 	acl.AddDeleteRoles("admin")
 	acl.AddMetaReadRoles("admin")
 	acl.AddMetaWriteRoles("admin")
 
-	expected := metadata.StreamMetadata{}
+	expected := types.StreamMetadata{}
 	expected.SetMaxAge(2 * time.Second)
 	expected.SetCacheControl(15 * time.Second)
 	expected.SetTruncateBefore(1)
@@ -39,7 +39,7 @@ func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
 
 	assert.NoError(t, err, "failed to deserializing props")
 
-	meta, err := metadata.StreamMetadataFromMap(outProps)
+	meta, err := types.StreamMetadataFromMap(outProps)
 
 	assert.NoError(t, err, "failed to parse metadata from props")
 
@@ -47,12 +47,12 @@ func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
 }
 
 func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
-	expected := metadata.StreamMetadata{}
+	expected := types.StreamMetadata{}
 	expected.SetMaxAge(2 * time.Second)
 	expected.SetCacheControl(15 * time.Second)
 	expected.SetTruncateBefore(1)
 	expected.SetMaxCount(12)
-	expected.SetAcl(metadata.UserStreamAcl)
+	expected.SetAcl(types.UserStreamAcl)
 	expected.AddCustomProperty("foo", "bar")
 
 	props, err := expected.ToMap()
@@ -69,7 +69,7 @@ func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
 
 	assert.NoError(t, err, "failed to deserializing props")
 
-	meta, err := metadata.StreamMetadataFromMap(outProps)
+	meta, err := types.StreamMetadataFromMap(outProps)
 
 	assert.NoError(t, err, "failed to parse metadata from props")
 
@@ -77,12 +77,12 @@ func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
 }
 
 func TestConsistentMetadataSerializationSystemStreamAcl(t *testing.T) {
-	expected := metadata.StreamMetadata{}
+	expected := types.StreamMetadata{}
 	expected.SetMaxAge(2 * time.Second)
 	expected.SetCacheControl(15 * time.Second)
 	expected.SetTruncateBefore(1)
 	expected.SetMaxCount(12)
-	expected.SetAcl(metadata.SystemStreamAcl)
+	expected.SetAcl(types.SystemStreamAcl)
 	expected.AddCustomProperty("foo", "bar")
 
 	props, err := expected.ToMap()
@@ -99,7 +99,7 @@ func TestConsistentMetadataSerializationSystemStreamAcl(t *testing.T) {
 
 	assert.NoError(t, err, "failed to deserializing props")
 
-	meta, err := metadata.StreamMetadataFromMap(outProps)
+	meta, err := types.StreamMetadataFromMap(outProps)
 
 	assert.NoError(t, err, "failed to parse metadata from props")
 

@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
-	"github.com/EventStore/EventStore-Client-Go/metadata"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -173,10 +173,10 @@ func TestMetadataOperation(t *testing.T) {
 
 	assert.Nil(t, err, "error when writing an event")
 
-	acl := metadata.Acl{}
+	acl := types.Acl{}
 	acl.AddReadRoles("admin")
 
-	meta := metadata.StreamMetadata{}
+	meta := types.StreamMetadata{}
 	meta.SetMaxAge(2 * time.Second)
 	meta.SetAcl(acl)
 

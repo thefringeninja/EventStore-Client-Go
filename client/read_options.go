@@ -1,13 +1,12 @@
 package client
 
 import (
-	"github.com/EventStore/EventStore-Client-Go/direction"
 	"github.com/EventStore/EventStore-Client-Go/stream"
-	position "github.com/EventStore/EventStore-Client-Go/types"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type ReadStreamEventsOptions struct {
-	direction    direction.Direction
+	direction    types.Direction
 	position     stream.StreamPosition
 	resolveLinks bool
 }
@@ -19,14 +18,14 @@ func (o *ReadStreamEventsOptions) setDefaults() {
 }
 
 func (o *ReadStreamEventsOptions) SetForwards() {
-	o.direction = direction.Forwards
+	o.direction = types.Forwards
 }
 
 func (o *ReadStreamEventsOptions) SetBackwards() {
-	o.direction = direction.Backwards
+	o.direction = types.Backwards
 }
 
-func (o *ReadStreamEventsOptions) SetDirection(dir direction.Direction) {
+func (o *ReadStreamEventsOptions) SetDirection(dir types.Direction) {
 	o.direction = dir
 }
 
@@ -50,7 +49,7 @@ func (o *ReadStreamEventsOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *ReadStreamEventsOptions) Direction() direction.Direction {
+func (o *ReadStreamEventsOptions) Direction() types.Direction {
 	return o.direction
 }
 
@@ -63,7 +62,7 @@ func (o *ReadStreamEventsOptions) ResolveLinks() bool {
 }
 
 type ReadAllEventsOptions struct {
-	direction    direction.Direction
+	direction    types.Direction
 	position     stream.AllStreamPosition
 	resolveLinks bool
 }
@@ -75,14 +74,14 @@ func (o *ReadAllEventsOptions) setDefaults() {
 }
 
 func (o *ReadAllEventsOptions) SetForwards() {
-	o.direction = direction.Forwards
+	o.direction = types.Forwards
 }
 
 func (o *ReadAllEventsOptions) SetBackwards() {
-	o.direction = direction.Backwards
+	o.direction = types.Backwards
 }
 
-func (o *ReadAllEventsOptions) SetDirection(dir direction.Direction) {
+func (o *ReadAllEventsOptions) SetDirection(dir types.Direction) {
 	o.direction = dir
 }
 
@@ -94,7 +93,7 @@ func (o *ReadAllEventsOptions) SetFromEnd() {
 	o.position = stream.RevisionEnd{}
 }
 
-func (o *ReadAllEventsOptions) SetFromPosition(pos position.Position) {
+func (o *ReadAllEventsOptions) SetFromPosition(pos types.Position) {
 	o.position = stream.Position(pos)
 }
 
@@ -106,7 +105,7 @@ func (o *ReadAllEventsOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *ReadAllEventsOptions) Direction() direction.Direction {
+func (o *ReadAllEventsOptions) Direction() types.Direction {
 	return o.direction
 }
 
