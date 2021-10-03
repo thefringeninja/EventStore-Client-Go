@@ -39,7 +39,7 @@ type Event struct {
 	EventData      []byte         `json:"eventData"`
 	UserMetadata   []byte         `json:"userMetadata"`
 	ContentType    string         `json:"contentType"`
-	Position       Position       `json:"From"`
+	Position       Position       `json:"position"`
 	Created        Created        `json:"created"`
 }
 

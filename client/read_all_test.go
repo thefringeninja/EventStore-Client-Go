@@ -35,6 +35,8 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	numberOfEvents := uint64(numberOfEventsToRead)
 
 	opts := client.ReadAllEventsOptions{
+		Direction:    types.Forwards,
+		From:         types.Start{},
 		ResolveLinks: true,
 	}
 	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)

@@ -126,7 +126,7 @@ func getDatabase(options *dockertest.RunOptions) *Container {
 			}
 		}
 
-		healthCheckEndpoint := fmt.Sprintf("https://%s", endpoint)
+		healthCheckEndpoint := fmt.Sprintf("https://%s/health/alive", endpoint)
 		_, err := http.Get(healthCheckEndpoint)
 		return err
 	})
