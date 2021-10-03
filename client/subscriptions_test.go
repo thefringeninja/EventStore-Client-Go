@@ -101,12 +101,12 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	var receivedEvents sync.WaitGroup
 	receivedEvents.Add(len(positions))
 
-	filter := filtering.FilterOnEventType().AddPrefixes("eventType-194")
-	filterOptions := filtering.SubscriptionFilterOptionsDefault(filter)
+	filter := filtering.NewFilterOnEventType()
+	filter.AddPrefixes("eventType-194")
 
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFromStart()
-	opts.SetFilter(filterOptions)
+	opts.SetFilter(filter)
 
 	subscription, err := db.SubscribeToAll(context.Background(), opts)
 

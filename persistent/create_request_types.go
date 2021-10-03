@@ -2,6 +2,7 @@ package persistent
 
 import (
 	"fmt"
+
 	"github.com/EventStore/EventStore-Client-Go/stream"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
@@ -189,7 +190,7 @@ func CreateRequestFilterOptionsProto(
 			"the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := persistent.CreateReq_AllOptions_FilterOptions{
-		CheckpointIntervalMultiplier: uint32(options.CheckpointIntervalValue),
+		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
 	}
 	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_EventType{
@@ -206,13 +207,13 @@ func CreateRequestFilterOptionsProto(
 			},
 		}
 	}
-	if options.MaxSearchWindowValue == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
 		filterOptions.Window = &persistent.CreateReq_AllOptions_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
 	} else {
 		filterOptions.Window = &persistent.CreateReq_AllOptions_FilterOptions_Max{
-			Max: uint32(options.MaxSearchWindowValue),
+			Max: uint32(options.MaxSearchWindow),
 		}
 	}
 	return &filterOptions, nil

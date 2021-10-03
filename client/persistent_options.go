@@ -55,9 +55,11 @@ func (o *PersistentStreamSubscriptionOptions) From() stream.StreamPosition {
 }
 
 type PersistentAllSubscriptionOptions struct {
-	settings []persistent.SubscriptionSettings
-	position stream.AllStreamPosition
-	filter   []filtering.SubscriptionFilterOptions
+	settings           []persistent.SubscriptionSettings
+	position           stream.AllStreamPosition
+	maxSearchWindow    int
+	checkpointInterval int
+	filter             []filtering.SubscriptionFilter
 }
 
 func (o *PersistentAllSubscriptionOptions) setDefaults() {
@@ -69,8 +71,14 @@ func (o *PersistentAllSubscriptionOptions) setDefaults() {
 		o.position = stream.End()
 	}
 
-	if o.filter == nil {
-		o.filter = []filtering.SubscriptionFilterOptions{}
+	if len(o.filter) != 0 {
+		if o.maxSearchWindow == 0 {
+			o.maxSearchWindow = 32
+		}
+
+		if o.checkpointInterval == 0 {
+			o.checkpointInterval = 1
+		}
 	}
 }
 
@@ -90,12 +98,24 @@ func (o *PersistentAllSubscriptionOptions) SetFromEnd() {
 	o.position = stream.End()
 }
 
+func (o *PersistentAllSubscriptionOptions) SetMaxSearchWindow(value int) {
+	o.maxSearchWindow = value
+}
+
+func (o *PersistentAllSubscriptionOptions) SetNoMaxSearchWindow() {
+	o.maxSearchWindow = -1
+}
+
+func (o *PersistentAllSubscriptionOptions) SetCheckpointInterval(value int) {
+	o.checkpointInterval = value
+}
+
 func (o *PersistentAllSubscriptionOptions) SetFromPosition(value position.Position) {
 	o.position = stream.Position(value)
 }
 
-func (o *PersistentAllSubscriptionOptions) SetFilter(filter filtering.SubscriptionFilterOptions) {
-	o.filter = []filtering.SubscriptionFilterOptions{filter}
+func (o *PersistentAllSubscriptionOptions) SetFilter(filter filtering.SubscriptionFilter) {
+	o.filter = []filtering.SubscriptionFilter{filter}
 }
 
 func (o *PersistentAllSubscriptionOptions) Settings() *persistent.SubscriptionSettings {
@@ -110,7 +130,15 @@ func (o *PersistentAllSubscriptionOptions) From() stream.AllStreamPosition {
 	return o.position
 }
 
-func (o *PersistentAllSubscriptionOptions) Filter() *filtering.SubscriptionFilterOptions {
+func (o *PersistentAllSubscriptionOptions) MaxSearchWindow() int {
+	return o.maxSearchWindow
+}
+
+func (o *PersistentAllSubscriptionOptions) CheckpointInterval() int {
+	return o.checkpointInterval
+}
+
+func (o *PersistentAllSubscriptionOptions) Filter() *filtering.SubscriptionFilter {
 	if len(o.filter) == 0 {
 		return nil
 	}

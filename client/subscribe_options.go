@@ -46,9 +46,11 @@ func (o *SubscribeToStreamOptions) ResolveLinks() bool {
 }
 
 type SubscribeToAllOptions struct {
-	position     stream.AllStreamPosition
-	resolveLinks bool
-	filter       []filtering.SubscriptionFilterOptions
+	position           stream.AllStreamPosition
+	resolveLinks       bool
+	maxSearchWindow    int
+	checkpointInterval int
+	filter             []filtering.SubscriptionFilter
 }
 
 func (o *SubscribeToAllOptions) setDefaults() {
@@ -56,8 +58,14 @@ func (o *SubscribeToAllOptions) setDefaults() {
 		o.position = stream.End()
 	}
 
-	if o.filter == nil {
-		o.filter = []filtering.SubscriptionFilterOptions{}
+	if len(o.filter) != 0 {
+		if o.maxSearchWindow == 0 {
+			o.maxSearchWindow = 32
+		}
+
+		if o.checkpointInterval == 0 {
+			o.checkpointInterval = 1
+		}
 	}
 }
 
@@ -81,8 +89,8 @@ func (o *SubscribeToAllOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *SubscribeToAllOptions) SetFilter(value filtering.SubscriptionFilterOptions) {
-	o.filter = []filtering.SubscriptionFilterOptions{value}
+func (o *SubscribeToAllOptions) SetFilter(value filtering.SubscriptionFilter) {
+	o.filter = []filtering.SubscriptionFilter{value}
 }
 
 func (o *SubscribeToAllOptions) Position() stream.AllStreamPosition {
@@ -93,7 +101,27 @@ func (o *SubscribeToAllOptions) ResolveLinks() bool {
 	return o.resolveLinks
 }
 
-func (o *SubscribeToAllOptions) Filter() *filtering.SubscriptionFilterOptions {
+func (o *SubscribeToAllOptions) MaxSearchWindow() int {
+	return o.maxSearchWindow
+}
+
+func (o *SubscribeToAllOptions) SetNoMaxSearchWindow() {
+	o.maxSearchWindow = -1
+}
+
+func (o *SubscribeToAllOptions) CheckpointInterval() int {
+	return o.checkpointInterval
+}
+
+func (o *SubscribeToAllOptions) SetMaxSearchWindow(value int) {
+	o.maxSearchWindow = value
+}
+
+func (o *SubscribeToAllOptions) SetCheckpointInterval(value int) {
+	o.checkpointInterval = value
+}
+
+func (o *SubscribeToAllOptions) Filter() *filtering.SubscriptionFilter {
 	if len(o.filter) == 0 {
 		return nil
 	}

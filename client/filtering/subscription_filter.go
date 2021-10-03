@@ -9,9 +9,9 @@ const (
 )
 
 type SubscriptionFilterOptions struct {
-	MaxSearchWindowValue    int
-	CheckpointIntervalValue int
-	SubscriptionFilter      SubscriptionFilter
+	MaxSearchWindow    int
+	CheckpointInterval int
+	SubscriptionFilter *SubscriptionFilter
 }
 type SubscriptionFilter struct {
 	FilterType FilterType
@@ -19,50 +19,13 @@ type SubscriptionFilter struct {
 	RegexValue string
 }
 
-func SubscriptionFilterOptionsDefault(filter SubscriptionFilter) SubscriptionFilterOptions {
-	return SubscriptionFilterOptions{
-		MaxSearchWindowValue:    32,
-		CheckpointIntervalValue: 1,
-		SubscriptionFilter:      filter,
-	}
-}
-
-func (o *SubscriptionFilterOptions) SetDefaults() {
-	if o.MaxSearchWindowValue == 0 {
-		o.MaxSearchWindowValue = 32
-	}
-
-	if o.CheckpointIntervalValue == 0 {
-		o.CheckpointIntervalValue = 1
-	}
-}
-
-func (o SubscriptionFilterOptions) SetMaxSearchWindow(value int) SubscriptionFilterOptions {
-	o.MaxSearchWindowValue = value
-	return o
-}
-
-func (o SubscriptionFilterOptions) SetCheckpointInterval(value int) SubscriptionFilterOptions {
-	o.CheckpointIntervalValue = value
-	return o
-}
-
-func NewSubscriptionFilterOptions(maxSearchWindow int, checkpointInterval int, filter SubscriptionFilter) SubscriptionFilterOptions {
-	return SubscriptionFilterOptions{
-		MaxSearchWindowValue:    maxSearchWindow,
-		CheckpointIntervalValue: checkpointInterval,
-		SubscriptionFilter:      filter,
-	}
-}
-
-func FilterOnEventType() SubscriptionFilter {
+func NewFilterOnEventType() SubscriptionFilter {
 	return SubscriptionFilter{
 		FilterType: EventFilter,
-		Prefixes:   []string{},
 	}
 }
 
-func FilterOnStreamName() SubscriptionFilter {
+func NewFilterOnStreamName() SubscriptionFilter {
 	return SubscriptionFilter{
 		FilterType: StreamFilter,
 	}

@@ -8,6 +8,7 @@ import (
 
 	"errors"
 
+	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
@@ -344,7 +345,17 @@ func (client *Client) SubscribeToAll(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.Position(), opts.ResolveLinks(), opts.Filter())
+
+	var filterOptions *filtering.SubscriptionFilterOptions = nil
+	if opts.Filter() != nil {
+		filterOptions = &filtering.SubscriptionFilterOptions{
+			MaxSearchWindow:    opts.MaxSearchWindow(),
+			CheckpointInterval: opts.CheckpointInterval(),
+			SubscriptionFilter: opts.Filter(),
+		}
+	}
+
+	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.Position(), opts.ResolveLinks(), filterOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
@@ -421,6 +432,15 @@ func (client *Client) CreatePersistentSubscriptionAll(
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
+
+	var filterOptions *filtering.SubscriptionFilterOptions = nil
+	if options.Filter() != nil {
+		filterOptions = &filtering.SubscriptionFilterOptions{
+			MaxSearchWindow:    options.MaxSearchWindow(),
+			CheckpointInterval: options.CheckpointInterval(),
+			SubscriptionFilter: options.Filter(),
+		}
+	}
 	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.CreateAllSubscription(
@@ -429,7 +449,7 @@ func (client *Client) CreatePersistentSubscriptionAll(
 		groupName,
 		options.From(),
 		*options.Settings(),
-		options.Filter(),
+		filterOptions,
 	)
 }
 

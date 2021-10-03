@@ -10,10 +10,10 @@ import (
 
 func ExcludeSystemEvents(db *client.Client) {
 	// region exclude-system
-	filter := filtering.FilterOnEventType()
+	filter := filtering.NewFilterOnEventType()
 	filter.SetRegex("/^[^\\$].*/")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
 
@@ -43,10 +43,10 @@ func ExcludeSystemEvents(db *client.Client) {
 
 func EventTypePrefix(db *client.Client) {
 	// region event-type-prefix
-	filter := filtering.FilterOnEventType()
+	filter := filtering.NewFilterOnEventType()
 	filter.AddPrefixes("customer-")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
 
@@ -76,10 +76,10 @@ func EventTypePrefix(db *client.Client) {
 
 func EventTypeRegex(db *client.Client) {
 	// region event-type-regex
-	filter := filtering.FilterOnEventType()
+	filter := filtering.NewFilterOnEventType()
 	filter.SetRegex("^user|^company")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
 
@@ -109,10 +109,10 @@ func EventTypeRegex(db *client.Client) {
 
 func StreamPrefix(db *client.Client) {
 	// region stream-prefix
-	filter := filtering.FilterOnStreamName()
+	filter := filtering.NewFilterOnStreamName()
 	filter.AddPrefixes("user-")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
 
@@ -142,10 +142,10 @@ func StreamPrefix(db *client.Client) {
 
 func StreamRegex(db *client.Client) {
 	// region stream-regex
-	filter := filtering.FilterOnStreamName()
+	filter := filtering.NewFilterOnStreamName()
 	filter.SetRegex("^user|^company")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
 
@@ -175,10 +175,10 @@ func StreamRegex(db *client.Client) {
 
 func CheckpointCallbackWithInterval(db *client.Client) {
 	// region checkpoint-with-interval
-	filter := filtering.FilterOnEventType()
+	filter := filtering.NewFilterOnEventType()
 	filter.SetRegex("/^[^\\$].*/")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	sub, err := db.SubscribeToAll(context.Background(), opts)
 

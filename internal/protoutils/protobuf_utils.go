@@ -2,11 +2,12 @@ package protoutils
 
 import (
 	"fmt"
-	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
-	stream_revision "github.com/EventStore/EventStore-Client-Go/stream"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
+	stream_revision "github.com/EventStore/EventStore-Client-Go/stream"
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
@@ -202,7 +203,7 @@ func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_
 		return nil, fmt.Errorf("the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := api.ReadReq_Options_FilterOptions{
-		CheckpointIntervalMultiplier: uint32(options.CheckpointIntervalValue),
+		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
 	}
 	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_EventType{
@@ -219,13 +220,13 @@ func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_
 			},
 		}
 	}
-	if options.MaxSearchWindowValue == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
 	} else {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Max{
-			Max: uint32(options.MaxSearchWindowValue),
+			Max: uint32(options.MaxSearchWindow),
 		}
 	}
 	return &filterOptions, nil

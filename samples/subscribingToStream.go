@@ -149,15 +149,15 @@ func SubscribeToAll(db *client.Client) {
 
 func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
-	filter := filtering.FilterOnStreamName()
+	filter := filtering.NewFilterOnStreamName()
 	filter.AddPrefixes("test-")
 	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filtering.SubscriptionFilterOptionsDefault(filter))
+	opts.SetFilter(filter)
 
 	db.SubscribeToAll(context.Background(), opts)
 	// endregion stream-prefix-filtered-subscription
 	// region stream-regex-filtered-subscription
-	filter = filtering.FilterOnStreamName()
+	filter = filtering.NewFilterOnStreamName()
 	filter.SetRegex("/invoice-\\d\\d\\d/g")
 	// endregion stream-regex-filtered-subscription
 
