@@ -8,7 +8,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/client"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
-	"github.com/EventStore/EventStore-Client-Go/persistent"
 	"github.com/stretchr/testify/require"
 )
 
@@ -505,7 +504,7 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 
 	// since buffer size is two, after reading two outstanding messages
 	// we must acknowledge a message in order to receive third one
-	err = readConnectionClient.Nack("test reason", persistent.Nack_Park, firstReadEvent)
+	err = readConnectionClient.Nack("test reason", client.Nack_Park, firstReadEvent)
 	require.NoError(t, err)
 
 	thirdReadEvent := readConnectionClient.Recv()

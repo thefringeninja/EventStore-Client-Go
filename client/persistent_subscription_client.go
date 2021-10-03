@@ -1,4 +1,4 @@
-package persistent
+package client
 
 import (
 	"context"
@@ -14,12 +14,12 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-type Client struct {
+type PersistentClient struct {
 	inner                        connection.GrpcClient
 	persistentSubscriptionClient persistent.PersistentSubscriptionsClient
 }
 
-func (client Client) ConnectToPersistentSubscription(
+func (client *PersistentClient) ConnectToPersistentSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	bufferSize int32,
@@ -62,7 +62,7 @@ func (client Client) ConnectToPersistentSubscription(
 	return nil, types.PersistentSubscriptionNoConfirmationError(err)
 }
 
-func (client Client) CreateStreamSubscription(
+func (client *PersistentClient) CreateStreamSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	streamName string,
@@ -81,7 +81,7 @@ func (client Client) CreateStreamSubscription(
 	return nil
 }
 
-func (client Client) CreateAllSubscription(
+func (client *PersistentClient) CreateAllSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	groupName string,
@@ -104,7 +104,7 @@ func (client Client) CreateAllSubscription(
 	return nil
 }
 
-func (client Client) UpdateStreamSubscription(
+func (client *PersistentClient) UpdateStreamSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	streamName string,
@@ -123,7 +123,7 @@ func (client Client) UpdateStreamSubscription(
 	return nil
 }
 
-func (client Client) UpdateAllSubscription(
+func (client *PersistentClient) UpdateAllSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	groupName string,
@@ -142,7 +142,7 @@ func (client Client) UpdateAllSubscription(
 	return nil
 }
 
-func (client Client) DeleteStreamSubscription(
+func (client *PersistentClient) DeleteStreamSubscription(
 	ctx context.Context,
 	handle connection.ConnectionHandle,
 	streamName string,
@@ -159,7 +159,7 @@ func (client Client) DeleteStreamSubscription(
 	return nil
 }
 
-func (client Client) DeleteAllSubscription(ctx context.Context, handle connection.ConnectionHandle, groupName string) error {
+func (client *PersistentClient) DeleteAllSubscription(ctx context.Context, handle connection.ConnectionHandle, groupName string) error {
 	deleteSubscriptionOptions := protoutils.DeletePersistentRequestAllOptionsProto(groupName)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
@@ -171,8 +171,8 @@ func (client Client) DeleteAllSubscription(ctx context.Context, handle connectio
 	return nil
 }
 
-func NewClient(inner connection.GrpcClient, client persistent.PersistentSubscriptionsClient) Client {
-	return Client{
+func NewPersistentClient(inner connection.GrpcClient, client persistent.PersistentSubscriptionsClient) PersistentClient {
+	return PersistentClient{
 		inner:                        inner,
 		persistentSubscriptionClient: client,
 	}

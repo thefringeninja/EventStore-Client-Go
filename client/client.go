@@ -13,7 +13,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/connection"
-	"github.com/EventStore/EventStore-Client-Go/persistent"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -389,13 +388,13 @@ func (client *Client) ConnectToPersistentSubscription(
 	streamName string,
 	groupName string,
 	options ConnectToPersistentSubscriptionOptions,
-) (*persistent.PersistentSubscription, error) {
+) (*PersistentSubscription, error) {
 	options.setDefaults()
 	handle, err := client.grpcClient.GetConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.ConnectToPersistentSubscription(
 		ctx,
@@ -417,7 +416,7 @@ func (client *Client) CreatePersistentSubscription(
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From(), *options.Settings())
 }
@@ -441,7 +440,7 @@ func (client *Client) CreatePersistentSubscriptionAll(
 			SubscriptionFilter: options.Filter(),
 		}
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.CreateAllSubscription(
 		ctx,
@@ -464,7 +463,7 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From(), *options.Settings())
 }
@@ -479,7 +478,7 @@ func (client *Client) UpdatePersistentSubscriptionAll(
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From(), *options.Settings())
 }
@@ -493,7 +492,7 @@ func (client *Client) DeletePersistentSubscription(
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.DeleteStreamSubscription(ctx, handle, streamName, groupName)
 }
@@ -506,7 +505,7 @@ func (client *Client) DeletePersistentSubscriptionAll(
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := persistent.NewClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.DeleteAllSubscription(ctx, handle, groupName)
 }

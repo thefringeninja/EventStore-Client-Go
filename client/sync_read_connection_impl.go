@@ -1,4 +1,4 @@
-package persistent
+package client
 
 import (
 	"context"
@@ -34,14 +34,14 @@ const (
 type PersistentSubscription struct {
 	client         persistent.PersistentSubscriptions_ReadClient
 	subscriptionId string
-	channel        chan request
+	channel        chan persistentRequest
 	cancel         context.CancelFunc
 	once           *sync.Once
 }
 
 func (connection *PersistentSubscription) Recv() *subscription.Event {
 	channel := make(chan *subscription.Event)
-	req := request{
+	req := persistentRequest{
 		channel: channel,
 	}
 
@@ -122,7 +122,7 @@ func messageIdSliceToProto(messageIds ...uuid.UUID) []*shared.UUID {
 	return result
 }
 
-type request struct {
+type persistentRequest struct {
 	channel chan *subscription.Event
 }
 
@@ -131,7 +131,7 @@ func NewPersistentSubscription(
 	subscriptionId string,
 	cancel context.CancelFunc,
 ) *PersistentSubscription {
-	channel := make(chan request)
+	channel := make(chan persistentRequest)
 	once := new(sync.Once)
 
 	// It is not safe to consume a stream in different goroutines. This is why we only consume
