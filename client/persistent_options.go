@@ -2,19 +2,19 @@ package client
 
 import (
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/persistent"
 	"github.com/EventStore/EventStore-Client-Go/position"
 	"github.com/EventStore/EventStore-Client-Go/stream"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type PersistentStreamSubscriptionOptions struct {
-	settings []persistent.SubscriptionSettings
+	settings []types.SubscriptionSettings
 	position stream.StreamPosition
 }
 
 func (o *PersistentStreamSubscriptionOptions) setDefaults() {
 	if o.settings == nil {
-		o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
+		o.settings = []types.SubscriptionSettings{types.SubscriptionSettingsDefault()}
 	}
 
 	if o.position == nil {
@@ -22,8 +22,8 @@ func (o *PersistentStreamSubscriptionOptions) setDefaults() {
 	}
 }
 
-func (o *PersistentStreamSubscriptionOptions) SetSettings(settings persistent.SubscriptionSettings) {
-	o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
+func (o *PersistentStreamSubscriptionOptions) SetSettings(settings types.SubscriptionSettings) {
+	o.settings = []types.SubscriptionSettings{settings}
 }
 
 func (o *PersistentStreamSubscriptionOptions) SetFrom(position stream.StreamPosition) {
@@ -42,7 +42,7 @@ func (o *PersistentStreamSubscriptionOptions) SetFromRevision(value uint64) {
 	o.position = stream.Revision(value)
 }
 
-func (o *PersistentStreamSubscriptionOptions) Settings() *persistent.SubscriptionSettings {
+func (o *PersistentStreamSubscriptionOptions) Settings() *types.SubscriptionSettings {
 	if len(o.settings) == 0 {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (o *PersistentStreamSubscriptionOptions) From() stream.StreamPosition {
 }
 
 type PersistentAllSubscriptionOptions struct {
-	settings           []persistent.SubscriptionSettings
+	settings           []types.SubscriptionSettings
 	position           stream.AllStreamPosition
 	maxSearchWindow    int
 	checkpointInterval int
@@ -64,7 +64,7 @@ type PersistentAllSubscriptionOptions struct {
 
 func (o *PersistentAllSubscriptionOptions) setDefaults() {
 	if o.settings == nil {
-		o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
+		o.settings = []types.SubscriptionSettings{types.SubscriptionSettingsDefault()}
 	}
 
 	if o.position == nil {
@@ -82,8 +82,8 @@ func (o *PersistentAllSubscriptionOptions) setDefaults() {
 	}
 }
 
-func (o *PersistentAllSubscriptionOptions) SetSettings(settings persistent.SubscriptionSettings) {
-	o.settings = []persistent.SubscriptionSettings{persistent.SubscriptionSettingsDefault()}
+func (o *PersistentAllSubscriptionOptions) SetSettings(settings types.SubscriptionSettings) {
+	o.settings = []types.SubscriptionSettings{settings}
 }
 
 func (o *PersistentAllSubscriptionOptions) SetFrom(position stream.AllStreamPosition) {
@@ -118,7 +118,7 @@ func (o *PersistentAllSubscriptionOptions) SetFilter(filter filtering.Subscripti
 	o.filter = []filtering.SubscriptionFilter{filter}
 }
 
-func (o *PersistentAllSubscriptionOptions) Settings() *persistent.SubscriptionSettings {
+func (o *PersistentAllSubscriptionOptions) Settings() *types.SubscriptionSettings {
 	if len(o.settings) == 0 {
 		return nil
 	}

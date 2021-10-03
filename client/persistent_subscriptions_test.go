@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/persistent"
 	"github.com/stretchr/testify/require"
 )
 
@@ -45,7 +45,7 @@ func Test_CreatePersistentStreamSubscription_MessageTimeoutZero(t *testing.T) {
 	streamID := "someStream"
 	pushEventToStream(t, clientInstance, streamID)
 
-	settings := persistent.SubscriptionSettingsDefault()
+	settings := types.SubscriptionSettingsDefault()
 	settings.MessageTimeoutInMs = 0
 
 	options := client.PersistentStreamSubscriptionOptions{}
@@ -165,10 +165,10 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	options := client.PersistentStreamSubscriptionOptions{}
-	settings := persistent.SubscriptionSettingsDefault()
+	settings := types.SubscriptionSettingsDefault()
 
 	settings.HistoryBufferSize = settings.HistoryBufferSize + 1
-	settings.NamedConsumerStrategy = persistent.ConsumerStrategy_DispatchToSingle
+	settings.NamedConsumerStrategy = types.ConsumerStrategy_DispatchToSingle
 	settings.MaxSubscriberCount = settings.MaxSubscriberCount + 1
 	settings.ReadBatchSize = settings.ReadBatchSize + 1
 	settings.CheckpointAfterInMs = settings.CheckpointAfterInMs + 1

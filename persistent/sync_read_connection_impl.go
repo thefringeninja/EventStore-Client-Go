@@ -3,7 +3,10 @@ package persistent
 import (
 	"context"
 	"fmt"
+
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
+	"github.com/EventStore/EventStore-Client-Go/types"
+
 	"log"
 	"sync"
 
@@ -36,12 +39,6 @@ type PersistentSubscription struct {
 	once           *sync.Once
 }
 
-const (
-	Read_FailedToRead_Err                     ErrorCode = "Read_FailedToRead_Err"
-	Read_ReceivedSubscriptionConfirmation_Err ErrorCode = "Read_ReceivedSubscriptionConfirmation_Err"
-	Read_UnknownContentTypeReceived_Err       ErrorCode = "Read_UnknownContentTypeReceived_Err"
-)
-
 func (connection *PersistentSubscription) Recv() *subscription.Event {
 	channel := make(chan *subscription.Event)
 	req := request{
@@ -59,18 +56,16 @@ func (connection *PersistentSubscription) Close() error {
 	return nil
 }
 
-var Exceeds_Max_Message_Count_Err ErrorCode = "Exceeds_Max_Message_Count_Err"
-
 func (connection *PersistentSubscription) Ack(messages ...*messages.ResolvedEvent) error {
 	if len(messages) == 0 {
 		return nil
 	}
 
 	if len(messages) > MAX_ACK_COUNT {
-		return NewErrorCode(Exceeds_Max_Message_Count_Err)
+		return &types.PersistentSubscriptionExceedsMaxMessageCountError
 	}
 
-	ids := []uuid.UUID{}
+	var ids []uuid.UUID
 	for _, event := range messages {
 		ids = append(ids, event.OriginalEvent().EventID)
 	}
