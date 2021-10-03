@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
@@ -149,7 +148,7 @@ func SubscribeToAll(db *client.Client) {
 
 func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
-	filter := filtering.NewFilterOnStreamName()
+	filter := types.NewFilterOnStreamName()
 	filter.AddPrefixes("test-")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)
@@ -157,7 +156,7 @@ func SubscribeToFiltered(db *client.Client) {
 	db.SubscribeToAll(context.Background(), opts)
 	// endregion stream-prefix-filtered-subscription
 	// region stream-regex-filtered-subscription
-	filter = filtering.NewFilterOnStreamName()
+	filter = types.NewFilterOnStreamName()
 	filter.SetRegex("/invoice-\\d\\d\\d/g")
 	// endregion stream-regex-filtered-subscription
 

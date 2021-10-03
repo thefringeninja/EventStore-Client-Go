@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 func ExcludeSystemEvents(db *client.Client) {
 	// region exclude-system
-	filter := filtering.NewFilterOnEventType()
+	filter := types.NewFilterOnEventType()
 	filter.SetRegex("/^[^\\$].*/")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)
@@ -43,7 +43,7 @@ func ExcludeSystemEvents(db *client.Client) {
 
 func EventTypePrefix(db *client.Client) {
 	// region event-type-prefix
-	filter := filtering.NewFilterOnEventType()
+	filter := types.NewFilterOnEventType()
 	filter.AddPrefixes("customer-")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)
@@ -76,7 +76,7 @@ func EventTypePrefix(db *client.Client) {
 
 func EventTypeRegex(db *client.Client) {
 	// region event-type-regex
-	filter := filtering.NewFilterOnEventType()
+	filter := types.NewFilterOnEventType()
 	filter.SetRegex("^user|^company")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)
@@ -109,7 +109,7 @@ func EventTypeRegex(db *client.Client) {
 
 func StreamPrefix(db *client.Client) {
 	// region stream-prefix
-	filter := filtering.NewFilterOnStreamName()
+	filter := types.NewFilterOnStreamName()
 	filter.AddPrefixes("user-")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)
@@ -142,7 +142,7 @@ func StreamPrefix(db *client.Client) {
 
 func StreamRegex(db *client.Client) {
 	// region stream-regex
-	filter := filtering.NewFilterOnStreamName()
+	filter := types.NewFilterOnStreamName()
 	filter.SetRegex("^user|^company")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)
@@ -175,7 +175,7 @@ func StreamRegex(db *client.Client) {
 
 func CheckpointCallbackWithInterval(db *client.Client) {
 	// region checkpoint-with-interval
-	filter := filtering.NewFilterOnEventType()
+	filter := types.NewFilterOnEventType()
 	filter.SetRegex("/^[^\\$].*/")
 	opts := client.SubscribeToAllOptions{}
 	opts.SetFilter(filter)

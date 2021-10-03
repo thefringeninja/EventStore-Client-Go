@@ -9,8 +9,7 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
+	"github.com/EventStore/EventStore-Client-Go/types"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -101,7 +100,7 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	var receivedEvents sync.WaitGroup
 	receivedEvents.Add(len(positions))
 
-	filter := filtering.NewFilterOnEventType()
+	filter := types.NewFilterOnEventType()
 	filter.AddPrefixes("eventType-194")
 
 	opts := client.SubscribeToAllOptions{}

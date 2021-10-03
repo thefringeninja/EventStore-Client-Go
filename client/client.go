@@ -8,7 +8,6 @@ import (
 
 	"errors"
 
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/types"
@@ -337,9 +336,9 @@ func (client *Client) SubscribeToAll(
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
 
-	var filterOptions *filtering.SubscriptionFilterOptions = nil
+	var filterOptions *protoutils.SubscriptionFilterOptions = nil
 	if opts.Filter() != nil {
-		filterOptions = &filtering.SubscriptionFilterOptions{
+		filterOptions = &protoutils.SubscriptionFilterOptions{
 			MaxSearchWindow:    opts.MaxSearchWindow(),
 			CheckpointInterval: opts.CheckpointInterval(),
 			SubscriptionFilter: opts.Filter(),
@@ -424,9 +423,9 @@ func (client *Client) CreatePersistentSubscriptionAll(
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
 
-	var filterOptions *filtering.SubscriptionFilterOptions = nil
+	var filterOptions *protoutils.SubscriptionFilterOptions = nil
 	if options.Filter() != nil {
-		filterOptions = &filtering.SubscriptionFilterOptions{
+		filterOptions = &protoutils.SubscriptionFilterOptions{
 			MaxSearchWindow:    options.MaxSearchWindow(),
 			CheckpointInterval: options.CheckpointInterval(),
 			SubscriptionFilter: options.Filter(),

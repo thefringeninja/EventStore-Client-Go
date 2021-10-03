@@ -12,11 +12,17 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
+	filtering "github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/gofrs/uuid"
 )
+
+type SubscriptionFilterOptions struct {
+	MaxSearchWindow    int
+	CheckpointInterval int
+	SubscriptionFilter *types.SubscriptionFilter
+}
 
 // SystemMetadataKeysType ...
 const SystemMetadataKeysType = "type"
@@ -202,7 +208,7 @@ func (reg *regularStream) VisitEnd() {
 }
 
 // toFilterOptions ...
-func toFilterOptions(options filtering.SubscriptionFilterOptions) (*api.ReadReq_Options_FilterOptions, error) {
+func toFilterOptions(options *SubscriptionFilterOptions) (*api.ReadReq_Options_FilterOptions, error) {
 	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
 		return nil, fmt.Errorf("the subscription filter requires a set of prefixes or a regex")
 	}
@@ -373,7 +379,7 @@ func ToReadAllRequest(direction types.Direction, from stream.AllStreamPosition, 
 	}
 }
 
-func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, resolveLinks bool, filterOptions *filtering.SubscriptionFilterOptions) (*api.ReadReq, error) {
+func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -393,7 +399,7 @@ func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, re
 		},
 	}
 	if filterOptions != nil {
-		options, err := toFilterOptions(*filterOptions)
+		options, err := toFilterOptions(filterOptions)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to construct subscription request. Reason: %v", err)
 		}
@@ -404,7 +410,7 @@ func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, re
 	return readReq, nil
 }
 
-func ToAllSubscriptionRequest(from stream.AllStreamPosition, resolveLinks bool, filterOptions *filtering.SubscriptionFilterOptions) (*api.ReadReq, error) {
+func ToAllSubscriptionRequest(from stream.AllStreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -424,7 +430,7 @@ func ToAllSubscriptionRequest(from stream.AllStreamPosition, resolveLinks bool, 
 		},
 	}
 	if filterOptions != nil {
-		options, err := toFilterOptions(*filterOptions)
+		options, err := toFilterOptions(filterOptions)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to construct subscription request. Reason: %v", err)
 		}
@@ -805,7 +811,7 @@ func CreatePersistentRequestAllOptionsProto(
 	groupName string,
 	position stream.AllStreamPosition,
 	settings types.SubscriptionSettings,
-	filter *filtering.SubscriptionFilterOptions,
+	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq, error) {
 	options, err := CreatePersistentRequestAllOptionsSettingsProto(position, filter)
 	if err != nil {
@@ -823,7 +829,7 @@ func CreatePersistentRequestAllOptionsProto(
 
 func CreatePersistentRequestAllOptionsSettingsProto(
 	pos stream.AllStreamPosition,
-	filter *filtering.SubscriptionFilterOptions,
+	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
 	options := &persistent.CreateReq_Options_All{
 		All: &persistent.CreateReq_AllOptions{
@@ -848,7 +854,7 @@ func CreatePersistentRequestAllOptionsSettingsProto(
 	}
 
 	if filter != nil {
-		filter, err := CreateRequestFilterOptionsProto(*filter)
+		filter, err := CreateRequestFilterOptionsProto(filter)
 		if err != nil {
 			return nil, err
 		}
@@ -953,7 +959,7 @@ func CheckpointAfterMsProto(checkpointAfterMs int32) *persistent.CreateReq_Setti
 
 // CreateRequestFilterOptionsProto ...
 func CreateRequestFilterOptionsProto(
-	options filtering.SubscriptionFilterOptions,
+	options *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_AllOptions_FilterOptions, error) {
 	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
 		return nil, &types.PersistentSubscriptionToAllMustProvideRegexOrPrefixError

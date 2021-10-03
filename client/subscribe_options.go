@@ -1,7 +1,6 @@
 package client
 
 import (
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/stream"
 	"github.com/EventStore/EventStore-Client-Go/types"
 )
@@ -50,7 +49,7 @@ type SubscribeToAllOptions struct {
 	resolveLinks       bool
 	maxSearchWindow    int
 	checkpointInterval int
-	filter             []filtering.SubscriptionFilter
+	filter             []types.SubscriptionFilter
 }
 
 func (o *SubscribeToAllOptions) setDefaults() {
@@ -89,8 +88,8 @@ func (o *SubscribeToAllOptions) SetResolveLinks() {
 	o.resolveLinks = true
 }
 
-func (o *SubscribeToAllOptions) SetFilter(value filtering.SubscriptionFilter) {
-	o.filter = []filtering.SubscriptionFilter{value}
+func (o *SubscribeToAllOptions) SetFilter(value types.SubscriptionFilter) {
+	o.filter = []types.SubscriptionFilter{value}
 }
 
 func (o *SubscribeToAllOptions) Position() stream.AllStreamPosition {
@@ -121,7 +120,7 @@ func (o *SubscribeToAllOptions) SetCheckpointInterval(value int) {
 	o.checkpointInterval = value
 }
 
-func (o *SubscribeToAllOptions) Filter() *filtering.SubscriptionFilter {
+func (o *SubscribeToAllOptions) Filter() *types.SubscriptionFilter {
 	if len(o.filter) == 0 {
 		return nil
 	}

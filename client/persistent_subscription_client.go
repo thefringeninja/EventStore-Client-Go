@@ -7,7 +7,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/stream"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
-	"github.com/EventStore/EventStore-Client-Go/client/filtering"
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -86,7 +85,7 @@ func (client *persistentClient) CreateAllSubscription(
 	groupName string,
 	position stream.AllStreamPosition,
 	settings types.SubscriptionSettings,
-	filter *filtering.SubscriptionFilterOptions,
+	filter *protoutils.SubscriptionFilterOptions,
 ) error {
 	protoConfig, err := protoutils.CreatePersistentRequestAllOptionsProto(groupName, position, settings, filter)
 	if err != nil {
