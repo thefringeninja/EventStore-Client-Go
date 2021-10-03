@@ -2,9 +2,11 @@ package samples
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/EventStore/EventStore-Client-Go/types"
+	"github.com/gofrs/uuid"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 )
@@ -21,15 +23,16 @@ func AppendToStream(db *client.Client) {
 		ImportantData: "some value",
 	}
 
-	event := types.ProposedEvent{}
-	event.SetEventType("some-event")
-	err := event.SetJsonData(data)
-
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
 	}
 
-	result, err := db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
+	result, err := db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "some-event",
+		Data:        bytes,
+	})
 	// endregion append-to-stream
 
 	log.Printf("Result: %v", result)
@@ -42,12 +45,17 @@ func AppendWithSameId(db *client.Client) {
 		ImportantData: "some value",
 	}
 
-	event := types.ProposedEvent{}
-	event.SetEventType("some-event")
-	err := event.SetJsonData(data)
-
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
+	}
+
+	id := uuid.Must(uuid.NewV4())
+	event := types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "some-event",
+		EventID:     id,
+		Data:        bytes,
 	}
 
 	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
@@ -72,10 +80,7 @@ func AppendWithNoStream(db *client.Client) {
 		ImportantData: "some value",
 	}
 
-	event := types.ProposedEvent{}
-	event.SetEventType("some-event")
-	err := event.SetJsonData(data)
-
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
 	}
@@ -84,22 +89,29 @@ func AppendWithNoStream(db *client.Client) {
 		ExpectedRevision: types.NoStream{},
 	}
 
-	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
-
-	if err != nil {
-		panic(err)
-	}
-
-	err = event.SetJsonData(TestEvent{
-		Id:            "2",
-		ImportantData: "some other value",
+	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "some-event",
+		Data:        bytes,
 	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
+	bytes, err = json.Marshal(TestEvent{
+		Id:            "2",
+		ImportantData: "some other value",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "some-event",
+		Data:        bytes,
+	})
 	// noregion append-with-no-stream
 }
 
@@ -129,10 +141,7 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		ImportantData: "clientOne",
 	}
 
-	event := types.ProposedEvent{}
-	event.SetEventType("some-event")
-	err = event.SetJsonData(data)
-
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
 	}
@@ -141,13 +150,25 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		ExpectedRevision: types.Revision(lastEvent.OriginalEvent().EventNumber),
 	}
 
-	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
+	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "some-event",
+		Data:        bytes,
+	})
 
 	data = TestEvent{
 		Id:            "1",
 		ImportantData: "clientTwo",
 	}
+	bytes, err = json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
 
-	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
+	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "some-event",
+		Data:        bytes,
+	})
 	// endregion append-with-concurrency-check
 }

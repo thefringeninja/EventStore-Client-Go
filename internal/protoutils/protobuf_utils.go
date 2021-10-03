@@ -66,21 +66,22 @@ func ToAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) 
 
 // ToProposedMessage ...
 func ToProposedMessage(event filtering.ProposedEvent) *api.AppendReq_ProposedMessage {
-	if event.ContentType() == "" {
-		event.SetContentType("application/octet-stream")
+	contentType := "application/octet-stream"
+	if event.ContentType == types.JsonContentType {
+		contentType = "application/json"
 	}
 
 	metadata := make(map[string]string)
-	metadata[SystemMetadataKeysContentType] = event.ContentType()
-	metadata[SystemMetadataKeysType] = event.EventType()
-	eventId := event.EventID()
+	metadata[SystemMetadataKeysContentType] = contentType
+	metadata[SystemMetadataKeysType] = event.EventType
+	eventId := event.EventID
 
-	if event.Data() == nil {
-		event.SetData([]byte{})
+	if event.Data == nil {
+		event.Data = []byte{}
 	}
 
-	if event.Metadata() == nil {
-		event.SetMetadata([]byte{})
+	if event.Metadata == nil {
+		event.Metadata = []byte{}
 	}
 
 	if eventId == uuid.Nil {
@@ -93,8 +94,8 @@ func ToProposedMessage(event filtering.ProposedEvent) *api.AppendReq_ProposedMes
 				String_: eventId.String(),
 			},
 		},
-		Data:           event.Data(),
-		CustomMetadata: event.Metadata(),
+		Data:           event.Data,
+		CustomMetadata: event.Metadata,
 		Metadata:       metadata,
 	}
 }

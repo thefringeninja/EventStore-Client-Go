@@ -138,15 +138,17 @@ func (client *Client) SetStreamMetadata(
 		return nil, fmt.Errorf("error when serializing stream metadata: %w", err)
 	}
 
-	event := types.ProposedEvent{}
-	event.SetEventType("$metadata")
-	err = event.SetJsonData(props)
+	data, err := json.Marshal(props)
 
 	if err != nil {
 		return nil, fmt.Errorf("error when serializing stream metadata: %w", err)
 	}
 
-	result, err := client.AppendToStream(context, streamName, opts, event)
+	result, err := client.AppendToStream(context, streamName, opts, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "$metadata",
+		Data:        data,
+	})
 
 	if err != nil {
 		return nil, err

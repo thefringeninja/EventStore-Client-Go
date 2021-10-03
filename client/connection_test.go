@@ -19,7 +19,7 @@ func Test_CloseConnection(t *testing.T) {
 	db := CreateTestClient(container, t)
 
 	testEvent := createTestEvent()
-	testEvent.SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872"))
+	testEvent.EventID = uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")
 
 	streamID := uuid.Must(uuid.NewV4())
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)

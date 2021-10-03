@@ -41,7 +41,7 @@ func TestConsistentMetadataSerializationStreamAcl(t *testing.T) {
 
 	meta, err := types.StreamMetadataFromMap(outProps)
 
-	assert.NoError(t, err, "failed to parse metadata from props")
+	assert.NoError(t, err, "failed to parse Metadata from props")
 
 	assert.Equal(t, expected, meta, "consistency serialization failure")
 }
@@ -71,7 +71,7 @@ func TestConsistentMetadataSerializationUserStreamAcl(t *testing.T) {
 
 	meta, err := types.StreamMetadataFromMap(outProps)
 
-	assert.NoError(t, err, "failed to parse metadata from props")
+	assert.NoError(t, err, "failed to parse Metadata from props")
 
 	assert.Equal(t, expected, meta, "consistency serialization failure")
 }
@@ -101,7 +101,7 @@ func TestConsistentMetadataSerializationSystemStreamAcl(t *testing.T) {
 
 	meta, err := types.StreamMetadataFromMap(outProps)
 
-	assert.NoError(t, err, "failed to parse metadata from props")
+	assert.NoError(t, err, "failed to parse Metadata from props")
 
 	assert.Equal(t, expected, meta, "consistency serialization failure")
 }

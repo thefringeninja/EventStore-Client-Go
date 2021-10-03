@@ -2,6 +2,7 @@ package samples
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -30,15 +31,16 @@ func Run() {
 		ImportantData: "I wrote my first event!",
 	}
 
-	event := types.ProposedEvent{}
-	event.SetEventType("TestEvent")
-	err = event.SetJsonData(testEvent)
-
+	data, err := json.Marshal(testEvent)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, event)
+	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, types.ProposedEvent{
+		ContentType: types.JsonContentType,
+		EventType:   "TestEvent",
+		Data:        data,
+	})
 
 	if err != nil {
 		panic(err)

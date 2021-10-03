@@ -16,11 +16,13 @@ import (
 )
 
 func createTestEvent() types.ProposedEvent {
-	event := types.ProposedEvent{}
-	event.SetEventType("TestEvent")
-	event.SetBinaryData([]byte{0xb, 0xe, 0xe, 0xf})
-	event.SetEventID(uuid.Must(uuid.NewV4()))
-	event.SetMetadata([]byte{0xd, 0xe, 0xa, 0xd})
+	event := types.ProposedEvent{
+		EventType:   "TestEvent",
+		ContentType: types.BinaryContentType,
+		EventID:     uuid.Must(uuid.NewV4()),
+		Data:        []byte{0xb, 0xe, 0xe, 0xf},
+		Metadata:    []byte{0xd, 0xe, 0xa, 0xd},
+	}
 
 	return event
 }
@@ -52,7 +54,7 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	defer db.Close()
 
 	testEvent := createTestEvent()
-	testEvent.SetEventID(uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872"))
+	testEvent.EventID = uuid.FromStringOrNil("38fffbc2-339e-11ea-8c7b-784f43837872")
 
 	streamID := uuid.Must(uuid.NewV4())
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
@@ -83,11 +85,11 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	}
 
 	assert.Equal(t, int32(1), int32(len(events)), "Expected the correct number of messages to be returned")
-	assert.Equal(t, testEvent.EventID(), events[0].OriginalEvent().EventID)
-	assert.Equal(t, testEvent.EventType(), events[0].OriginalEvent().EventType)
+	assert.Equal(t, testEvent.EventID, events[0].OriginalEvent().EventID)
+	assert.Equal(t, testEvent.EventType, events[0].OriginalEvent().EventType)
 	assert.Equal(t, streamID.String(), events[0].OriginalEvent().StreamID)
-	assert.Equal(t, testEvent.Data(), events[0].OriginalEvent().Data)
-	assert.Equal(t, testEvent.Metadata(), events[0].OriginalEvent().UserMetadata)
+	assert.Equal(t, testEvent.Data, events[0].OriginalEvent().Data)
+	assert.Equal(t, testEvent.Metadata, events[0].OriginalEvent().UserMetadata)
 }
 
 func TestAppendWithInvalidStreamRevision(t *testing.T) {

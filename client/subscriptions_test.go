@@ -22,7 +22,7 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 
 	streamID := "dataset20M-0"
 	testEvent := createTestEvent()
-	testEvent.SetEventID(uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f"))
+	testEvent.EventID = uuid.FromStringOrNil("84c8e36c-4e64-11ea-8b59-b7f658acfc9f")
 
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
@@ -44,11 +44,11 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 				}
 
 				event := subEvent.EventAppeared
-				require.Equal(t, testEvent.EventID(), event.OriginalEvent().EventID)
+				require.Equal(t, testEvent.EventID, event.OriginalEvent().EventID)
 				require.Equal(t, uint64(6_000), event.OriginalEvent().EventNumber)
 				require.Equal(t, streamID, event.OriginalEvent().StreamID)
-				require.Equal(t, testEvent.Data(), event.OriginalEvent().Data)
-				require.Equal(t, testEvent.Metadata(), event.OriginalEvent().UserMetadata)
+				require.Equal(t, testEvent.Data, event.OriginalEvent().Data)
+				require.Equal(t, testEvent.Metadata, event.OriginalEvent().UserMetadata)
 				appendedEvents.Done()
 				break
 			}
