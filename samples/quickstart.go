@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/EventStore/EventStore-Client-Go/types"
+	"github.com/gofrs/uuid"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 )
@@ -26,8 +27,9 @@ func Run() {
 		panic(err)
 	}
 
+	// region appendEvents
 	testEvent := TestEvent{
-		Id:            "some Id",
+		Id:            uuid.Must(uuid.NewV4()).String(),
 		ImportantData: "I wrote my first event!",
 	}
 
@@ -41,6 +43,7 @@ func Run() {
 		EventType:   "TestEvent",
 		Data:        data,
 	})
+	// endregion appendEvents
 
 	if err != nil {
 		panic(err)

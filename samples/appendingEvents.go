@@ -112,7 +112,7 @@ func AppendWithNoStream(db *client.Client) {
 		EventType:   "some-event",
 		Data:        bytes,
 	})
-	// noregion append-with-no-stream
+	// endregion append-with-no-stream
 }
 
 func AppendWithConcurrencyCheck(db *client.Client) {
