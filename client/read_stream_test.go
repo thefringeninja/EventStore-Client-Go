@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	uuid "github.com/gofrs/uuid"
@@ -201,5 +200,5 @@ func TestReadStreamNotFound(t *testing.T) {
 
 	_, err := db.ReadStreamEvents(context.Background(), "foobar", client.ReadStreamEventsOptions{}, 1)
 
-	require.True(t, errors.Is(err, esdb_errors.ErrStreamNotFound))
+	require.True(t, errors.Is(err, client.ErrStreamNotFound))
 }

@@ -13,30 +13,22 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
-	"github.com/EventStore/EventStore-Client-Go/connection"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 )
 
-type Configuration = connection.Configuration
-
-func ParseConnectionString(str string) (*connection.Configuration, error) {
-	return connection.ParseConnectionString(str)
-}
-
 // Client ...
 type Client struct {
-	grpcClient connection.GrpcClient
-	Config     *connection.Configuration
+	grpcClient *grpcClient
+	Config     *Configuration
 }
 
 // NewClient ...
-func NewClient(configuration *connection.Configuration) (*Client, error) {
-	grpcClient := connection.NewGrpcClient(*configuration)
+func NewClient(configuration *Configuration) (*Client, error) {
+	grpcClient := NewGrpcClient(*configuration)
 	return &Client{
 		grpcClient: grpcClient,
 		Config:     configuration,
@@ -45,7 +37,7 @@ func NewClient(configuration *connection.Configuration) (*Client, error) {
 
 // Close ...
 func (client *Client) Close() error {
-	client.grpcClient.Close()
+	client.grpcClient.close()
 	return nil
 }
 
@@ -57,7 +49,7 @@ func (client *Client) AppendToStream(
 	events ...messages.ProposedEvent,
 ) (*WriteResult, error) {
 	opts.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -66,14 +58,14 @@ func (client *Client) AppendToStream(
 
 	appendOperation, err := streamsClient.Append(context, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("could not construct append operation. Reason: %w", err)
 	}
 
 	header := protoutils.ToAppendHeader(streamID, opts.ExpectedRevision())
 
 	if err := appendOperation.Send(header); err != nil {
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("could not send append request header. Reason: %w", err)
 	}
 
@@ -85,14 +77,14 @@ func (client *Client) AppendToStream(
 		}
 
 		if err = appendOperation.Send(appendRequest); err != nil {
-			err = client.grpcClient.HandleError(handle, headers, trailers, err)
+			err = client.grpcClient.handleError(handle, headers, trailers, err)
 			return nil, fmt.Errorf("could not send append request. Reason: %w", err)
 		}
 	}
 
 	response, err := appendOperation.CloseAndRecv()
 	if err != nil {
-		return nil, client.grpcClient.HandleError(handle, headers, trailers, err)
+		return nil, client.grpcClient.handleError(handle, headers, trailers, err)
 	}
 
 	result := response.GetResult()
@@ -124,7 +116,7 @@ func (client *Client) AppendToStream(
 		}
 	case *api.AppendResp_WrongExpectedVersion_:
 		{
-			return nil, esdb_errors.ErrWrongExpectedStreamRevision
+			return nil, ErrWrongExpectedStreamRevision
 		}
 	}
 
@@ -174,8 +166,8 @@ func (client *Client) GetStreamMetadata(
 
 	stream, err := client.ReadStreamEvents(context, streamName, opts, 1)
 
-	var streamDeletedError *esdb_errors.StreamDeletedError
-	if errors.Is(err, esdb_errors.ErrStreamNotFound) || errors.As(err, &streamDeletedError) {
+	var streamDeletedError *StreamDeletedError
+	if errors.Is(err, ErrStreamNotFound) || errors.As(err, &streamDeletedError) {
 		return nil, err
 	}
 
@@ -217,7 +209,7 @@ func (client *Client) DeleteStream(
 	opts DeleteStreamOptions,
 ) (*DeleteResult, error) {
 	opts.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -226,7 +218,7 @@ func (client *Client) DeleteStream(
 	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.ExpectedRevision())
 	deleteResponse, err := streamsClient.Delete(context, deleteRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to perform delete, details: %w", err)
 	}
 
@@ -240,7 +232,7 @@ func (client *Client) TombstoneStream(
 	opts TombstoneStreamOptions,
 ) (*DeleteResult, error) {
 	opts.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -250,7 +242,7 @@ func (client *Client) TombstoneStream(
 	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 
 	if err != nil {
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to perform delete, details: %w", err)
 	}
 
@@ -266,7 +258,7 @@ func (client *Client) ReadStreamEvents(
 ) (*ReadStream, error) {
 	opts.setDefaults()
 	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction(), opts.Position(), count, opts.ResolveLinks())
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -282,7 +274,7 @@ func (client *Client) ReadAllEvents(
 	count uint64,
 ) (*ReadStream, error) {
 	opts.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -298,7 +290,7 @@ func (client *Client) SubscribeToStream(
 	opts SubscribeToStreamOptions,
 ) (*Subscription, error) {
 	opts.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -312,13 +304,13 @@ func (client *Client) SubscribeToStream(
 	readClient, err := streamsClient.Read(ctx, subscriptionRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		defer cancel()
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
 	readResult, err := readClient.Recv()
 	if err != nil {
 		defer cancel()
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to perform read. Reason: %w", err)
 	}
 	switch readResult.Content.(type) {
@@ -338,7 +330,7 @@ func (client *Client) SubscribeToAll(
 	opts SubscribeToAllOptions,
 ) (*Subscription, error) {
 	opts.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -362,13 +354,13 @@ func (client *Client) SubscribeToAll(
 	readClient, err := streamsClient.Read(ctx, subscriptionRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		defer cancel()
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
 	readResult, err := readClient.Recv()
 	if err != nil {
 		defer cancel()
-		err = client.grpcClient.HandleError(handle, headers, trailers, err)
+		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to perform read. Reason: %w", err)
 	}
 	switch readResult.Content.(type) {
@@ -390,11 +382,11 @@ func (client *Client) ConnectToPersistentSubscription(
 	options ConnectToPersistentSubscriptionOptions,
 ) (*PersistentSubscription, error) {
 	options.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.ConnectToPersistentSubscription(
 		ctx,
@@ -412,11 +404,11 @@ func (client *Client) CreatePersistentSubscription(
 	options PersistentStreamSubscriptionOptions,
 ) error {
 	options.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From(), *options.Settings())
 }
@@ -427,7 +419,7 @@ func (client *Client) CreatePersistentSubscriptionAll(
 	options PersistentAllSubscriptionOptions,
 ) error {
 	options.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
@@ -440,7 +432,7 @@ func (client *Client) CreatePersistentSubscriptionAll(
 			SubscriptionFilter: options.Filter(),
 		}
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.CreateAllSubscription(
 		ctx,
@@ -459,11 +451,11 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	options PersistentStreamSubscriptionOptions,
 ) error {
 	options.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From(), *options.Settings())
 }
@@ -474,11 +466,11 @@ func (client *Client) UpdatePersistentSubscriptionAll(
 	options PersistentAllSubscriptionOptions,
 ) error {
 	options.setDefaults()
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From(), *options.Settings())
 }
@@ -488,11 +480,11 @@ func (client *Client) DeletePersistentSubscription(
 	streamName string,
 	groupName string,
 ) error {
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.DeleteStreamSubscription(ctx, handle, streamName, groupName)
 }
@@ -501,19 +493,19 @@ func (client *Client) DeletePersistentSubscriptionAll(
 	ctx context.Context,
 	groupName string,
 ) error {
-	handle, err := client.grpcClient.GetConnectionHandle()
+	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
-	persistentSubscriptionClient := NewPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	return persistentSubscriptionClient.DeleteAllSubscription(ctx, handle, groupName)
 }
 
 func readInternal(
 	ctx context.Context,
-	client connection.GrpcClient,
-	handle connection.ConnectionHandle,
+	client *grpcClient,
+	handle connectionHandle,
 	streamsClient api.StreamsClient,
 	readRequest *api.ReadReq,
 ) (*ReadStream, error) {
@@ -523,7 +515,7 @@ func readInternal(
 	if err != nil {
 		defer cancel()
 
-		err = client.HandleError(handle, headers, trailers, err)
+		err = client.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to construct read stream. Reason: %w", err)
 	}
 
@@ -540,7 +532,7 @@ func readInternal(
 				streamName = values[0]
 			}
 
-			return nil, &esdb_errors.StreamDeletedError{StreamName: streamName}
+			return nil, &StreamDeletedError{StreamName: streamName}
 		}
 
 		return nil, err
@@ -549,7 +541,7 @@ func readInternal(
 	switch msg.Content.(type) {
 	case *api.ReadResp_Event:
 		resolvedEvent := protoutils.GetResolvedEventFromProto(msg.GetEvent())
-		params := ReadStreamParams{
+		params := readStreamParams{
 			client:   client,
 			handle:   handle,
 			cancel:   cancel,
@@ -558,11 +550,11 @@ func readInternal(
 			trailers: trailers,
 		}
 
-		stream := NewReadStream(params, resolvedEvent)
+		stream := newReadStream(params, resolvedEvent)
 		return stream, nil
 	case *api.ReadResp_StreamNotFound_:
 		defer cancel()
-		return nil, esdb_errors.ErrStreamNotFound
+		return nil, ErrStreamNotFound
 	}
 
 	defer cancel()

@@ -137,7 +137,7 @@ func getDatabase(options *dockertest.RunOptions) *Container {
 		closeErr := resource.Close()
 
 		if closeErr != nil {
-			log.Fatalf("Failed to close docker resource. Reason: %v", err)
+			log.Fatalf("Failed to closeConnection docker resource. Reason: %v", err)
 		}
 		log.Fatalln("Stopping docker resource")
 	}

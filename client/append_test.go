@@ -12,7 +12,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	client_errors "github.com/EventStore/EventStore-Client-Go/errors"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -107,7 +106,7 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 
 	_, err := db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
-	if !errors.Is(err, client_errors.ErrWrongExpectedStreamRevision) {
+	if !errors.Is(err, client.ErrWrongExpectedStreamRevision) {
 		t.Fatalf("Expected WrongExpectedVersion, got %+v", err)
 	}
 }
@@ -138,7 +137,7 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 
 	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
-	if !errors.Is(err, client_errors.ErrUnauthenticated) {
+	if !errors.Is(err, client.ErrUnauthenticated) {
 		t.Fatalf("Expected Unauthenticated, got %+v", err)
 	}
 }

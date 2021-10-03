@@ -9,7 +9,6 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/messages"
 
-	"github.com/EventStore/EventStore-Client-Go/connection"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	"google.golang.org/grpc/metadata"
 )
@@ -20,15 +19,15 @@ type readResp struct {
 }
 
 type ReadStream struct {
-	client  connection.GrpcClient
+	client  *grpcClient
 	channel chan (chan readResp)
 	cancel  context.CancelFunc
 	once    *sync.Once
 }
 
-type ReadStreamParams struct {
-	client   connection.GrpcClient
-	handle   connection.ConnectionHandle
+type readStreamParams struct {
+	client   *grpcClient
+	handle   connectionHandle
 	cancel   context.CancelFunc
 	inner    api.Streams_ReadClient
 	headers  metadata.MD
@@ -57,7 +56,7 @@ func (stream *ReadStream) Recv() (*messages.ResolvedEvent, error) {
 	return resp.event, nil
 }
 
-func NewReadStream(params ReadStreamParams, firstEvt messages.ResolvedEvent) *ReadStream {
+func newReadStream(params readStreamParams, firstEvt messages.ResolvedEvent) *ReadStream {
 	channel := make(chan (chan readResp))
 	once := new(sync.Once)
 
@@ -95,7 +94,7 @@ func NewReadStream(params ReadStreamParams, firstEvt messages.ResolvedEvent) *Re
 
 			if err != nil {
 				if err != io.EOF {
-					err = params.client.HandleError(params.handle, params.headers, params.trailers, err)
+					err = params.client.handleError(params.handle, params.headers, params.trailers, err)
 				}
 
 				lastError = &err

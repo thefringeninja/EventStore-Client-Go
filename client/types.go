@@ -1,4 +1,4 @@
-package connection
+package client
 
 import (
 	"fmt"
@@ -6,22 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/gofrs/uuid"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 )
-
-type ConnectionHandle interface {
-	Id() uuid.UUID
-	Connection() *grpc.ClientConn
-}
-
-type GrpcClient interface {
-	HandleError(handle ConnectionHandle, headers metadata.MD, trailers metadata.MD, err error) error
-	GetConnectionHandle() (ConnectionHandle, error)
-	Close()
-}
 
 type EndPoint struct {
 	Host string
@@ -84,12 +69,12 @@ func ParseEndPoint(s string) (*EndPoint, error) {
 	return endpoint, nil
 }
 
-func NewGrpcClient(config Configuration) GrpcClient {
+func NewGrpcClient(config Configuration) *grpcClient {
 	channel := make(chan msg)
 
 	go connectionStateMachine(config, channel)
 
-	return &grpcClientImpl{
+	return &grpcClient{
 		channel: channel,
 	}
 }

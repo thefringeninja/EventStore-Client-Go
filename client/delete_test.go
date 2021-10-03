@@ -5,8 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
-
 	"github.com/EventStore/EventStore-Client-Go/client"
 
 	"github.com/stretchr/testify/assert"
@@ -72,7 +70,7 @@ func TestDetectStreamDeleted(t *testing.T) {
 	require.Nil(t, err)
 
 	_, err = db.ReadStreamEvents(context.Background(), "foobar", client.ReadStreamEventsOptions{}, 1)
-	var streamDeletedError *esdb_errors.StreamDeletedError
+	var streamDeletedError *client.StreamDeletedError
 
 	require.True(t, errors.As(err, &streamDeletedError))
 }

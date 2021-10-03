@@ -1,4 +1,4 @@
-package connection
+package client
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/errors"
 	gossipApi "github.com/EventStore/EventStore-Client-Go/protos/gossip"
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 	"github.com/gofrs/uuid"
@@ -22,11 +21,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type grpcClientImpl struct {
+type grpcClient struct {
 	channel chan msg
 }
 
-func (client grpcClientImpl) HandleError(handle ConnectionHandle, headers metadata.MD, trailers metadata.MD, err error) error {
+func (client *grpcClient) handleError(handle connectionHandle, headers metadata.MD, trailers metadata.MD, err error) error {
 	values := trailers.Get("exception")
 
 	if values != nil && values[0] == "not-leader" {
@@ -58,14 +57,14 @@ func (client grpcClientImpl) HandleError(handle ConnectionHandle, headers metada
 	log.Printf("[error] unexpected exception: %v", err)
 
 	status, _ := status.FromError(err)
-	if status.Code() == codes.FailedPrecondition { // Precondition -> ErrWrongExpectedStremRevision
-		return fmt.Errorf("%w, reason: %s", errors.ErrWrongExpectedStreamRevision, err.Error())
+	if status.Code() == codes.FailedPrecondition { // Precondition -> ErrWrongExpectedStreamRevision
+		return fmt.Errorf("%w, reason: %s", ErrWrongExpectedStreamRevision, err.Error())
 	}
-	if status.Code() == codes.PermissionDenied { // PermissionDenied -> ErrPemissionDenied
-		return fmt.Errorf("%w", errors.ErrPermissionDenied)
+	if status.Code() == codes.PermissionDenied { // PermissionDenied -> ErrPermissionDenied
+		return fmt.Errorf("%w", ErrPermissionDenied)
 	}
 	if status.Code() == codes.Unauthenticated { // PermissionDenied -> ErrUnauthenticated
-		return fmt.Errorf("%w", errors.ErrUnauthenticated)
+		return fmt.Errorf("%w", ErrUnauthenticated)
 	}
 
 	msg := reconnect{
@@ -77,7 +76,7 @@ func (client grpcClientImpl) HandleError(handle ConnectionHandle, headers metada
 	return err
 }
 
-func (client grpcClientImpl) GetConnectionHandle() (ConnectionHandle, error) {
+func (client *grpcClient) getConnectionHandle() (connectionHandle, error) {
 	msg := newGetConnectionMsg()
 	client.channel <- msg
 
@@ -86,9 +85,9 @@ func (client grpcClientImpl) GetConnectionHandle() (ConnectionHandle, error) {
 	return resp, resp.err
 }
 
-func (client grpcClientImpl) Close() {
+func (client *grpcClient) close() {
 	channel := make(chan bool)
-	client.channel <- close{channel}
+	client.channel <- closeConnection{channel}
 	<-channel
 }
 
@@ -203,7 +202,7 @@ func connectionStateMachine(config Configuration, channel chan msg) {
 						err: fmt.Errorf("esdb connection is closed"),
 					}
 				}
-			case close:
+			case closeConnection:
 				{
 					evt.channel <- true
 				}
@@ -255,11 +254,11 @@ func (msg reconnect) handle(state *connectionState) {
 	}
 }
 
-type close struct {
+type closeConnection struct {
 	channel chan bool
 }
 
-func (msg close) handle(state *connectionState) {
+func (msg closeConnection) handle(state *connectionState) {
 	state.closed = true
 	if state.connection != nil {
 		defer func() {

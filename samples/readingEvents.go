@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	esdb_errors "github.com/EventStore/EventStore-Client-Go/errors"
 )
 
 func ReadFromStream(db *client.Client) {
@@ -84,7 +83,7 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if errors.Is(err, esdb_errors.ErrStreamNotFound) {
+		if errors.Is(err, client.ErrStreamNotFound) {
 			fmt.Print("Stream not found")
 		}
 

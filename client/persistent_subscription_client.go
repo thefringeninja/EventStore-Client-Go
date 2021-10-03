@@ -8,20 +8,19 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
-	"github.com/EventStore/EventStore-Client-Go/connection"
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
-type PersistentClient struct {
-	inner                        connection.GrpcClient
+type persistentClient struct {
+	inner                        *grpcClient
 	persistentSubscriptionClient persistent.PersistentSubscriptionsClient
 }
 
-func (client *PersistentClient) ConnectToPersistentSubscription(
+func (client *persistentClient) ConnectToPersistentSubscription(
 	ctx context.Context,
-	handle connection.ConnectionHandle,
+	handle connectionHandle,
 	bufferSize int32,
 	streamName string,
 	groupName string,
@@ -31,7 +30,7 @@ func (client *PersistentClient) ConnectToPersistentSubscription(
 	readClient, err := client.persistentSubscriptionClient.Read(ctx, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		defer cancel()
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return nil, types.PersistentSubscriptionFailedToInitClientError(err)
 	}
 
@@ -62,9 +61,9 @@ func (client *PersistentClient) ConnectToPersistentSubscription(
 	return nil, types.PersistentSubscriptionNoConfirmationError(err)
 }
 
-func (client *PersistentClient) CreateStreamSubscription(
+func (client *persistentClient) CreateStreamSubscription(
 	ctx context.Context,
-	handle connection.ConnectionHandle,
+	handle connectionHandle,
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
@@ -74,16 +73,16 @@ func (client *PersistentClient) CreateStreamSubscription(
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Create(ctx, createSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return types.PersistentSubscriptionFailedCreationError(err)
 	}
 
 	return nil
 }
 
-func (client *PersistentClient) CreateAllSubscription(
+func (client *persistentClient) CreateAllSubscription(
 	ctx context.Context,
-	handle connection.ConnectionHandle,
+	handle connectionHandle,
 	groupName string,
 	position stream.AllStreamPosition,
 	settings types.SubscriptionSettings,
@@ -97,16 +96,16 @@ func (client *PersistentClient) CreateAllSubscription(
 	var headers, trailers metadata.MD
 	_, err = client.persistentSubscriptionClient.Create(ctx, protoConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return types.PersistentSubscriptionFailedCreationError(err)
 	}
 
 	return nil
 }
 
-func (client *PersistentClient) UpdateStreamSubscription(
+func (client *persistentClient) UpdateStreamSubscription(
 	ctx context.Context,
-	handle connection.ConnectionHandle,
+	handle connectionHandle,
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
@@ -116,16 +115,16 @@ func (client *PersistentClient) UpdateStreamSubscription(
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return types.PersistentSubscriptionUpdateFailedError(err)
 	}
 
 	return nil
 }
 
-func (client *PersistentClient) UpdateAllSubscription(
+func (client *persistentClient) UpdateAllSubscription(
 	ctx context.Context,
-	handle connection.ConnectionHandle,
+	handle connectionHandle,
 	groupName string,
 	position stream.AllStreamPosition,
 	settings types.SubscriptionSettings,
@@ -135,16 +134,16 @@ func (client *PersistentClient) UpdateAllSubscription(
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return types.PersistentSubscriptionUpdateFailedError(err)
 	}
 
 	return nil
 }
 
-func (client *PersistentClient) DeleteStreamSubscription(
+func (client *persistentClient) DeleteStreamSubscription(
 	ctx context.Context,
-	handle connection.ConnectionHandle,
+	handle connectionHandle,
 	streamName string,
 	groupName string,
 ) error {
@@ -152,27 +151,27 @@ func (client *PersistentClient) DeleteStreamSubscription(
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return types.PersistentSubscriptionDeletionFailedError(err)
 	}
 
 	return nil
 }
 
-func (client *PersistentClient) DeleteAllSubscription(ctx context.Context, handle connection.ConnectionHandle, groupName string) error {
+func (client *persistentClient) DeleteAllSubscription(ctx context.Context, handle connectionHandle, groupName string) error {
 	deleteSubscriptionOptions := protoutils.DeletePersistentRequestAllOptionsProto(groupName)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
-		err = client.inner.HandleError(handle, headers, trailers, err)
+		err = client.inner.handleError(handle, headers, trailers, err)
 		return types.PersistentSubscriptionDeletionFailedError(err)
 	}
 
 	return nil
 }
 
-func NewPersistentClient(inner connection.GrpcClient, client persistent.PersistentSubscriptionsClient) PersistentClient {
-	return PersistentClient{
+func newPersistentClient(inner *grpcClient, client persistent.PersistentSubscriptionsClient) persistentClient {
+	return persistentClient{
 		inner:                        inner,
 		persistentSubscriptionClient: client,
 	}
