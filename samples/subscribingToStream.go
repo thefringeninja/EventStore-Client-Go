@@ -9,9 +9,8 @@ import (
 )
 
 func SubscribeToStream(db *client.Client) {
+	options := client.SubscribeToStreamOptions{}
 	// region subscribe-to-stream
-	opts := client.SubscribeToStreamOptions{}
-
 	stream, err := db.SubscribeToStream(context.Background(), "some-stream", client.SubscribeToStreamOptions{})
 
 	if err != nil {
@@ -34,30 +33,36 @@ func SubscribeToStream(db *client.Client) {
 	// endregion subscribe-to-stream
 
 	// region subscribe-to-stream-from-position
-	opts.SetFromRevision(20)
-
-	db.SubscribeToStream(context.Background(), "some-stream", opts)
+	db.SubscribeToStream(context.Background(), "some-stream", client.SubscribeToStreamOptions{
+		From: types.Revision(20),
+	})
 	// endregion subscribe-to-stream-from-position
 
 	// region subscribe-to-stream-live
-	opts.SetFromEnd()
+	options = client.SubscribeToStreamOptions{
+		From: types.End{},
+	}
 
-	db.SubscribeToStream(context.Background(), "some-stream", opts)
+	db.SubscribeToStream(context.Background(), "some-stream", options)
 	// endregion subscribe-to-stream-live
 
 	// region subscribe-to-stream-resolving-linktos
-	opts.SetFromStart()
-	opts.SetResolveLinks()
+	options = client.SubscribeToStreamOptions{
+		From:         types.Start{},
+		ResolveLinks: true,
+	}
 
-	db.SubscribeToStream(context.Background(), "$et-myEventType", opts)
+	db.SubscribeToStream(context.Background(), "$et-myEventType", options)
 	// endregion subscribe-to-stream-resolving-linktos
 
 	// region subscribe-to-stream-subscription-dropped
-	opts.SetFromStart()
+	options = client.SubscribeToStreamOptions{
+		From: types.Start{},
+	}
 
 	for {
 
-		stream, err := db.SubscribeToStream(context.Background(), "some-stream", opts)
+		stream, err := db.SubscribeToStream(context.Background(), "some-stream", options)
 
 		if err != nil {
 			time.Sleep(1 * time.Second)
@@ -74,7 +79,7 @@ func SubscribeToStream(db *client.Client) {
 
 			if event.EventAppeared != nil {
 				// handles the event...
-				opts.SetFromRevision(event.EventAppeared.OriginalEvent().EventNumber)
+				options.From = types.Revision(event.EventAppeared.OriginalEvent().EventNumber)
 			}
 		}
 	}
@@ -82,6 +87,7 @@ func SubscribeToStream(db *client.Client) {
 }
 
 func SubscribeToAll(db *client.Client) {
+	options := client.SubscribeToAllOptions{}
 	// region subscribe-to-all
 	stream, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{})
 
@@ -105,24 +111,27 @@ func SubscribeToAll(db *client.Client) {
 	// endregion subscribe-to-all
 
 	// region subscribe-to-all-from-position
-	opts := client.SubscribeToAllOptions{}
-	opts.SetFromPosition(types.Position{
-		Commit:  1_056,
-		Prepare: 1_056,
+	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
+		From: types.Position{
+			Commit:  1_056,
+			Prepare: 1_056,
+		},
 	})
-
-	db.SubscribeToAll(context.Background(), opts)
 	// endregion subscribe-to-all-from-position
 
 	// region subscribe-to-all-live
-	opts.SetFromEnd()
-	db.SubscribeToAll(context.Background(), opts)
+	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
+		From: types.End{},
+	})
 	// endregion subscribe-to-all-live
 
 	// region subscribe-to-all-subscription-dropped
-	opts.SetFromStart()
+	options = client.SubscribeToAllOptions{
+		From: types.Start{},
+	}
+
 	for {
-		stream, err := db.SubscribeToAll(context.Background(), opts)
+		stream, err := db.SubscribeToAll(context.Background(), options)
 
 		if err != nil {
 			time.Sleep(1 * time.Second)
@@ -139,7 +148,7 @@ func SubscribeToAll(db *client.Client) {
 
 			if event.EventAppeared != nil {
 				// handles the event...
-				opts.SetFromPosition(event.EventAppeared.OriginalEvent().Position)
+				options.From = event.EventAppeared.OriginalEvent().Position
 			}
 		}
 	}
@@ -148,16 +157,20 @@ func SubscribeToAll(db *client.Client) {
 
 func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
-	filter := types.NewFilterOnStreamName()
-	filter.AddPrefixes("test-")
-	opts := client.SubscribeToAllOptions{}
-	opts.SetFilter(filter)
-
-	db.SubscribeToAll(context.Background(), opts)
+	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
+		Filter: &types.SubscriptionFilter{
+			Type:     types.StreamFilterType,
+			Prefixes: []string{"test-"},
+		},
+	})
 	// endregion stream-prefix-filtered-subscription
 	// region stream-regex-filtered-subscription
-	filter = types.NewFilterOnStreamName()
-	filter.SetRegex("/invoice-\\d\\d\\d/g")
+	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
+		Filter: &types.SubscriptionFilter{
+			Type:  types.StreamFilterType,
+			Regex: "/invoice-\\d\\d\\d/g",
+		},
+	})
 	// endregion stream-regex-filtered-subscription
 
 }

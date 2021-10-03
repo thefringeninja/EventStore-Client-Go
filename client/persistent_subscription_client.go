@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-	"github.com/EventStore/EventStore-Client-Go/stream"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
@@ -65,7 +64,7 @@ func (client *persistentClient) CreateStreamSubscription(
 	handle connectionHandle,
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position types.StreamPosition,
 	settings types.SubscriptionSettings,
 ) error {
 	createSubscriptionConfig := protoutils.CreatePersistentRequestProto(streamName, groupName, position, settings)
@@ -83,7 +82,7 @@ func (client *persistentClient) CreateAllSubscription(
 	ctx context.Context,
 	handle connectionHandle,
 	groupName string,
-	position stream.AllStreamPosition,
+	position types.AllPosition,
 	settings types.SubscriptionSettings,
 	filter *protoutils.SubscriptionFilterOptions,
 ) error {
@@ -107,7 +106,7 @@ func (client *persistentClient) UpdateStreamSubscription(
 	handle connectionHandle,
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position types.StreamPosition,
 	settings types.SubscriptionSettings,
 ) error {
 	updateSubscriptionConfig := protoutils.UpdatePersistentRequestStreamProto(streamName, groupName, position, settings)
@@ -125,7 +124,7 @@ func (client *persistentClient) UpdateAllSubscription(
 	ctx context.Context,
 	handle connectionHandle,
 	groupName string,
-	position stream.AllStreamPosition,
+	position types.AllPosition,
 	settings types.SubscriptionSettings,
 ) error {
 	updateSubscriptionConfig := protoutils.UpdatePersistentRequestAllOptionsProto(groupName, position, settings)

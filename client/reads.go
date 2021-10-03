@@ -7,14 +7,14 @@ import (
 	"sync"
 
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	"google.golang.org/grpc/metadata"
 )
 
 type readResp struct {
-	event *messages.ResolvedEvent
+	event *types.ResolvedEvent
 	err   *error
 }
 
@@ -38,7 +38,7 @@ func (stream *ReadStream) Close() {
 	stream.once.Do(stream.cancel)
 }
 
-func (stream *ReadStream) Recv() (*messages.ResolvedEvent, error) {
+func (stream *ReadStream) Recv() (*types.ResolvedEvent, error) {
 	promise := make(chan readResp)
 
 	stream.channel <- promise
@@ -56,7 +56,7 @@ func (stream *ReadStream) Recv() (*messages.ResolvedEvent, error) {
 	return resp.event, nil
 }
 
-func newReadStream(params readStreamParams, firstEvt messages.ResolvedEvent) *ReadStream {
+func newReadStream(params readStreamParams, firstEvt types.ResolvedEvent) *ReadStream {
 	channel := make(chan (chan readResp))
 	once := new(sync.Once)
 

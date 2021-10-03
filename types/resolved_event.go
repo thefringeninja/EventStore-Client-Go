@@ -1,4 +1,4 @@
-package messages
+package types
 
 type ResolvedEvent struct {
 	Link   *RecordedEvent

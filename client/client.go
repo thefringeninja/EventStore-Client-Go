@@ -9,7 +9,6 @@ import (
 	"errors"
 
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
@@ -45,7 +44,7 @@ func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
 	opts AppendToStreamOptions,
-	events ...messages.ProposedEvent,
+	events ...types.ProposedEvent,
 ) (*WriteResult, error) {
 	opts.setDefaults()
 	handle, err := client.grpcClient.getConnectionHandle()
@@ -61,7 +60,7 @@ func (client *Client) AppendToStream(
 		return nil, fmt.Errorf("could not construct append operation. Reason: %w", err)
 	}
 
-	header := protoutils.ToAppendHeader(streamID, opts.ExpectedRevision())
+	header := protoutils.ToAppendHeader(streamID, opts.ExpectedRevision)
 
 	if err := appendOperation.Send(header); err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
@@ -139,7 +138,7 @@ func (client *Client) SetStreamMetadata(
 		return nil, fmt.Errorf("error when serializing stream metadata: %w", err)
 	}
 
-	event := messages.ProposedEvent{}
+	event := types.ProposedEvent{}
 	event.SetEventType("$metadata")
 	err = event.SetJsonData(props)
 
@@ -256,7 +255,7 @@ func (client *Client) ReadStreamEvents(
 	count uint64,
 ) (*ReadStream, error) {
 	opts.setDefaults()
-	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction(), opts.Position(), count, opts.ResolveLinks())
+	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction, opts.From, count, opts.ResolveLinks)
 	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
@@ -278,7 +277,7 @@ func (client *Client) ReadAllEvents(
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	readRequest := protoutils.ToReadAllRequest(opts.Direction(), opts.Position(), count, opts.ResolveLinks())
+	readRequest := protoutils.ToReadAllRequest(opts.Direction, opts.From, count, opts.ResolveLinks)
 	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest)
 }
 
@@ -295,7 +294,7 @@ func (client *Client) SubscribeToStream(
 	}
 	var headers, trailers metadata.MD
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.Position(), opts.ResolveLinks(), nil)
+	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.From, opts.ResolveLinks, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
@@ -337,15 +336,15 @@ func (client *Client) SubscribeToAll(
 	var headers, trailers metadata.MD
 
 	var filterOptions *protoutils.SubscriptionFilterOptions = nil
-	if opts.Filter() != nil {
+	if opts.Filter != nil {
 		filterOptions = &protoutils.SubscriptionFilterOptions{
-			MaxSearchWindow:    opts.MaxSearchWindow(),
-			CheckpointInterval: opts.CheckpointInterval(),
-			SubscriptionFilter: opts.Filter(),
+			MaxSearchWindow:    opts.MaxSearchWindow,
+			CheckpointInterval: opts.CheckpointInterval,
+			SubscriptionFilter: opts.Filter,
 		}
 	}
 
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.Position(), opts.ResolveLinks(), filterOptions)
+	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.From, opts.ResolveLinks, filterOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}

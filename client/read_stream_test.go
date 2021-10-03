@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +39,7 @@ type Event struct {
 	EventData      []byte         `json:"eventData"`
 	UserMetadata   []byte         `json:"userMetadata"`
 	ContentType    string         `json:"contentType"`
-	Position       Position       `json:"position"`
+	Position       Position       `json:"From"`
 	Created        Created        `json:"created"`
 }
 
@@ -161,7 +161,7 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 
 	var waitingForError sync.WaitGroup
 
-	proposedEvents := []messages.ProposedEvent{}
+	proposedEvents := []types.ProposedEvent{}
 
 	for i := 1; i <= 10; i++ {
 		proposedEvents = append(proposedEvents, createTestEvent())

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 )
@@ -30,7 +30,7 @@ func Run() {
 		ImportantData: "I wrote my first event!",
 	}
 
-	event := messages.ProposedEvent{}
+	event := types.ProposedEvent{}
 	event.SetEventType("TestEvent")
 	err = event.SetJsonData(testEvent)
 

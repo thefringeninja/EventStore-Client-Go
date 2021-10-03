@@ -7,10 +7,7 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
-	"github.com/EventStore/EventStore-Client-Go/stream"
 	"github.com/EventStore/EventStore-Client-Go/types"
-
-	"github.com/EventStore/EventStore-Client-Go/messages"
 
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
@@ -33,36 +30,8 @@ const SystemMetadataKeysContentType = "content-type"
 // SystemMetadataKeysCreated ...
 const SystemMetadataKeysCreated = "created"
 
-type appendSetOptions struct {
-	req *api.AppendReq
-}
-
-func (append *appendSetOptions) VisitAny() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Any{
-		Any: &shared.Empty{},
-	}
-}
-
-func (append *appendSetOptions) VisitStreamExists() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_StreamExists{
-		StreamExists: &shared.Empty{},
-	}
-}
-
-func (append *appendSetOptions) VisitNoStream() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_NoStream{
-		NoStream: &shared.Empty{},
-	}
-}
-
-func (append *appendSetOptions) VisitExact(value uint64) {
-	append.req.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Revision{
-		Revision: value,
-	}
-}
-
 // ToAppendHeader ...
-func ToAppendHeader(streamID string, streamRevision stream.ExpectedRevision) *api.AppendReq {
+func ToAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) *api.AppendReq {
 	appendReq := &api.AppendReq{
 		Content: &api.AppendReq_Options_{
 			Options: &api.AppendReq_Options{},
@@ -73,17 +42,30 @@ func ToAppendHeader(streamID string, streamRevision stream.ExpectedRevision) *ap
 		StreamName: []byte(streamID),
 	}
 
-	setOptions := appendSetOptions{
-		req: appendReq,
+	switch value := streamRevision.(type) {
+	case types.Any:
+		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Any{
+			Any: &shared.Empty{},
+		}
+	case types.NoStream:
+		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_NoStream{
+			NoStream: &shared.Empty{},
+		}
+	case types.StreamExists:
+		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_StreamExists{
+			StreamExists: &shared.Empty{},
+		}
+	case types.StreamRevision:
+		appendReq.GetOptions().ExpectedStreamRevision = &api.AppendReq_Options_Revision{
+			Revision: value.Value,
+		}
 	}
-
-	streamRevision.AcceptExpectedRevision(&setOptions)
 
 	return appendReq
 }
 
 // ToProposedMessage ...
-func ToProposedMessage(event messages.ProposedEvent) *api.AppendReq_ProposedMessage {
+func ToProposedMessage(event filtering.ProposedEvent) *api.AppendReq_ProposedMessage {
 	if event.ContentType() == "" {
 		event.SetContentType("application/octet-stream")
 	}
@@ -130,106 +112,82 @@ func toReadDirectionFromDirection(dir types.Direction) api.ReadReq_Options_ReadD
 }
 
 // toAllReadOptionsFromPosition ...
-func toAllReadOptionsFromPosition(position stream.AllStreamPosition) *api.ReadReq_Options_All {
-	all := &allStream{
-		options: &api.ReadReq_Options_AllOptions{},
-	}
+func toAllReadOptionsFromPosition(position filtering.AllPosition) *api.ReadReq_Options_All {
+	options := &api.ReadReq_Options_AllOptions{}
 
-	position.AcceptAllVisitor(all)
+	switch value := position.(type) {
+	case types.Start:
+		options.AllOption = &api.ReadReq_Options_AllOptions_Start{
+			Start: &shared.Empty{},
+		}
+	case types.End:
+		options.AllOption = &api.ReadReq_Options_AllOptions_End{
+			End: &shared.Empty{},
+		}
+	case types.Position:
+		options.AllOption = &api.ReadReq_Options_AllOptions_Position{
+			Position: &api.ReadReq_Options_Position{
+				PreparePosition: value.Prepare,
+				CommitPosition:  value.Commit,
+			},
+		}
+	}
 
 	return &api.ReadReq_Options_All{
-		All: all.options,
+		All: options,
 	}
 }
 
-type allStream struct {
-	options *api.ReadReq_Options_AllOptions
-}
-
-func (all *allStream) VisitStart() {
-	all.options.AllOption = &api.ReadReq_Options_AllOptions_Start{
-		Start: &shared.Empty{},
-	}
-}
-
-func (all *allStream) VisitEnd() {
-	all.options.AllOption = &api.ReadReq_Options_AllOptions_End{
-		End: &shared.Empty{},
-	}
-}
-
-func (all *allStream) VisitPosition(value types.Position) {
-	all.options.AllOption = &api.ReadReq_Options_AllOptions_Position{
-		Position: &api.ReadReq_Options_Position{
-			PreparePosition: value.Prepare,
-			CommitPosition:  value.Commit,
-		},
-	}
-}
-
-func toReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamPosition stream.StreamPosition) *api.ReadReq_Options_Stream {
+func toReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamPosition filtering.StreamPosition) *api.ReadReq_Options_Stream {
 	options := &api.ReadReq_Options_StreamOptions{
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamID),
 		},
 	}
 
-	regular := &regularStream{
-		options: options,
+	switch value := streamPosition.(type) {
+	case types.Start:
+		options.RevisionOption = &api.ReadReq_Options_StreamOptions_Start{
+			Start: &shared.Empty{},
+		}
+	case types.End:
+		options.RevisionOption = &api.ReadReq_Options_StreamOptions_End{
+			End: &shared.Empty{},
+		}
+	case types.StreamRevision:
+		options.RevisionOption = &api.ReadReq_Options_StreamOptions_Revision{
+			Revision: value.Value,
+		}
 	}
-
-	streamPosition.AcceptRegularVisitor(regular)
 
 	return &api.ReadReq_Options_Stream{
-		Stream: regular.options,
-	}
-}
-
-type regularStream struct {
-	options *api.ReadReq_Options_StreamOptions
-}
-
-func (reg *regularStream) VisitRevision(value uint64) {
-	reg.options.RevisionOption = &api.ReadReq_Options_StreamOptions_Revision{
-		Revision: value,
-	}
-}
-
-func (reg *regularStream) VisitStart() {
-	reg.options.RevisionOption = &api.ReadReq_Options_StreamOptions_Start{
-		Start: &shared.Empty{},
-	}
-}
-
-func (reg *regularStream) VisitEnd() {
-	reg.options.RevisionOption = &api.ReadReq_Options_StreamOptions_End{
-		End: &shared.Empty{},
+		Stream: options,
 	}
 }
 
 // toFilterOptions ...
 func toFilterOptions(options *SubscriptionFilterOptions) (*api.ReadReq_Options_FilterOptions, error) {
-	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
+	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
 		return nil, fmt.Errorf("the subscription filter requires a set of prefixes or a regex")
 	}
-	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
+	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.Regex) > 0 {
 		return nil, fmt.Errorf("the subscription filter may only contain a regex or a set of prefixes, but not both")
 	}
 	filterOptions := api.ReadReq_Options_FilterOptions{
 		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
 	}
-	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
+	if options.SubscriptionFilter.Type == filtering.EventFilterType {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_EventType{
 			EventType: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.RegexValue,
+				Regex:  options.SubscriptionFilter.Regex,
 			},
 		}
 	} else {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_StreamIdentifier{
 			StreamIdentifier: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.RegexValue,
+				Regex:  options.SubscriptionFilter.Regex,
 			},
 		}
 	}
@@ -245,35 +203,7 @@ func toFilterOptions(options *SubscriptionFilterOptions) (*api.ReadReq_Options_F
 	return &filterOptions, nil
 }
 
-type deleteSetOptions struct {
-	req *api.DeleteReq
-}
-
-func (append *deleteSetOptions) VisitAny() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Any{
-		Any: &shared.Empty{},
-	}
-}
-
-func (append *deleteSetOptions) VisitStreamExists() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_StreamExists{
-		StreamExists: &shared.Empty{},
-	}
-}
-
-func (append *deleteSetOptions) VisitNoStream() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_NoStream{
-		NoStream: &shared.Empty{},
-	}
-}
-
-func (append *deleteSetOptions) VisitExact(value uint64) {
-	append.req.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Revision{
-		Revision: value,
-	}
-}
-
-func ToDeleteRequest(streamID string, streamRevision stream.ExpectedRevision) *api.DeleteReq {
+func ToDeleteRequest(streamID string, streamRevision types.ExpectedRevision) *api.DeleteReq {
 	deleteReq := &api.DeleteReq{
 		Options: &api.DeleteReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -282,44 +212,29 @@ func ToDeleteRequest(streamID string, streamRevision stream.ExpectedRevision) *a
 		},
 	}
 
-	setOptions := deleteSetOptions{
-		req: deleteReq,
+	switch value := streamRevision.(type) {
+	case types.Any:
+		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Any{
+			Any: &shared.Empty{},
+		}
+	case types.StreamExists:
+		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_StreamExists{
+			StreamExists: &shared.Empty{},
+		}
+	case types.NoStream:
+		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_NoStream{
+			NoStream: &shared.Empty{},
+		}
+	case types.StreamRevision:
+		deleteReq.GetOptions().ExpectedStreamRevision = &api.DeleteReq_Options_Revision{
+			Revision: value.Value,
+		}
 	}
-
-	streamRevision.AcceptExpectedRevision(&setOptions)
 
 	return deleteReq
 }
 
-type tombstoneSetOptions struct {
-	req *api.TombstoneReq
-}
-
-func (append *tombstoneSetOptions) VisitAny() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Any{
-		Any: &shared.Empty{},
-	}
-}
-
-func (append *tombstoneSetOptions) VisitStreamExists() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_StreamExists{
-		StreamExists: &shared.Empty{},
-	}
-}
-
-func (append *tombstoneSetOptions) VisitNoStream() {
-	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_NoStream{
-		NoStream: &shared.Empty{},
-	}
-}
-
-func (append *tombstoneSetOptions) VisitExact(value uint64) {
-	append.req.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Revision{
-		Revision: value,
-	}
-}
-
-func ToTombstoneRequest(streamID string, streamRevision stream.ExpectedRevision) *api.TombstoneReq {
+func ToTombstoneRequest(streamID string, streamRevision types.ExpectedRevision) *api.TombstoneReq {
 	tombstoneReq := &api.TombstoneReq{
 		Options: &api.TombstoneReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -328,16 +243,29 @@ func ToTombstoneRequest(streamID string, streamRevision stream.ExpectedRevision)
 		},
 	}
 
-	optionsSet := tombstoneSetOptions{
-		req: tombstoneReq,
+	switch value := streamRevision.(type) {
+	case types.Any:
+		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Any{
+			Any: &shared.Empty{},
+		}
+	case types.StreamExists:
+		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_StreamExists{
+			StreamExists: &shared.Empty{},
+		}
+	case types.NoStream:
+		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_NoStream{
+			NoStream: &shared.Empty{},
+		}
+	case types.StreamRevision:
+		tombstoneReq.GetOptions().ExpectedStreamRevision = &api.TombstoneReq_Options_Revision{
+			Revision: value.Value,
+		}
 	}
-
-	streamRevision.AcceptExpectedRevision(&optionsSet)
 
 	return tombstoneReq
 }
 
-func ToReadStreamRequest(streamID string, direction types.Direction, from stream.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func ToReadStreamRequest(streamID string, direction types.Direction, from filtering.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -358,7 +286,7 @@ func ToReadStreamRequest(streamID string, direction types.Direction, from stream
 	}
 }
 
-func ToReadAllRequest(direction types.Direction, from stream.AllStreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func ToReadAllRequest(direction types.Direction, from filtering.AllPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -379,7 +307,7 @@ func ToReadAllRequest(direction types.Direction, from stream.AllStreamPosition, 
 	}
 }
 
-func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
+func ToStreamSubscriptionRequest(streamID string, from filtering.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -410,7 +338,7 @@ func ToStreamSubscriptionRequest(streamID string, from stream.StreamPosition, re
 	return readReq, nil
 }
 
-func ToAllSubscriptionRequest(from stream.AllStreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
+func ToAllSubscriptionRequest(from filtering.AllPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -482,13 +410,13 @@ func GetContentTypeFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent
 }
 
 // RecordedEventFromProto
-func RecordedEventFromProto(result *api.ReadResp_ReadEvent) messages.RecordedEvent {
+func RecordedEventFromProto(result *api.ReadResp_ReadEvent) filtering.RecordedEvent {
 	recordedEvent := result.GetEvent()
 	return GetRecordedEventFromProto(recordedEvent)
 }
-func GetRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) messages.RecordedEvent {
+func GetRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
-	return messages.RecordedEvent{
+	return filtering.RecordedEvent{
 		EventID:        EventIDFromProto(recordedEvent),
 		EventType:      recordedEvent.Metadata[SystemMetadataKeysType],
 		ContentType:    GetContentTypeFromProto(recordedEvent),
@@ -502,13 +430,13 @@ func GetRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEve
 	}
 }
 
-func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) messages.ResolvedEvent {
+func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.ResolvedEvent {
 	positionWire := result.GetPosition()
 	linkWire := result.GetLink()
 	eventWire := result.GetEvent()
 
-	var event *messages.RecordedEvent = nil
-	var link *messages.RecordedEvent = nil
+	var event *filtering.RecordedEvent = nil
+	var link *filtering.RecordedEvent = nil
 	var commit *uint64
 
 	if positionWire != nil {
@@ -534,7 +462,7 @@ func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) messages.Resolved
 		link = &recordedEvent
 	}
 
-	return messages.ResolvedEvent{
+	return filtering.ResolvedEvent{
 		Event:  event,
 		Link:   link,
 		Commit: commit,
@@ -577,14 +505,14 @@ func PositionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_Re
 	}
 }
 
-func FromPersistentProtoResponse(resp *persistent.ReadResp) *messages.ResolvedEvent {
+func FromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedEvent {
 	readEvent := resp.GetEvent()
 	positionWire := readEvent.GetPosition()
 	eventWire := readEvent.GetEvent()
 	linkWire := readEvent.GetLink()
 
-	var event *messages.RecordedEvent = nil
-	var link *messages.RecordedEvent = nil
+	var event *filtering.RecordedEvent = nil
+	var link *filtering.RecordedEvent = nil
 	var commit *uint64
 
 	if positionWire != nil {
@@ -610,17 +538,17 @@ func FromPersistentProtoResponse(resp *persistent.ReadResp) *messages.ResolvedEv
 		link = &recordedEvent
 	}
 
-	return &messages.ResolvedEvent{
+	return &filtering.ResolvedEvent{
 		Event:  event,
 		Link:   link,
 		Commit: commit,
 	}
 }
 
-func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) messages.RecordedEvent {
+func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
 
-	return messages.RecordedEvent{
+	return filtering.RecordedEvent{
 		EventID:        EventIDFromPersistentProto(recordedEvent),
 		EventType:      recordedEvent.Metadata[SystemMetadataKeysType],
 		ContentType:    GetContentTypeFromPersistentProto(recordedEvent),
@@ -637,7 +565,7 @@ func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_
 func UpdatePersistentRequestStreamProto(
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq {
 	return &persistent.UpdateReq{
@@ -647,7 +575,7 @@ func UpdatePersistentRequestStreamProto(
 
 func UpdatePersistentRequestAllOptionsProto(
 	groupName string,
-	position stream.AllStreamPosition,
+	position filtering.AllPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq {
 	options := UpdatePersistentRequestAllOptionsSettingsProto(position)
@@ -662,7 +590,7 @@ func UpdatePersistentRequestAllOptionsProto(
 }
 
 func UpdatePersistentRequestAllOptionsSettingsProto(
-	position stream.AllStreamPosition,
+	position filtering.AllPosition,
 ) *persistent.UpdateReq_Options_All {
 	options := &persistent.UpdateReq_Options_All{
 		All: &persistent.UpdateReq_AllOptions{
@@ -671,16 +599,16 @@ func UpdatePersistentRequestAllOptionsSettingsProto(
 	}
 
 	switch value := position.(type) {
-	case stream.RevisionStart:
+	case types.Start:
 		options.All.AllOption = &persistent.UpdateReq_AllOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream.RevisionEnd:
+	case types.End:
 		options.All.AllOption = &persistent.UpdateReq_AllOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream.RevisionPosition:
-		options.All.AllOption = ToUpdatePersistentRequestAllOptionsFromPosition(value.Value)
+	case types.Position:
+		options.All.AllOption = ToUpdatePersistentRequestAllOptionsFromPosition(value)
 	}
 
 	return options
@@ -689,7 +617,7 @@ func UpdatePersistentRequestAllOptionsSettingsProto(
 func UpdatePersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq_Options {
 	return &persistent.UpdateReq_Options{
@@ -706,7 +634,7 @@ func UpdatePersistentSubscriptionStreamConfigProto(
 func UpdatePersistentSubscriptionStreamSettingsProto(
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position filtering.StreamPosition,
 ) *persistent.UpdateReq_Options_Stream {
 	streamOption := &persistent.UpdateReq_Options_Stream{
 		Stream: &persistent.UpdateReq_StreamOptions{
@@ -718,15 +646,15 @@ func UpdatePersistentSubscriptionStreamSettingsProto(
 	}
 
 	switch value := position.(type) {
-	case stream.RevisionStart:
+	case types.Start:
 		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream.RevisionEnd:
+	case types.End:
 		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream.RevisionExact:
+	case types.StreamRevision:
 		streamOption.Stream.RevisionOption = &persistent.UpdateReq_StreamOptions_Revision{
 			Revision: value.Value,
 		}
@@ -799,7 +727,7 @@ func ToUpdatePersistentRequestAllOptionsFromPosition(position types.Position) *p
 func CreatePersistentRequestProto(
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq {
 	return &persistent.CreateReq{
@@ -809,7 +737,7 @@ func CreatePersistentRequestProto(
 
 func CreatePersistentRequestAllOptionsProto(
 	groupName string,
-	position stream.AllStreamPosition,
+	position filtering.AllPosition,
 	settings types.SubscriptionSettings,
 	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq, error) {
@@ -828,7 +756,7 @@ func CreatePersistentRequestAllOptionsProto(
 }
 
 func CreatePersistentRequestAllOptionsSettingsProto(
-	pos stream.AllStreamPosition,
+	pos filtering.AllPosition,
 	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
 	options := &persistent.CreateReq_Options_All{
@@ -841,16 +769,16 @@ func CreatePersistentRequestAllOptionsSettingsProto(
 	}
 
 	switch value := pos.(type) {
-	case stream.RevisionStart:
+	case types.Start:
 		options.All.AllOption = &persistent.CreateReq_AllOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream.RevisionEnd:
+	case types.End:
 		options.All.AllOption = &persistent.CreateReq_AllOptions_End{
 			End: &shared.Empty{},
 		}
-	case stream.RevisionPosition:
-		options.All.AllOption = ToCreatePersistentRequestAllOptionsFromPosition(value.Value)
+	case types.Position:
+		options.All.AllOption = ToCreatePersistentRequestAllOptionsFromPosition(value)
 	}
 
 	if filter != nil {
@@ -869,7 +797,7 @@ func CreatePersistentRequestAllOptionsSettingsProto(
 func CreatePersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
-	position stream.StreamPosition,
+	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq_Options {
 	return &persistent.CreateReq_Options{
@@ -885,7 +813,7 @@ func CreatePersistentSubscriptionStreamConfigProto(
 
 func CreatePersistentSubscriptionStreamSettingsProto(
 	streamName string,
-	position stream.StreamPosition,
+	position filtering.StreamPosition,
 ) *persistent.CreateReq_Options_Stream {
 	streamOption := &persistent.CreateReq_Options_Stream{
 		Stream: &persistent.CreateReq_StreamOptions{
@@ -896,15 +824,15 @@ func CreatePersistentSubscriptionStreamSettingsProto(
 	}
 
 	switch value := position.(type) {
-	case stream.RevisionStart:
+	case types.Start:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_Start{
 			Start: &shared.Empty{},
 		}
-	case stream.RevisionEnd:
+	case types.End:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_End{
 			End: &shared.Empty{},
 		}
-	case stream.RevisionExact:
+	case types.StreamRevision:
 		streamOption.Stream.RevisionOption = &persistent.CreateReq_StreamOptions_Revision{
 			Revision: value.Value,
 		}
@@ -961,28 +889,28 @@ func CheckpointAfterMsProto(checkpointAfterMs int32) *persistent.CreateReq_Setti
 func CreateRequestFilterOptionsProto(
 	options *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_AllOptions_FilterOptions, error) {
-	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.RegexValue) == 0 {
+	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
 		return nil, &types.PersistentSubscriptionToAllMustProvideRegexOrPrefixError
 
 	}
-	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.RegexValue) > 0 {
+	if len(options.SubscriptionFilter.Prefixes) > 0 && len(options.SubscriptionFilter.Regex) > 0 {
 		return nil, &types.PersistentSubscriptionToAllCanSetOnlyRegexOrPrefixError
 	}
 	filterOptions := persistent.CreateReq_AllOptions_FilterOptions{
 		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
 	}
-	if options.SubscriptionFilter.FilterType == filtering.EventFilter {
+	if options.SubscriptionFilter.Type == filtering.EventFilterType {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_EventType{
 			EventType: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.RegexValue,
+				Regex:  options.SubscriptionFilter.Regex,
 			},
 		}
 	} else {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_StreamIdentifier{
 			StreamIdentifier: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
-				Regex:  options.SubscriptionFilter.RegexValue,
+				Regex:  options.SubscriptionFilter.Regex,
 			},
 		}
 	}

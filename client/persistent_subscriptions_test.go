@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
@@ -255,13 +254,13 @@ func initializeContainerAndClient(t *testing.T) (*Container, *client.Client) {
 
 func pushEventToStream(t *testing.T, clientInstance *client.Client, streamID string) {
 	testEvent := createTestEvent()
-	pushEventsToStream(t, clientInstance, streamID, []messages.ProposedEvent{testEvent})
+	pushEventsToStream(t, clientInstance, streamID, []types.ProposedEvent{testEvent})
 }
 
 func pushEventsToStream(t *testing.T,
 	clientInstance *client.Client,
 	streamID string,
-	events []messages.ProposedEvent) {
+	events []types.ProposedEvent) {
 
 	opts := client.AppendToStreamOptions{}
 	opts.SetExpectNoStream()

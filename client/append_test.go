@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
@@ -16,8 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestEvent() messages.ProposedEvent {
-	event := messages.ProposedEvent{}
+func createTestEvent() types.ProposedEvent {
+	event := types.ProposedEvent{}
 	event.SetEventType("TestEvent")
 	event.SetBinaryData([]byte{0xb, 0xe, 0xe, 0xf})
 	event.SetEventID(uuid.Must(uuid.NewV4()))
@@ -26,8 +25,8 @@ func createTestEvent() messages.ProposedEvent {
 	return event
 }
 
-func collectStreamEvents(stream *client.ReadStream) ([]*messages.ResolvedEvent, error) {
-	events := []*messages.ResolvedEvent{}
+func collectStreamEvents(stream *client.ReadStream) ([]*types.ResolvedEvent, error) {
+	events := []*types.ResolvedEvent{}
 
 	for {
 		event, err := stream.Recv()

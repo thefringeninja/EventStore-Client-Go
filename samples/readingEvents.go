@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 func ReadFromStream(db *client.Client) {
@@ -39,8 +40,9 @@ func ReadFromStream(db *client.Client) {
 
 func ReadFromStreamPosition(db *client.Client) {
 	// region read-from-position
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetFromRevision(10)
+	ropts := client.ReadStreamEventsOptions{
+		From: types.Revision(10),
+	}
 
 	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 20)
 
@@ -69,8 +71,9 @@ func ReadFromStreamPosition(db *client.Client) {
 
 func ReadFromStreamPositionCheck(db *client.Client) {
 	// region checking-for-stream-presence
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetFromRevision(10)
+	ropts := client.ReadStreamEventsOptions{
+		From: types.Revision(10),
+	}
 
 	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 100)
 
@@ -102,9 +105,10 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 
 func ReadStreamBackwards(db *client.Client) {
 	// region reading-backwards
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetBackwards()
-	ropts.SetFromEnd()
+	ropts := client.ReadStreamEventsOptions{
+		Direction: types.Backwards,
+		From:      types.End{},
+	}
 
 	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 10)
 
@@ -191,9 +195,10 @@ func IgnoreSystemEvents(db *client.Client) {
 
 func ReadFromAllBackwards(db *client.Client) {
 	// region read-from-all-stream-backwards
-	ropts := client.ReadAllEventsOptions{}
-	ropts.SetFromEnd()
-	ropts.SetBackwards()
+	ropts := client.ReadAllEventsOptions{
+		Direction: types.Backwards,
+		From:      types.End{},
+	}
 
 	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
 
@@ -222,8 +227,9 @@ func ReadFromAllBackwards(db *client.Client) {
 
 func ReadFromStreamResolvingLinkToS(db *client.Client) {
 	// region read-from-all-stream-resolving-link-tos
-	ropts := client.ReadAllEventsOptions{}
-	ropts.SetResolveLinks()
+	ropts := client.ReadAllEventsOptions{
+		ResolveLinks: true,
+	}
 
 	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
 	// endregion read-from-all-stream-resolving-link-tos

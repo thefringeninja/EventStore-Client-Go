@@ -1,9 +1,8 @@
-package messages
+package types
 
 import (
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/types"
 	uuid "github.com/gofrs/uuid"
 )
 
@@ -14,7 +13,7 @@ type RecordedEvent struct {
 	ContentType    string
 	StreamID       string
 	EventNumber    uint64
-	Position       types.Position
+	Position       Position
 	CreatedDate    time.Time
 	Data           []byte
 	SystemMetadata map[string]string

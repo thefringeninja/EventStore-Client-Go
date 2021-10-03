@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/EventStore/EventStore-Client-Go/messages"
+	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
 )
@@ -21,7 +21,7 @@ func AppendToStream(db *client.Client) {
 		ImportantData: "some value",
 	}
 
-	event := messages.ProposedEvent{}
+	event := types.ProposedEvent{}
 	event.SetEventType("some-event")
 	err := event.SetJsonData(data)
 
@@ -42,7 +42,7 @@ func AppendWithSameId(db *client.Client) {
 		ImportantData: "some value",
 	}
 
-	event := messages.ProposedEvent{}
+	event := types.ProposedEvent{}
 	event.SetEventType("some-event")
 	err := event.SetJsonData(data)
 
@@ -72,7 +72,7 @@ func AppendWithNoStream(db *client.Client) {
 		ImportantData: "some value",
 	}
 
-	event := messages.ProposedEvent{}
+	event := types.ProposedEvent{}
 	event.SetEventType("some-event")
 	err := event.SetJsonData(data)
 
@@ -80,8 +80,9 @@ func AppendWithNoStream(db *client.Client) {
 		panic(err)
 	}
 
-	options := client.AppendToStreamOptions{}
-	options.SetExpectNoStream()
+	options := client.AppendToStreamOptions{
+		ExpectedRevision: types.NoStream{},
+	}
 
 	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, event)
 
@@ -104,9 +105,10 @@ func AppendWithNoStream(db *client.Client) {
 
 func AppendWithConcurrencyCheck(db *client.Client) {
 	// region append-with-concurrency-check
-	ropts := client.ReadStreamEventsOptions{}
-	ropts.SetBackwards()
-	ropts.SetFromEnd()
+	ropts := client.ReadStreamEventsOptions{
+		Direction: types.Backwards,
+		From:      types.End{},
+	}
 
 	stream, err := db.ReadStreamEvents(context.Background(), "concurrency-stream", ropts, 1)
 
@@ -127,7 +129,7 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		ImportantData: "clientOne",
 	}
 
-	event := messages.ProposedEvent{}
+	event := types.ProposedEvent{}
 	event.SetEventType("some-event")
 	err = event.SetJsonData(data)
 
@@ -135,8 +137,9 @@ func AppendWithConcurrencyCheck(db *client.Client) {
 		panic(err)
 	}
 
-	aopts := client.AppendToStreamOptions{}
-	aopts.SetExpectRevision(lastEvent.OriginalEvent().EventNumber)
+	aopts := client.AppendToStreamOptions{
+		ExpectedRevision: types.Revision(lastEvent.OriginalEvent().EventNumber),
+	}
 
 	_, err = db.AppendToStream(context.Background(), "concurrency-stream", aopts, event)
 

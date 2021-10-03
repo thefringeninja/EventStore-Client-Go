@@ -1,13 +1,12 @@
 package client
 
 import (
-	"github.com/EventStore/EventStore-Client-Go/stream"
 	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 type PersistentStreamSubscriptionOptions struct {
 	settings []types.SubscriptionSettings
-	position stream.StreamPosition
+	position types.StreamPosition
 }
 
 func (o *PersistentStreamSubscriptionOptions) setDefaults() {
@@ -16,7 +15,7 @@ func (o *PersistentStreamSubscriptionOptions) setDefaults() {
 	}
 
 	if o.position == nil {
-		o.position = stream.End()
+		o.position = types.End{}
 	}
 }
 
@@ -24,20 +23,8 @@ func (o *PersistentStreamSubscriptionOptions) SetSettings(settings types.Subscri
 	o.settings = []types.SubscriptionSettings{settings}
 }
 
-func (o *PersistentStreamSubscriptionOptions) SetFrom(position stream.StreamPosition) {
+func (o *PersistentStreamSubscriptionOptions) SetFrom(position types.StreamPosition) {
 	o.position = position
-}
-
-func (o *PersistentStreamSubscriptionOptions) SetFromStart() {
-	o.position = stream.Start()
-}
-
-func (o *PersistentStreamSubscriptionOptions) SetFromEnd() {
-	o.position = stream.End()
-}
-
-func (o *PersistentStreamSubscriptionOptions) SetFromRevision(value uint64) {
-	o.position = stream.Revision(value)
 }
 
 func (o *PersistentStreamSubscriptionOptions) Settings() *types.SubscriptionSettings {
@@ -48,13 +35,13 @@ func (o *PersistentStreamSubscriptionOptions) Settings() *types.SubscriptionSett
 	return &o.settings[0]
 }
 
-func (o *PersistentStreamSubscriptionOptions) From() stream.StreamPosition {
+func (o *PersistentStreamSubscriptionOptions) From() types.StreamPosition {
 	return o.position
 }
 
 type PersistentAllSubscriptionOptions struct {
 	settings           []types.SubscriptionSettings
-	position           stream.AllStreamPosition
+	position           types.AllPosition
 	maxSearchWindow    int
 	checkpointInterval int
 	filter             []types.SubscriptionFilter
@@ -66,7 +53,7 @@ func (o *PersistentAllSubscriptionOptions) setDefaults() {
 	}
 
 	if o.position == nil {
-		o.position = stream.End()
+		o.position = types.End{}
 	}
 
 	if len(o.filter) != 0 {
@@ -84,16 +71,8 @@ func (o *PersistentAllSubscriptionOptions) SetSettings(settings types.Subscripti
 	o.settings = []types.SubscriptionSettings{settings}
 }
 
-func (o *PersistentAllSubscriptionOptions) SetFrom(position stream.AllStreamPosition) {
+func (o *PersistentAllSubscriptionOptions) SetFrom(position types.AllPosition) {
 	o.position = position
-}
-
-func (o *PersistentAllSubscriptionOptions) SetFromStart() {
-	o.position = stream.Start()
-}
-
-func (o *PersistentAllSubscriptionOptions) SetFromEnd() {
-	o.position = stream.End()
 }
 
 func (o *PersistentAllSubscriptionOptions) SetMaxSearchWindow(value int) {
@@ -109,7 +88,7 @@ func (o *PersistentAllSubscriptionOptions) SetCheckpointInterval(value int) {
 }
 
 func (o *PersistentAllSubscriptionOptions) SetFromPosition(value types.Position) {
-	o.position = stream.Position(value)
+	o.position = types.Position(value)
 }
 
 func (o *PersistentAllSubscriptionOptions) SetFilter(filter types.SubscriptionFilter) {
@@ -124,7 +103,7 @@ func (o *PersistentAllSubscriptionOptions) Settings() *types.SubscriptionSetting
 	return &o.settings[0]
 }
 
-func (o *PersistentAllSubscriptionOptions) From() stream.AllStreamPosition {
+func (o *PersistentAllSubscriptionOptions) From() types.AllPosition {
 	return o.position
 }
 
