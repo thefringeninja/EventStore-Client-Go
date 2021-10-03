@@ -219,7 +219,7 @@ func CreateRequestFilterOptionsProto(
 	return &filterOptions, nil
 }
 
-// toUpdateRequestAllOptionsFromPosition ...
+// ToUpdatePersistentRequestAllOptionsFromPosition ...
 func ToCreatePersistentRequestAllOptionsFromPosition(
 	position position.Position,
 ) *persistent.CreateReq_AllOptions_Position {

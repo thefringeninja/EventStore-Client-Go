@@ -5,12 +5,7 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 )
 
-type DeleteOptions struct {
-	StreamName []byte
-	GroupName  string
-}
-
-func deleteRequestStreamProto(streamName string, groupName string) *persistent.DeleteReq {
+func DeletePersistentRequestStreamProto(streamName string, groupName string) *persistent.DeleteReq {
 	return &persistent.DeleteReq{
 		Options: &persistent.DeleteReq_Options{
 			GroupName: groupName,
@@ -23,7 +18,7 @@ func deleteRequestStreamProto(streamName string, groupName string) *persistent.D
 	}
 }
 
-func deleteRequestAllOptionsProto(groupName string) *persistent.DeleteReq {
+func DeletePersistentRequestAllOptionsProto(groupName string) *persistent.DeleteReq {
 	return &persistent.DeleteReq{
 		Options: &persistent.DeleteReq_Options{
 			GroupName: groupName,

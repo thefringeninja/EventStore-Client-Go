@@ -2,6 +2,7 @@ package persistent
 
 import (
 	"fmt"
+
 	"github.com/EventStore/EventStore-Client-Go/stream"
 
 	"github.com/EventStore/EventStore-Client-Go/position"
@@ -9,34 +10,34 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 )
 
-func updateRequestStreamProto(
+func UpdatePersistentRequestStreamProto(
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.UpdateReq {
 	return &persistent.UpdateReq{
-		Options: updateSubscriptionStreamConfigProto(streamName, groupName, position, settings),
+		Options: UpdatePersistentSubscriptionStreamConfigProto(streamName, groupName, position, settings),
 	}
 }
 
-func UpdateRequestAllOptionsProto(
+func UpdatePersistentRequestAllOptionsProto(
 	groupName string,
 	position stream.AllStreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.UpdateReq {
-	options := updateRequestAllOptionsSettingsProto(position)
+	options := UpdatePersistentRequestAllOptionsSettingsProto(position)
 
 	return &persistent.UpdateReq{
 		Options: &persistent.UpdateReq_Options{
 			StreamOption: options,
 			GroupName:    groupName,
-			Settings:     updateSubscriptionSettingsProto(settings),
+			Settings:     UpdatePersistentSubscriptionSettingsProto(settings),
 		},
 	}
 }
 
-func updateRequestAllOptionsSettingsProto(
+func UpdatePersistentRequestAllOptionsSettingsProto(
 	position stream.AllStreamPosition,
 ) *persistent.UpdateReq_Options_All {
 	options := &persistent.UpdateReq_Options_All{
@@ -55,30 +56,30 @@ func updateRequestAllOptionsSettingsProto(
 			Start: &shared.Empty{},
 		}
 	case stream.RevisionPosition:
-		options.All.AllOption = toUpdateRequestAllOptionsFromPosition(value.Value)
+		options.All.AllOption = ToUpdatePersistentRequestAllOptionsFromPosition(value.Value)
 	}
 
 	return options
 }
 
-func updateSubscriptionStreamConfigProto(
+func UpdatePersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) *persistent.UpdateReq_Options {
 	return &persistent.UpdateReq_Options{
-		StreamOption: updateSubscriptionStreamSettingsProto(streamName, groupName, position),
+		StreamOption: UpdatePersistentSubscriptionStreamSettingsProto(streamName, groupName, position),
 		// backward compatibility
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamName),
 		},
 		GroupName: groupName,
-		Settings:  updateSubscriptionSettingsProto(settings),
+		Settings:  UpdatePersistentSubscriptionSettingsProto(settings),
 	}
 }
 
-func updateSubscriptionStreamSettingsProto(
+func UpdatePersistentSubscriptionStreamSettingsProto(
 	streamName string,
 	groupName string,
 	position stream.StreamPosition,
@@ -110,7 +111,7 @@ func updateSubscriptionStreamSettingsProto(
 	return streamOption
 }
 
-func updateSubscriptionSettingsProto(
+func UpdatePersistentSubscriptionSettingsProto(
 	settings SubscriptionSettings,
 ) *persistent.UpdateReq_Settings {
 	return &persistent.UpdateReq_Settings{
@@ -123,13 +124,13 @@ func updateSubscriptionSettingsProto(
 		LiveBufferSize:        settings.LiveBufferSize,
 		ReadBatchSize:         settings.ReadBatchSize,
 		HistoryBufferSize:     settings.HistoryBufferSize,
-		NamedConsumerStrategy: updateRequestConsumerStrategyProto(settings.NamedConsumerStrategy),
-		MessageTimeout:        updateRequestMessageTimeOutInMsProto(settings.MessageTimeoutInMs),
-		CheckpointAfter:       updateRequestCheckpointAfterMsProto(settings.CheckpointAfterInMs),
+		NamedConsumerStrategy: UpdatePersistentRequestConsumerStrategyProto(settings.NamedConsumerStrategy),
+		MessageTimeout:        UpdatePersistentRequestMessageTimeOutInMsProto(settings.MessageTimeoutInMs),
+		CheckpointAfter:       UpdatePersistentRequestCheckpointAfterMsProto(settings.CheckpointAfterInMs),
 	}
 }
 
-func updateRequestConsumerStrategyProto(
+func UpdatePersistentRequestConsumerStrategyProto(
 	strategy ConsumerStrategy,
 ) persistent.UpdateReq_ConsumerStrategy {
 	switch strategy {
@@ -145,7 +146,7 @@ func updateRequestConsumerStrategyProto(
 	}
 }
 
-func updateRequestMessageTimeOutInMsProto(
+func UpdatePersistentRequestMessageTimeOutInMsProto(
 	timeout int32,
 ) *persistent.UpdateReq_Settings_MessageTimeoutMs {
 	return &persistent.UpdateReq_Settings_MessageTimeoutMs{
@@ -153,7 +154,7 @@ func updateRequestMessageTimeOutInMsProto(
 	}
 }
 
-func updateRequestCheckpointAfterMsProto(
+func UpdatePersistentRequestCheckpointAfterMsProto(
 	checkpointAfterMs int32,
 ) *persistent.UpdateReq_Settings_CheckpointAfterMs {
 	return &persistent.UpdateReq_Settings_CheckpointAfterMs{
@@ -161,8 +162,8 @@ func updateRequestCheckpointAfterMsProto(
 	}
 }
 
-// toUpdateRequestAllOptionsFromPosition ...
-func toUpdateRequestAllOptionsFromPosition(position position.Position) *persistent.UpdateReq_AllOptions_Position {
+// ToUpdatePersistentRequestAllOptionsFromPosition ...
+func ToUpdatePersistentRequestAllOptionsFromPosition(position position.Position) *persistent.UpdateReq_AllOptions_Position {
 	return &persistent.UpdateReq_AllOptions_Position{
 		Position: &persistent.UpdateReq_Position{
 			PreparePosition: position.Prepare,

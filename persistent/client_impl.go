@@ -2,6 +2,7 @@ package persistent
 
 import (
 	"context"
+
 	"github.com/EventStore/EventStore-Client-Go/stream"
 
 	"github.com/EventStore/EventStore-Client-Go/client/filtering"
@@ -39,7 +40,7 @@ func (client Client) ConnectToPersistentSubscription(
 		return nil, NewError(SubscribeToStreamSync_FailedToInitPersistentSubscriptionClientErr, err)
 	}
 
-	err = readClient.Send(toPersistentReadRequest(bufferSize, groupName, []byte(streamName)))
+	err = readClient.Send(ToPersistentReadRequest(bufferSize, groupName, []byte(streamName)))
 	if err != nil {
 		defer cancel()
 		return nil, NewError(SubscribeToStreamSync_FailedToSendStreamInitializationErr, err)
@@ -135,7 +136,7 @@ func (client Client) UpdateStreamSubscription(
 	position stream.StreamPosition,
 	settings SubscriptionSettings,
 ) error {
-	updateSubscriptionConfig := updateRequestStreamProto(streamName, groupName, position, settings)
+	updateSubscriptionConfig := UpdatePersistentRequestStreamProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
@@ -155,7 +156,7 @@ func (client Client) UpdateAllSubscription(
 	position stream.AllStreamPosition,
 	settings SubscriptionSettings,
 ) error {
-	updateSubscriptionConfig := UpdateRequestAllOptionsProto(groupName, position, settings)
+	updateSubscriptionConfig := UpdatePersistentRequestAllOptionsProto(groupName, position, settings)
 
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, grpc.Header(&headers), grpc.Trailer(&trailers))
@@ -175,7 +176,7 @@ func (client Client) DeleteStreamSubscription(
 	streamName string,
 	groupName string,
 ) error {
-	deleteSubscriptionOptions := deleteRequestStreamProto(streamName, groupName)
+	deleteSubscriptionOptions := DeletePersistentRequestStreamProto(streamName, groupName)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
@@ -189,7 +190,7 @@ func (client Client) DeleteStreamSubscription(
 const DeleteAllSubscription_FailedToDeleteErr ErrorCode = "DeleteAllSubscription_FailedToDeleteErr"
 
 func (client Client) DeleteAllSubscription(ctx context.Context, handle connection.ConnectionHandle, groupName string) error {
-	deleteSubscriptionOptions := deleteRequestAllOptionsProto(groupName)
+	deleteSubscriptionOptions := DeletePersistentRequestAllOptionsProto(groupName)
 	var headers, trailers metadata.MD
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
