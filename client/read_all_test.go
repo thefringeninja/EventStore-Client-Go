@@ -34,8 +34,9 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{}
-	opts.SetResolveLinks()
+	opts := client.ReadAllEventsOptions{
+		ResolveLinks: true,
+	}
 	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
 	if err != nil {
@@ -83,9 +84,10 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{}
-	opts.SetFromPosition(types.Position{Commit: 1788, Prepare: 1788})
-	opts.SetResolveLinks()
+	opts := client.ReadAllEventsOptions{
+		From:         types.Position{Commit: 1_788, Prepare: 1_788},
+		ResolveLinks: true,
+	}
 
 	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
@@ -134,10 +136,11 @@ func TestReadAllEventsBackwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{}
-	opts.SetFromEnd()
-	opts.SetBackwards()
-	opts.SetResolveLinks()
+	opts := client.ReadAllEventsOptions{
+		From:         types.End{},
+		Direction:    types.Backwards,
+		ResolveLinks: true,
+	}
 
 	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 
@@ -186,10 +189,11 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{}
-	opts.SetFromPosition(types.Position{Commit: 3_386, Prepare: 3_386})
-	opts.SetBackwards()
-	opts.SetResolveLinks()
+	opts := client.ReadAllEventsOptions{
+		From:         types.Position{Commit: 3_386, Prepare: 3_386},
+		Direction:    types.Backwards,
+		ResolveLinks: true,
+	}
 
 	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
 

@@ -213,7 +213,7 @@ func (client *Client) DeleteStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.ExpectedRevision())
+	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.ExpectedRevision)
 	deleteResponse, err := streamsClient.Delete(context, deleteRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 	if err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
@@ -236,7 +236,7 @@ func (client *Client) TombstoneStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
-	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.ExpectedRevision())
+	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.ExpectedRevision)
 	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
 
 	if err != nil {
@@ -389,7 +389,7 @@ func (client *Client) ConnectToPersistentSubscription(
 	return persistentSubscriptionClient.ConnectToPersistentSubscription(
 		ctx,
 		handle,
-		int32(options.BatchSize()),
+		int32(options.BatchSize),
 		streamName,
 		groupName,
 	)
@@ -408,7 +408,12 @@ func (client *Client) CreatePersistentSubscription(
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From(), *options.Settings())
+	if options.Settings == nil {
+		setts := types.SubscriptionSettingsDefault()
+		options.Settings = &setts
+	}
+
+	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From, *options.Settings)
 }
 
 func (client *Client) CreatePersistentSubscriptionAll(
@@ -423,21 +428,26 @@ func (client *Client) CreatePersistentSubscriptionAll(
 	}
 
 	var filterOptions *protoutils.SubscriptionFilterOptions = nil
-	if options.Filter() != nil {
+	if options.Filter != nil {
 		filterOptions = &protoutils.SubscriptionFilterOptions{
-			MaxSearchWindow:    options.MaxSearchWindow(),
-			CheckpointInterval: options.CheckpointInterval(),
-			SubscriptionFilter: options.Filter(),
+			MaxSearchWindow:    options.MaxSearchWindow,
+			CheckpointInterval: options.CheckpointInterval,
+			SubscriptionFilter: options.Filter,
 		}
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
+
+	if options.Settings == nil {
+		setts := types.SubscriptionSettingsDefault()
+		options.Settings = &setts
+	}
 
 	return persistentSubscriptionClient.CreateAllSubscription(
 		ctx,
 		handle,
 		groupName,
-		options.From(),
-		*options.Settings(),
+		options.From,
+		*options.Settings,
 		filterOptions,
 	)
 }
@@ -455,7 +465,12 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From(), *options.Settings())
+	if options.Settings == nil {
+		setts := types.SubscriptionSettingsDefault()
+		options.Settings = &setts
+	}
+
+	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From, *options.Settings)
 }
 
 func (client *Client) UpdatePersistentSubscriptionAll(
@@ -470,7 +485,7 @@ func (client *Client) UpdatePersistentSubscriptionAll(
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From(), *options.Settings())
+	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From, *options.Settings)
 }
 
 func (client *Client) DeletePersistentSubscription(

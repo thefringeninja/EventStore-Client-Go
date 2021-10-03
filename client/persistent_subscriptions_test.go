@@ -47,13 +47,13 @@ func Test_CreatePersistentStreamSubscription_MessageTimeoutZero(t *testing.T) {
 	settings := types.SubscriptionSettingsDefault()
 	settings.MessageTimeoutInMs = 0
 
-	options := client.PersistentStreamSubscriptionOptions{}
-	options.SetSettings(settings)
 	err := clientInstance.CreatePersistentSubscription(
 		context.Background(),
 		streamID,
 		"Group 1",
-		options,
+		client.PersistentStreamSubscriptionOptions{
+			Settings: &settings,
+		},
 	)
 
 	require.NoError(t, err)
@@ -163,9 +163,7 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 
 	require.NoError(t, err)
 
-	options := client.PersistentStreamSubscriptionOptions{}
 	settings := types.SubscriptionSettingsDefault()
-
 	settings.HistoryBufferSize = settings.HistoryBufferSize + 1
 	settings.NamedConsumerStrategy = types.ConsumerStrategy_DispatchToSingle
 	settings.MaxSubscriberCount = settings.MaxSubscriberCount + 1
@@ -179,8 +177,9 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 	settings.ExtraStatistics = !settings.ExtraStatistics
 	settings.ResolveLinks = !settings.ResolveLinks
 
-	options.SetSettings(settings)
-	err = clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", options)
+	err = clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", client.PersistentStreamSubscriptionOptions{
+		Settings: &settings,
+	})
 
 	require.NoError(t, err)
 }
@@ -262,8 +261,9 @@ func pushEventsToStream(t *testing.T,
 	streamID string,
 	events []types.ProposedEvent) {
 
-	opts := client.AppendToStreamOptions{}
-	opts.SetExpectNoStream()
+	opts := client.AppendToStreamOptions{
+		ExpectedRevision: types.NoStream{},
+	}
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 
 	require.NoError(t, err)
@@ -278,10 +278,9 @@ func TestPersistentSubscriptionClosing(t *testing.T) {
 	streamID := "dataset20M-0"
 	groupName := "Group 1"
 
-	opts := client.PersistentStreamSubscriptionOptions{}
-	opts.SetFromStart()
-
-	err := db.CreatePersistentSubscription(context.Background(), streamID, groupName, opts)
+	err := db.CreatePersistentSubscription(context.Background(), streamID, groupName, client.PersistentStreamSubscriptionOptions{
+		From: types.Start{},
+	})
 
 	require.NoError(t, err)
 

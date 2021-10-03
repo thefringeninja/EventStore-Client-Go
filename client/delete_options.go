@@ -5,19 +5,11 @@ import (
 )
 
 type DeleteStreamOptions struct {
-	expectedRevision types.ExpectedRevision
+	ExpectedRevision types.ExpectedRevision
 }
 
 func (o *DeleteStreamOptions) setDefaults() {
-	if o.expectedRevision == nil {
-		o.expectedRevision = types.Any{}
+	if o.ExpectedRevision == nil {
+		o.ExpectedRevision = types.Any{}
 	}
-}
-
-func (o *DeleteStreamOptions) SetExpectedRevision(revision types.ExpectedRevision) {
-	o.expectedRevision = revision
-}
-
-func (o *DeleteStreamOptions) ExpectedRevision() types.ExpectedRevision {
-	return o.expectedRevision
 }

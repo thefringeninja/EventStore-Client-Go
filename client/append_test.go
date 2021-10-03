@@ -58,8 +58,9 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := client.AppendToStreamOptions{}
-	opts.SetExpectNoStream()
+	opts := client.AppendToStreamOptions{
+		ExpectedRevision: types.NoStream{},
+	}
 
 	_, err := db.AppendToStream(context, streamID.String(), opts, testEvent)
 
@@ -100,8 +101,9 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := client.AppendToStreamOptions{}
-	opts.SetExpectStreamExists()
+	opts := client.AppendToStreamOptions{
+		ExpectedRevision: types.StreamExists{},
+	}
 
 	_, err := db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
@@ -131,8 +133,9 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := client.AppendToStreamOptions{}
-	opts.SetExpectAny()
+	opts := client.AppendToStreamOptions{
+		ExpectedRevision: types.Any{},
+	}
 
 	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
@@ -164,8 +167,9 @@ func TestMetadataOperation(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 
-	opts := client.AppendToStreamOptions{}
-	opts.SetExpectAny()
+	opts := client.AppendToStreamOptions{
+		ExpectedRevision: types.Any{},
+	}
 
 	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 

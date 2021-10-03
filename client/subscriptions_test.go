@@ -27,10 +27,9 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	var receivedEvents sync.WaitGroup
 	var appendedEvents sync.WaitGroup
 
-	opts := client.SubscribeToStreamOptions{}
-	opts.SetFromStart()
-
-	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", opts)
+	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", client.SubscribeToStreamOptions{
+		From: types.Start{},
+	})
 
 	go func() {
 		current := 0
@@ -63,8 +62,9 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	require.False(t, timedOut, "Timed out waiting for initial set of events")
 
 	// Write a new event
-	opts2 := client.AppendToStreamOptions{}
-	opts2.SetExpectRevision(5_999)
+	opts2 := client.AppendToStreamOptions{
+		ExpectedRevision: types.Revision(5_999),
+	}
 	writeResult, err := db.AppendToStream(context.Background(), streamID, opts2, testEvent)
 	require.NoError(t, err)
 	require.Equal(t, uint64(6_000), writeResult.NextExpectedVersion)
@@ -100,14 +100,13 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	var receivedEvents sync.WaitGroup
 	receivedEvents.Add(len(positions))
 
-	filter := types.NewFilterOnEventType()
-	filter.AddPrefixes("eventType-194")
-
-	opts := client.SubscribeToAllOptions{}
-	opts.SetFromStart()
-	opts.SetFilter(filter)
-
-	subscription, err := db.SubscribeToAll(context.Background(), opts)
+	subscription, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
+		From: types.Start{},
+		Filter: &types.SubscriptionFilter{
+			Type:     types.EventFilterType,
+			Prefixes: []string{"eventType-194"},
+		},
+	})
 
 	go func() {
 		current := 0
@@ -143,10 +142,10 @@ func TestConnectionClosing(t *testing.T) {
 
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
-	opts := client.SubscribeToStreamOptions{}
-	opts.SetFromStart()
 
-	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", opts)
+	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", client.SubscribeToStreamOptions{
+		From: types.Start{},
+	})
 
 	go func() {
 		current := 1
