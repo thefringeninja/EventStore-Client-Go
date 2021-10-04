@@ -70,7 +70,7 @@ func TestDetectStreamDeleted(t *testing.T) {
 	_, err = db.TombstoneStream(context.Background(), "foobar", client.TombstoneStreamOptions{})
 	require.Nil(t, err)
 
-	_, err = db.ReadStreamEvents(context.Background(), "foobar", client.ReadStreamEventsOptions{}, 1)
+	_, err = db.ReadStream(context.Background(), "foobar", client.ReadStreamOptions{}, 1)
 	var streamDeletedError *client.StreamDeletedError
 
 	require.True(t, errors.As(err, &streamDeletedError))

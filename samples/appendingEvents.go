@@ -117,12 +117,12 @@ func AppendWithNoStream(db *client.Client) {
 
 func AppendWithConcurrencyCheck(db *client.Client) {
 	// region append-with-concurrency-check
-	ropts := client.ReadStreamEventsOptions{
+	ropts := client.ReadStreamOptions{
 		Direction: types.Backwards,
 		From:      types.End{},
 	}
 
-	stream, err := db.ReadStreamEvents(context.Background(), "concurrency-stream", ropts, 1)
+	stream, err := db.ReadStream(context.Background(), "concurrency-stream", ropts, 1)
 
 	if err != nil {
 		panic(err)

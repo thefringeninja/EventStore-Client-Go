@@ -35,7 +35,7 @@ func Run() {
 
 	data, err := json.Marshal(testEvent)
 	// endregion createEvent
-	
+
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +53,7 @@ func Run() {
 	}
 
 	// region readStream
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", client.ReadStreamEventsOptions{}, 10)
+	stream, err := db.ReadStream(context.Background(), "some-stream", client.ReadStreamOptions{}, 10)
 
 	if err != nil {
 		panic(err)

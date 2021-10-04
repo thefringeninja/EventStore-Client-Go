@@ -33,13 +33,13 @@ func TestTLSDefaults(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
 
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
@@ -70,12 +70,12 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.True(t, errors.Is(err, io.EOF))
 }
 
@@ -95,12 +95,12 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.True(t, errors.Is(err, io.EOF))
 }
 
@@ -120,12 +120,12 @@ func TestTLSWithoutCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }
@@ -156,12 +156,12 @@ func TestTLSWithCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.True(t, errors.Is(err, io.EOF))
 }
 
@@ -187,12 +187,12 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.True(t, errors.Is(err, io.EOF))
 }
 
@@ -212,12 +212,12 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.True(t, errors.Is(err, io.EOF))
 }
 
@@ -247,12 +247,12 @@ func TestTLSWithInvalidCertificate(t *testing.T) {
 
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Start{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
-	_, err = c.ReadAllEvents(context.Background(), opts, numberOfEvents)
+	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "certificate signed by unknown authority")
 }

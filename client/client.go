@@ -166,11 +166,11 @@ func (client *Client) SetStreamMetadata(
 func (client *Client) GetStreamMetadata(
 	context context.Context,
 	streamID string,
-	opts ReadStreamEventsOptions,
+	opts ReadStreamOptions,
 ) (*types.StreamMetadata, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 
-	stream, err := client.ReadStreamEvents(context, streamName, opts, 1)
+	stream, err := client.ReadStream(context, streamName, opts, 1)
 
 	var streamDeletedError *StreamDeletedError
 	if errors.Is(err, ErrStreamNotFound) || errors.As(err, &streamDeletedError) {
@@ -269,11 +269,11 @@ func (client *Client) TombstoneStream(
 	return &DeleteResult{Position: protoutils.TombstonePositionFromProto(tombstoneResponse)}, nil
 }
 
-// ReadStreamEvents ...
-func (client *Client) ReadStreamEvents(
+// ReadStream ...
+func (client *Client) ReadStream(
 	context context.Context,
 	streamID string,
-	opts ReadStreamEventsOptions,
+	opts ReadStreamOptions,
 	count uint64,
 ) (*ReadStream, error) {
 	opts.setDefaults()
@@ -287,10 +287,10 @@ func (client *Client) ReadStreamEvents(
 	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest, opts.Authenticated)
 }
 
-// ReadAllEvents ...
-func (client *Client) ReadAllEvents(
+// ReadAll ...
+func (client *Client) ReadAll(
 	context context.Context,
-	opts ReadAllEventsOptions,
+	opts ReadAllOptions,
 	count uint64,
 ) (*ReadStream, error) {
 	opts.setDefaults()

@@ -4,27 +4,27 @@ import (
 	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
-type ReadStreamEventsOptions struct {
+type ReadStreamOptions struct {
 	Direction      types.Direction
 	From           types.StreamPosition
 	ResolveLinkTos bool
 	Authenticated  *types.Credentials
 }
 
-func (o *ReadStreamEventsOptions) setDefaults() {
+func (o *ReadStreamOptions) setDefaults() {
 	if o.From == nil {
 		o.From = types.Start{}
 	}
 }
 
-type ReadAllEventsOptions struct {
+type ReadAllOptions struct {
 	Direction      types.Direction
 	From           types.AllPosition
 	ResolveLinkTos bool
 	Authenticated  *types.Credentials
 }
 
-func (o *ReadAllEventsOptions) setDefaults() {
+func (o *ReadAllOptions) setDefaults() {
 	if o.From == nil {
 		o.From = types.Start{}
 	}

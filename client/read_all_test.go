@@ -34,12 +34,12 @@ func TestReadAllEventsForwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		Direction:      types.Forwards,
 		From:           types.Start{},
 		ResolveLinkTos: true,
 	}
-	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAll(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -86,12 +86,12 @@ func TestReadAllEventsForwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Position{Commit: 1_788, Prepare: 1_788},
 		ResolveLinkTos: true,
 	}
 
-	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAll(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -138,13 +138,13 @@ func TestReadAllEventsBackwardsFromZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.End{},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
 
-	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAll(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -191,13 +191,13 @@ func TestReadAllEventsBackwardsFromNonZeroPosition(t *testing.T) {
 	numberOfEventsToRead := 10
 	numberOfEvents := uint64(numberOfEventsToRead)
 
-	opts := client.ReadAllEventsOptions{
+	opts := client.ReadAllOptions{
 		From:           types.Position{Commit: 3_386, Prepare: 3_386},
 		Direction:      types.Backwards,
 		ResolveLinkTos: true,
 	}
 
-	stream, err := db.ReadAllEvents(context, opts, numberOfEvents)
+	stream, err := db.ReadAll(context, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)

@@ -65,12 +65,12 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 
 	streamId := "dataset20M-1800"
 
-	opts := client.ReadStreamEventsOptions{
+	opts := client.ReadStreamOptions{
 		Direction:      types.Forwards,
 		ResolveLinkTos: true,
 	}
 
-	stream, err := db.ReadStreamEvents(context, streamId, opts, numberOfEvents)
+	stream, err := db.ReadStream(context, streamId, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -120,13 +120,13 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 	numberOfEvents := uint64(numberOfEventsToRead)
 
 	streamId := "dataset20M-1800"
-	opts := client.ReadStreamEventsOptions{
+	opts := client.ReadStreamOptions{
 		Direction:      types.Backwards,
 		From:           types.End{},
 		ResolveLinkTos: true,
 	}
 
-	stream, err := db.ReadStreamEvents(context, streamId, opts, numberOfEvents)
+	stream, err := db.ReadStream(context, streamId, opts, numberOfEvents)
 
 	if err != nil {
 		t.Fatalf("Unexpected failure %+v", err)
@@ -175,7 +175,7 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 	_, err := db.AppendToStream(context.Background(), "testing-closing", opts, proposedEvents...)
 	require.NoError(t, err)
 
-	stream, err := db.ReadStreamEvents(context.Background(), "testing-closing", client.ReadStreamEventsOptions{}, 1_024)
+	stream, err := db.ReadStream(context.Background(), "testing-closing", client.ReadStreamOptions{}, 1_024)
 
 	require.NoError(t, err)
 	_, err = collectStreamEvents(stream)
@@ -201,7 +201,7 @@ func TestReadStreamNotFound(t *testing.T) {
 	db := CreateTestClient(container, t)
 	defer db.Close()
 
-	_, err := db.ReadStreamEvents(context.Background(), "foobar", client.ReadStreamEventsOptions{}, 1)
+	_, err := db.ReadStream(context.Background(), "foobar", client.ReadStreamOptions{}, 1)
 
 	require.True(t, errors.Is(err, client.ErrStreamNotFound))
 }

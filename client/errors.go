@@ -18,7 +18,7 @@ var ErrUnauthenticated = errors.New("Unauthenticated")
 // from the EventStore.
 // Example usage:
 // ```go
-// events, err := client.ReadStreamEvents(...)
+// events, err := client.ReadStream(...)
 // if err == errors.ErrStreamNotFound {
 //   // handle the stream not being found
 // }

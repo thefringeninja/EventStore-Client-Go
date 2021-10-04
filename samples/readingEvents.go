@@ -13,7 +13,7 @@ import (
 
 func ReadFromStream(db *client.Client) {
 	// region read-from-stream
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", client.ReadStreamEventsOptions{}, 100)
+	stream, err := db.ReadStream(context.Background(), "some-stream", client.ReadStreamOptions{}, 100)
 
 	if err != nil {
 		panic(err)
@@ -40,11 +40,11 @@ func ReadFromStream(db *client.Client) {
 
 func ReadFromStreamPosition(db *client.Client) {
 	// region read-from-position
-	ropts := client.ReadStreamEventsOptions{
+	ropts := client.ReadStreamOptions{
 		From: types.Revision(10),
 	}
 
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 20)
+	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 20)
 
 	if err != nil {
 		panic(err)
@@ -69,13 +69,32 @@ func ReadFromStreamPosition(db *client.Client) {
 	// endregion iterate-stream
 }
 
+func ReadStreamOverridingUserCredentials(db *client.Client) {
+	// region overriding-user-credentials
+	options := client.ReadStreamOptions{
+		From: types.Start{},
+		Authenticated: &types.Credentials{
+			Login:    "admin",
+			Password: "changeit",
+		},
+	}
+	stream, err := db.ReadStream(context.Background(), "some-stream", options, 100)
+	// endregion overriding-user-credentials
+
+	if err != nil {
+		panic(err)
+	}
+
+	stream.Close()
+}
+
 func ReadFromStreamPositionCheck(db *client.Client) {
 	// region checking-for-stream-presence
-	ropts := client.ReadStreamEventsOptions{
+	ropts := client.ReadStreamOptions{
 		From: types.Revision(10),
 	}
 
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 100)
+	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 100)
 
 	if err != nil {
 		panic(err)
@@ -105,12 +124,12 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 
 func ReadStreamBackwards(db *client.Client) {
 	// region reading-backwards
-	ropts := client.ReadStreamEventsOptions{
+	ropts := client.ReadStreamOptions{
 		Direction: types.Backwards,
 		From:      types.End{},
 	}
 
-	stream, err := db.ReadStreamEvents(context.Background(), "some-stream", ropts, 10)
+	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 10)
 
 	if err != nil {
 		panic(err)
@@ -136,7 +155,7 @@ func ReadStreamBackwards(db *client.Client) {
 
 func ReadFromAllStream(db *client.Client) {
 	// region read-from-all-stream
-	stream, err := db.ReadAllEvents(context.Background(), client.ReadAllEventsOptions{}, 100)
+	stream, err := db.ReadAll(context.Background(), client.ReadAllOptions{}, 100)
 
 	if err != nil {
 		panic(err)
@@ -163,7 +182,7 @@ func ReadFromAllStream(db *client.Client) {
 
 func IgnoreSystemEvents(db *client.Client) {
 	// region ignore-system-events
-	stream, err := db.ReadAllEvents(context.Background(), client.ReadAllEventsOptions{}, 100)
+	stream, err := db.ReadAll(context.Background(), client.ReadAllOptions{}, 100)
 
 	if err != nil {
 		panic(err)
@@ -195,12 +214,12 @@ func IgnoreSystemEvents(db *client.Client) {
 
 func ReadFromAllBackwards(db *client.Client) {
 	// region read-from-all-stream-backwards
-	ropts := client.ReadAllEventsOptions{
+	ropts := client.ReadAllOptions{
 		Direction: types.Backwards,
 		From:      types.End{},
 	}
 
-	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
+	stream, err := db.ReadAll(context.Background(), ropts, 100)
 
 	if err != nil {
 		panic(err)
@@ -227,11 +246,11 @@ func ReadFromAllBackwards(db *client.Client) {
 
 func ReadFromStreamResolvingLinkToS(db *client.Client) {
 	// region read-from-all-stream-resolving-link-Tos
-	ropts := client.ReadAllEventsOptions{
+	ropts := client.ReadAllOptions{
 		ResolveLinkTos: true,
 	}
 
-	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
+	stream, err := db.ReadAll(context.Background(), ropts, 100)
 	// endregion read-from-all-stream-resolving-link-Tos
 
 	if err != nil {
