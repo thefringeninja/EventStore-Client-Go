@@ -181,13 +181,14 @@ func CheckpointCallbackWithInterval(db *client.Client) {
 			Regex: "/^[^\\$].*/",
 		},
 	})
-
+	// endregion checkpoint-with-interval
 	if err != nil {
 		panic(err)
 	}
 
 	defer sub.Close()
 
+	// region checkpoint
 	for {
 		event := sub.Recv()
 
@@ -207,5 +208,5 @@ func CheckpointCallbackWithInterval(db *client.Client) {
 		}
 	}
 
-	// endregion checkpoint-with-interval
+	// endregion checkpoint
 }
