@@ -129,7 +129,7 @@ func Test_CreatePersistentStreamSubscription_AfterDeleting(t *testing.T) {
 
 	require.NoError(t, err)
 
-	err = clientInstance.DeletePersistentSubscription(context.Background(), streamID, "Group 1")
+	err = clientInstance.DeletePersistentSubscription(context.Background(), streamID, "Group 1", client.DeletePersistentSubscriptionOptions{})
 
 	require.NoError(t, err)
 
@@ -223,6 +223,7 @@ func Test_DeletePersistentStreamSubscription(t *testing.T) {
 		context.Background(),
 		streamID,
 		"Group 1",
+		client.DeletePersistentSubscriptionOptions{},
 	)
 
 	require.NoError(t, err)
@@ -240,6 +241,7 @@ func Test_DeletePersistentSubscription_ErrIfSubscriptionDoesNotExist(t *testing.
 		context.Background(),
 		"a",
 		"a",
+		client.DeletePersistentSubscriptionOptions{},
 	)
 
 	require.Error(t, err)
@@ -287,10 +289,10 @@ func TestPersistentSubscriptionClosing(t *testing.T) {
 	var receivedEvents sync.WaitGroup
 	var droppedEvent sync.WaitGroup
 
-	optsC := client.ConnectToPersistentSubscriptionOptions{}
-	optsC.SetBatchSize(2)
 	subscription, err := db.ConnectToPersistentSubscription(
-		context.Background(), streamID, groupName, optsC)
+		context.Background(), streamID, groupName, client.ConnectToPersistentSubscriptionOptions{
+			BatchSize: 2,
+		})
 
 	require.NoError(t, err)
 

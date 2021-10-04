@@ -9,9 +9,8 @@ import (
 	"errors"
 
 	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
+	"github.com/EventStore/EventStore-Client-Go/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
@@ -53,8 +52,15 @@ func (client *Client) AppendToStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
+	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
+	if opts.Authenticated != nil {
+		callOptions = append(callOptions, grpc.PerRPCCredentials(basicAuth{
+			username: opts.Authenticated.Login,
+			password: opts.Authenticated.Password,
+		}))
+	}
 
-	appendOperation, err := streamsClient.Append(context, grpc.Header(&headers), grpc.Trailer(&trailers))
+	appendOperation, err := streamsClient.Append(context, callOptions...)
 	if err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("could not construct append operation. Reason: %w", err)
@@ -215,8 +221,15 @@ func (client *Client) DeleteStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
+	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
+	if opts.Authenticated != nil {
+		callOptions = append(callOptions, grpc.PerRPCCredentials(basicAuth{
+			username: opts.Authenticated.Login,
+			password: opts.Authenticated.Password,
+		}))
+	}
 	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.ExpectedRevision)
-	deleteResponse, err := streamsClient.Delete(context, deleteRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
+	deleteResponse, err := streamsClient.Delete(context, deleteRequest, callOptions...)
 	if err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to perform delete, details: %w", err)
@@ -238,8 +251,15 @@ func (client *Client) TombstoneStream(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
+	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
+	if opts.Authenticated != nil {
+		callOptions = append(callOptions, grpc.PerRPCCredentials(basicAuth{
+			username: opts.Authenticated.Login,
+			password: opts.Authenticated.Password,
+		}))
+	}
 	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.ExpectedRevision)
-	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
+	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, callOptions...)
 
 	if err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
@@ -264,7 +284,7 @@ func (client *Client) ReadStreamEvents(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 
-	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest)
+	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest, opts.Authenticated)
 }
 
 // ReadAllEvents ...
@@ -280,7 +300,7 @@ func (client *Client) ReadAllEvents(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	readRequest := protoutils.ToReadAllRequest(opts.Direction, opts.From, count, opts.ResolveLinkTos)
-	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest)
+	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest, opts.Authenticated)
 }
 
 // SubscribeToStream ...
@@ -295,13 +315,20 @@ func (client *Client) SubscribeToStream(
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
 	var headers, trailers metadata.MD
+	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
+	if opts.Authenticated != nil {
+		callOptions = append(callOptions, grpc.PerRPCCredentials(basicAuth{
+			username: opts.Authenticated.Login,
+			password: opts.Authenticated.Password,
+		}))
+	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.From, opts.ResolveLinks, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
 	ctx, cancel := context.WithCancel(ctx)
-	readClient, err := streamsClient.Read(ctx, subscriptionRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
+	readClient, err := streamsClient.Read(ctx, subscriptionRequest, callOptions...)
 	if err != nil {
 		defer cancel()
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
@@ -336,6 +363,13 @@ func (client *Client) SubscribeToAll(
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
 	var headers, trailers metadata.MD
+	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
+	if opts.Authenticated != nil {
+		callOptions = append(callOptions, grpc.PerRPCCredentials(basicAuth{
+			username: opts.Authenticated.Login,
+			password: opts.Authenticated.Password,
+		}))
+	}
 
 	var filterOptions *protoutils.SubscriptionFilterOptions = nil
 	if opts.Filter != nil {
@@ -351,7 +385,7 @@ func (client *Client) SubscribeToAll(
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
 	ctx, cancel := context.WithCancel(ctx)
-	readClient, err := streamsClient.Read(ctx, subscriptionRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
+	readClient, err := streamsClient.Read(ctx, subscriptionRequest, callOptions...)
 	if err != nil {
 		defer cancel()
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
@@ -394,6 +428,7 @@ func (client *Client) ConnectToPersistentSubscription(
 		int32(options.BatchSize),
 		streamName,
 		groupName,
+		options.Authenticated,
 	)
 }
 
@@ -415,7 +450,7 @@ func (client *Client) CreatePersistentSubscription(
 		options.Settings = &setts
 	}
 
-	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From, *options.Settings)
+	return persistentSubscriptionClient.CreateStreamSubscription(ctx, handle, streamName, groupName, options.From, *options.Settings, options.Authenticated)
 }
 
 func (client *Client) CreatePersistentSubscriptionAll(
@@ -451,6 +486,7 @@ func (client *Client) CreatePersistentSubscriptionAll(
 		options.From,
 		*options.Settings,
 		filterOptions,
+		options.Authenticated,
 	)
 }
 
@@ -472,7 +508,7 @@ func (client *Client) UpdatePersistentStreamSubscription(
 		options.Settings = &setts
 	}
 
-	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From, *options.Settings)
+	return persistentSubscriptionClient.UpdateStreamSubscription(ctx, handle, streamName, groupName, options.From, *options.Settings, options.Authenticated)
 }
 
 func (client *Client) UpdatePersistentSubscriptionAll(
@@ -487,13 +523,14 @@ func (client *Client) UpdatePersistentSubscriptionAll(
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From, *options.Settings)
+	return persistentSubscriptionClient.UpdateAllSubscription(ctx, handle, groupName, options.From, *options.Settings, options.Authenticated)
 }
 
 func (client *Client) DeletePersistentSubscription(
 	ctx context.Context,
 	streamName string,
 	groupName string,
+	options DeletePersistentSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
@@ -501,12 +538,13 @@ func (client *Client) DeletePersistentSubscription(
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.DeleteStreamSubscription(ctx, handle, streamName, groupName)
+	return persistentSubscriptionClient.DeleteStreamSubscription(ctx, handle, streamName, groupName, options.Authenticated)
 }
 
 func (client *Client) DeletePersistentSubscriptionAll(
 	ctx context.Context,
 	groupName string,
+	options DeletePersistentSubscriptionOptions,
 ) error {
 	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
@@ -514,7 +552,7 @@ func (client *Client) DeletePersistentSubscriptionAll(
 	}
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
-	return persistentSubscriptionClient.DeleteAllSubscription(ctx, handle, groupName)
+	return persistentSubscriptionClient.DeleteAllSubscription(ctx, handle, groupName, options.Authenticated)
 }
 
 func readInternal(
@@ -523,10 +561,18 @@ func readInternal(
 	handle connectionHandle,
 	streamsClient api.StreamsClient,
 	readRequest *api.ReadReq,
+	auth *types.Credentials,
 ) (*ReadStream, error) {
 	var headers, trailers metadata.MD
+	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
+	if auth != nil {
+		callOptions = append(callOptions, grpc.PerRPCCredentials(basicAuth{
+			username: auth.Login,
+			password: auth.Password,
+		}))
+	}
 	ctx, cancel := context.WithCancel(ctx)
-	result, err := streamsClient.Read(ctx, readRequest, grpc.Header(&headers), grpc.Trailer(&trailers))
+	result, err := streamsClient.Read(ctx, readRequest, callOptions...)
 	if err != nil {
 		defer cancel()
 

@@ -35,11 +35,10 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 	)
 	require.NoError(t, err)
 
-	var bufferSize uint32 = 2
-	optsC := client.ConnectToPersistentSubscriptionOptions{}
-	optsC.SetBatchSize(bufferSize)
 	readConnectionClient, err := clientInstance.ConnectToPersistentSubscription(
-		context.Background(), streamID, groupName, optsC)
+		context.Background(), streamID, groupName, client.ConnectToPersistentSubscriptionOptions{
+			BatchSize: 2,
+		})
 	require.NoError(t, err)
 
 	firstReadEvent := readConnectionClient.Recv().EventAppeared

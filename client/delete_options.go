@@ -6,6 +6,7 @@ import (
 
 type DeleteStreamOptions struct {
 	ExpectedRevision types.ExpectedRevision
+	Authenticated    *types.Credentials
 }
 
 func (o *DeleteStreamOptions) setDefaults() {

@@ -8,6 +8,7 @@ type ReadStreamEventsOptions struct {
 	Direction      types.Direction
 	From           types.StreamPosition
 	ResolveLinkTos bool
+	Authenticated  *types.Credentials
 }
 
 func (o *ReadStreamEventsOptions) setDefaults() {
@@ -20,6 +21,7 @@ type ReadAllEventsOptions struct {
 	Direction      types.Direction
 	From           types.AllPosition
 	ResolveLinkTos bool
+	Authenticated  *types.Credentials
 }
 
 func (o *ReadAllEventsOptions) setDefaults() {

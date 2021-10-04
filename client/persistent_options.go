@@ -5,8 +5,9 @@ import (
 )
 
 type PersistentStreamSubscriptionOptions struct {
-	Settings *types.SubscriptionSettings
-	From     types.StreamPosition
+	Settings      *types.SubscriptionSettings
+	From          types.StreamPosition
+	Authenticated *types.Credentials
 }
 
 func (o *PersistentStreamSubscriptionOptions) setDefaults() {
@@ -21,6 +22,7 @@ type PersistentAllSubscriptionOptions struct {
 	MaxSearchWindow    int
 	CheckpointInterval int
 	Filter             *types.SubscriptionFilter
+	Authenticated      *types.Credentials
 }
 
 func (o *PersistentAllSubscriptionOptions) setDefaults() {
@@ -40,7 +42,8 @@ func (o *PersistentAllSubscriptionOptions) setDefaults() {
 }
 
 type ConnectToPersistentSubscriptionOptions struct {
-	BatchSize uint32
+	BatchSize     uint32
+	Authenticated *types.Credentials
 }
 
 func (o *ConnectToPersistentSubscriptionOptions) setDefaults() {
@@ -49,6 +52,6 @@ func (o *ConnectToPersistentSubscriptionOptions) setDefaults() {
 	}
 }
 
-func (o *ConnectToPersistentSubscriptionOptions) SetBatchSize(value uint32) {
-	o.BatchSize = value
+type DeletePersistentSubscriptionOptions struct {
+	Authenticated *types.Credentials
 }

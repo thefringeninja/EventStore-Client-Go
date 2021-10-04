@@ -6,6 +6,7 @@ import (
 
 type AppendToStreamOptions struct {
 	ExpectedRevision types.ExpectedRevision
+	Authenticated    *types.Credentials
 }
 
 func (o *AppendToStreamOptions) setDefaults() {

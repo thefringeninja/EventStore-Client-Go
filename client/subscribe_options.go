@@ -5,8 +5,9 @@ import (
 )
 
 type SubscribeToStreamOptions struct {
-	From         types.StreamPosition
-	ResolveLinks bool
+	From          types.StreamPosition
+	ResolveLinks  bool
+	Authenticated *types.Credentials
 }
 
 func (o *SubscribeToStreamOptions) setDefaults() {
@@ -21,6 +22,7 @@ type SubscribeToAllOptions struct {
 	MaxSearchWindow    int
 	CheckpointInterval int
 	Filter             *types.SubscriptionFilter
+	Authenticated      *types.Credentials
 }
 
 func (o *SubscribeToAllOptions) setDefaults() {
