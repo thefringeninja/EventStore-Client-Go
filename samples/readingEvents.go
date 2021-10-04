@@ -226,13 +226,13 @@ func ReadFromAllBackwards(db *client.Client) {
 }
 
 func ReadFromStreamResolvingLinkToS(db *client.Client) {
-	// region read-from-all-stream-resolving-link-tos
+	// region read-from-all-stream-resolving-link-Tos
 	ropts := client.ReadAllEventsOptions{
 		ResolveLinks: true,
 	}
 
 	stream, err := db.ReadAllEvents(context.Background(), ropts, 100)
-	// endregion read-from-all-stream-resolving-link-tos
+	// endregion read-from-all-stream-resolving-link-Tos
 
 	if err != nil {
 		panic(err)
