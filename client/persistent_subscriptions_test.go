@@ -175,7 +175,7 @@ func Test_UpdatePersistentStreamSubscription(t *testing.T) {
 	settings.MaxRetryCount = settings.MaxRetryCount + 1
 	settings.MessageTimeoutInMs = settings.MessageTimeoutInMs + 1
 	settings.ExtraStatistics = !settings.ExtraStatistics
-	settings.ResolveLinks = !settings.ResolveLinks
+	settings.ResolveLinkTos = !settings.ResolveLinkTos
 
 	err = clientInstance.UpdatePersistentStreamSubscription(context.Background(), streamID, "Group 1", client.PersistentStreamSubscriptionOptions{
 		Settings: &settings,

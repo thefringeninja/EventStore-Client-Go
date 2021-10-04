@@ -18,7 +18,7 @@ const (
 )
 
 type SubscriptionSettings struct {
-	ResolveLinks          bool
+	ResolveLinkTos        bool
 	ExtraStatistics       bool
 	MaxRetryCount         int32
 	MinCheckpointCount    int32
@@ -34,7 +34,7 @@ type SubscriptionSettings struct {
 
 func SubscriptionSettingsDefault() SubscriptionSettings {
 	return SubscriptionSettings{
-		ResolveLinks:          false,
+		ResolveLinkTos:        false,
 		ExtraStatistics:       false,
 		MaxRetryCount:         10,
 		MinCheckpointCount:    10,

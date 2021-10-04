@@ -668,7 +668,7 @@ func UpdatePersistentSubscriptionSettingsProto(
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq_Settings {
 	return &persistent.UpdateReq_Settings{
-		ResolveLinks:          settings.ResolveLinks,
+		ResolveLinks:          settings.ResolveLinkTos,
 		ExtraStatistics:       settings.ExtraStatistics,
 		MaxRetryCount:         settings.MaxRetryCount,
 		MinCheckpointCount:    settings.MinCheckpointCount,
@@ -846,7 +846,7 @@ func CreatePersistentSubscriptionSettingsProto(
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq_Settings {
 	return &persistent.CreateReq_Settings{
-		ResolveLinks:          settings.ResolveLinks,
+		ResolveLinks:          settings.ResolveLinkTos,
 		ExtraStatistics:       settings.ExtraStatistics,
 		MaxRetryCount:         settings.MaxRetryCount,
 		MinCheckpointCount:    settings.MinCheckpointCount,

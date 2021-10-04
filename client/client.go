@@ -257,7 +257,7 @@ func (client *Client) ReadStreamEvents(
 	count uint64,
 ) (*ReadStream, error) {
 	opts.setDefaults()
-	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction, opts.From, count, opts.ResolveLinks)
+	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction, opts.From, count, opts.ResolveLinkTos)
 	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
@@ -279,7 +279,7 @@ func (client *Client) ReadAllEvents(
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	readRequest := protoutils.ToReadAllRequest(opts.Direction, opts.From, count, opts.ResolveLinks)
+	readRequest := protoutils.ToReadAllRequest(opts.Direction, opts.From, count, opts.ResolveLinkTos)
 	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest)
 }
 

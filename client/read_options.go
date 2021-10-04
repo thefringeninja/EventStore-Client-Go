@@ -5,9 +5,9 @@ import (
 )
 
 type ReadStreamEventsOptions struct {
-	Direction    types.Direction
-	From         types.StreamPosition
-	ResolveLinks bool
+	Direction      types.Direction
+	From           types.StreamPosition
+	ResolveLinkTos bool
 }
 
 func (o *ReadStreamEventsOptions) setDefaults() {
@@ -17,9 +17,9 @@ func (o *ReadStreamEventsOptions) setDefaults() {
 }
 
 type ReadAllEventsOptions struct {
-	Direction    types.Direction
-	From         types.AllPosition
-	ResolveLinks bool
+	Direction      types.Direction
+	From           types.AllPosition
+	ResolveLinkTos bool
 }
 
 func (o *ReadAllEventsOptions) setDefaults() {

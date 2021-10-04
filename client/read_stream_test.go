@@ -66,8 +66,8 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 	streamId := "dataset20M-1800"
 
 	opts := client.ReadStreamEventsOptions{
-		Direction:    types.Forwards,
-		ResolveLinks: true,
+		Direction:      types.Forwards,
+		ResolveLinkTos: true,
 	}
 
 	stream, err := db.ReadStreamEvents(context, streamId, opts, numberOfEvents)
@@ -121,9 +121,9 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 
 	streamId := "dataset20M-1800"
 	opts := client.ReadStreamEventsOptions{
-		Direction:    types.Backwards,
-		From:         types.End{},
-		ResolveLinks: true,
+		Direction:      types.Backwards,
+		From:           types.End{},
+		ResolveLinkTos: true,
 	}
 
 	stream, err := db.ReadStreamEvents(context, streamId, opts, numberOfEvents)
