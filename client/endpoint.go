@@ -17,13 +17,6 @@ func (e *EndPoint) String() string {
 	return fmt.Sprintf("%s:%d", e.Host, e.Port)
 }
 
-func NewEndPoint(host string, port uint16) EndPoint {
-	return EndPoint{
-		Host: host,
-		Port: port,
-	}
-}
-
 func ParseEndPoint(s string) (*EndPoint, error) {
 	if strings.TrimSpace(s) == "" {
 		return nil, fmt.Errorf("an empty host is specified")

@@ -11,7 +11,6 @@ import (
 
 	"github.com/EventStore/EventStore-Client-Go/protos/shared"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
-	filtering "github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/gofrs/uuid"
 )
 
@@ -31,7 +30,7 @@ const systemMetadataKeysContentType = "content-type"
 const systemMetadataKeysCreated = "created"
 
 // toAppendHeader ...
-func toAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) *api.AppendReq {
+func toAppendHeader(streamID string, streamRevision types.ExpectedRevision) *api.AppendReq {
 	appendReq := &api.AppendReq{
 		Content: &api.AppendReq_Options_{
 			Options: &api.AppendReq_Options{},
@@ -65,7 +64,7 @@ func toAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) 
 }
 
 // toProposedMessage ...
-func toProposedMessage(event filtering.ProposedEvent) *api.AppendReq_ProposedMessage {
+func toProposedMessage(event types.ProposedEvent) *api.AppendReq_ProposedMessage {
 	contentType := "application/octet-stream"
 	if event.ContentType == types.JsonContentType {
 		contentType = "application/json"
@@ -113,7 +112,7 @@ func toReadDirectionFromDirection(dir types.Direction) api.ReadReq_Options_ReadD
 }
 
 // toAllReadOptionsFromPosition ...
-func toAllReadOptionsFromPosition(position filtering.AllPosition) *api.ReadReq_Options_All {
+func toAllReadOptionsFromPosition(position types.AllPosition) *api.ReadReq_Options_All {
 	options := &api.ReadReq_Options_AllOptions{}
 
 	switch value := position.(type) {
@@ -139,7 +138,7 @@ func toAllReadOptionsFromPosition(position filtering.AllPosition) *api.ReadReq_O
 	}
 }
 
-func toReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamPosition filtering.StreamPosition) *api.ReadReq_Options_Stream {
+func toReadStreamOptionsFromStreamAndStreamRevision(streamID string, streamPosition types.StreamPosition) *api.ReadReq_Options_Stream {
 	options := &api.ReadReq_Options_StreamOptions{
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamID),
@@ -177,7 +176,7 @@ func toFilterOptions(options *SubscriptionFilterOptions) (*api.ReadReq_Options_F
 	filterOptions := api.ReadReq_Options_FilterOptions{
 		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
 	}
-	if options.SubscriptionFilter.Type == filtering.EventFilterType {
+	if options.SubscriptionFilter.Type == types.EventFilterType {
 		filterOptions.Filter = &api.ReadReq_Options_FilterOptions_EventType{
 			EventType: &api.ReadReq_Options_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
@@ -192,7 +191,7 @@ func toFilterOptions(options *SubscriptionFilterOptions) (*api.ReadReq_Options_F
 			},
 		}
 	}
-	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindow == types.NoMaxSearchWindow {
 		filterOptions.Window = &api.ReadReq_Options_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
@@ -266,7 +265,7 @@ func toTombstoneRequest(streamID string, streamRevision types.ExpectedRevision) 
 	return tombstoneReq
 }
 
-func toReadStreamRequest(streamID string, direction types.Direction, from filtering.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func toReadStreamRequest(streamID string, direction types.Direction, from types.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -287,7 +286,7 @@ func toReadStreamRequest(streamID string, direction types.Direction, from filter
 	}
 }
 
-func toReadAllRequest(direction types.Direction, from filtering.AllPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func toReadAllRequest(direction types.Direction, from types.AllPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -308,7 +307,7 @@ func toReadAllRequest(direction types.Direction, from filtering.AllPosition, cou
 	}
 }
 
-func toStreamSubscriptionRequest(streamID string, from filtering.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
+func toStreamSubscriptionRequest(streamID string, from types.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -339,7 +338,7 @@ func toStreamSubscriptionRequest(streamID string, from filtering.StreamPosition,
 	return readReq, nil
 }
 
-func toAllSubscriptionRequest(from filtering.AllPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
+func toAllSubscriptionRequest(from types.AllPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -411,13 +410,13 @@ func getContentTypeFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent
 }
 
 // recordedEventFromProto
-func recordedEventFromProto(result *api.ReadResp_ReadEvent) filtering.RecordedEvent {
+func recordedEventFromProto(result *api.ReadResp_ReadEvent) types.RecordedEvent {
 	recordedEvent := result.GetEvent()
 	return getRecordedEventFromProto(recordedEvent)
 }
-func getRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
+func getRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) types.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
-	return filtering.RecordedEvent{
+	return types.RecordedEvent{
 		EventID:        EventIDFromProto(recordedEvent),
 		EventType:      recordedEvent.Metadata[systemMetadataKeysType],
 		ContentType:    getContentTypeFromProto(recordedEvent),
@@ -431,13 +430,13 @@ func getRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEve
 	}
 }
 
-func getResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.ResolvedEvent {
+func getResolvedEventFromProto(result *api.ReadResp_ReadEvent) types.ResolvedEvent {
 	positionWire := result.GetPosition()
 	linkWire := result.GetLink()
 	eventWire := result.GetEvent()
 
-	var event *filtering.RecordedEvent = nil
-	var link *filtering.RecordedEvent = nil
+	var event *types.RecordedEvent = nil
+	var link *types.RecordedEvent = nil
 	var commit *uint64
 
 	if positionWire != nil {
@@ -463,7 +462,7 @@ func getResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.Resolve
 		link = &recordedEvent
 	}
 
-	return filtering.ResolvedEvent{
+	return types.ResolvedEvent{
 		Event:  event,
 		Link:   link,
 		Commit: commit,
@@ -506,14 +505,14 @@ func positionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_Re
 	}
 }
 
-func fromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedEvent {
+func fromPersistentProtoResponse(resp *persistent.ReadResp) *types.ResolvedEvent {
 	readEvent := resp.GetEvent()
 	positionWire := readEvent.GetPosition()
 	eventWire := readEvent.GetEvent()
 	linkWire := readEvent.GetLink()
 
-	var event *filtering.RecordedEvent = nil
-	var link *filtering.RecordedEvent = nil
+	var event *types.RecordedEvent = nil
+	var link *types.RecordedEvent = nil
 	var commit *uint64
 
 	if positionWire != nil {
@@ -539,17 +538,17 @@ func fromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedE
 		link = &recordedEvent
 	}
 
-	return &filtering.ResolvedEvent{
+	return &types.ResolvedEvent{
 		Event:  event,
 		Link:   link,
 		Commit: commit,
 	}
 }
 
-func newMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
+func newMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) types.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
 
-	return filtering.RecordedEvent{
+	return types.RecordedEvent{
 		EventID:        eventIDFromPersistentProto(recordedEvent),
 		EventType:      recordedEvent.Metadata[systemMetadataKeysType],
 		ContentType:    getContentTypeFromPersistentProto(recordedEvent),
@@ -566,7 +565,7 @@ func newMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_
 func updatePersistentRequestStreamProto(
 	streamName string,
 	groupName string,
-	position filtering.StreamPosition,
+	position types.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq {
 	return &persistent.UpdateReq{
@@ -576,7 +575,7 @@ func updatePersistentRequestStreamProto(
 
 func updatePersistentRequestAllOptionsProto(
 	groupName string,
-	position filtering.AllPosition,
+	position types.AllPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq {
 	options := updatePersistentRequestAllOptionsSettingsProto(position)
@@ -591,7 +590,7 @@ func updatePersistentRequestAllOptionsProto(
 }
 
 func updatePersistentRequestAllOptionsSettingsProto(
-	position filtering.AllPosition,
+	position types.AllPosition,
 ) *persistent.UpdateReq_Options_All {
 	options := &persistent.UpdateReq_Options_All{
 		All: &persistent.UpdateReq_AllOptions{
@@ -618,7 +617,7 @@ func updatePersistentRequestAllOptionsSettingsProto(
 func updatePersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
-	position filtering.StreamPosition,
+	position types.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq_Options {
 	return &persistent.UpdateReq_Options{
@@ -635,7 +634,7 @@ func updatePersistentSubscriptionStreamConfigProto(
 func updatePersistentSubscriptionStreamSettingsProto(
 	streamName string,
 	groupName string,
-	position filtering.StreamPosition,
+	position types.StreamPosition,
 ) *persistent.UpdateReq_Options_Stream {
 	streamOption := &persistent.UpdateReq_Options_Stream{
 		Stream: &persistent.UpdateReq_StreamOptions{
@@ -728,7 +727,7 @@ func toUpdatePersistentRequestAllOptionsFromPosition(position types.Position) *p
 func createPersistentRequestProto(
 	streamName string,
 	groupName string,
-	position filtering.StreamPosition,
+	position types.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq {
 	return &persistent.CreateReq{
@@ -738,7 +737,7 @@ func createPersistentRequestProto(
 
 func createPersistentRequestAllOptionsProto(
 	groupName string,
-	position filtering.AllPosition,
+	position types.AllPosition,
 	settings types.SubscriptionSettings,
 	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq, error) {
@@ -757,7 +756,7 @@ func createPersistentRequestAllOptionsProto(
 }
 
 func createPersistentRequestAllOptionsSettingsProto(
-	pos filtering.AllPosition,
+	pos types.AllPosition,
 	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
 	options := &persistent.CreateReq_Options_All{
@@ -798,7 +797,7 @@ func createPersistentRequestAllOptionsSettingsProto(
 func createPersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
-	position filtering.StreamPosition,
+	position types.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq_Options {
 	return &persistent.CreateReq_Options{
@@ -814,7 +813,7 @@ func createPersistentSubscriptionStreamConfigProto(
 
 func createPersistentSubscriptionStreamSettingsProto(
 	streamName string,
-	position filtering.StreamPosition,
+	position types.StreamPosition,
 ) *persistent.CreateReq_Options_Stream {
 	streamOption := &persistent.CreateReq_Options_Stream{
 		Stream: &persistent.CreateReq_StreamOptions{
@@ -900,7 +899,7 @@ func createRequestFilterOptionsProto(
 	filterOptions := persistent.CreateReq_AllOptions_FilterOptions{
 		CheckpointIntervalMultiplier: uint32(options.CheckpointInterval),
 	}
-	if options.SubscriptionFilter.Type == filtering.EventFilterType {
+	if options.SubscriptionFilter.Type == types.EventFilterType {
 		filterOptions.Filter = &persistent.CreateReq_AllOptions_FilterOptions_EventType{
 			EventType: &persistent.CreateReq_AllOptions_FilterOptions_Expression{
 				Prefix: options.SubscriptionFilter.Prefixes,
@@ -915,7 +914,7 @@ func createRequestFilterOptionsProto(
 			},
 		}
 	}
-	if options.MaxSearchWindow == filtering.NoMaxSearchWindow {
+	if options.MaxSearchWindow == types.NoMaxSearchWindow {
 		filterOptions.Window = &persistent.CreateReq_AllOptions_FilterOptions_Count{
 			Count: &shared.Empty{},
 		}
