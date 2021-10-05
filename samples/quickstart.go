@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/gofrs/uuid"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
@@ -41,8 +40,8 @@ func Run() {
 	}
 
 	// region appendEvents
-	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, types.ProposedEvent{
-		ContentType: types.JsonContentType,
+	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, client.ProposedEvent{
+		ContentType: client.JsonContentType,
 		EventType:   "TestEvent",
 		Data:        data,
 	})

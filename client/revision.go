@@ -1,4 +1,4 @@
-package types
+package client
 
 type Any struct{}
 type StreamExists struct{}

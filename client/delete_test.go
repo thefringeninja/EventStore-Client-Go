@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +18,7 @@ func TestCanDeleteStream(t *testing.T) {
 	defer db.Close()
 
 	opts := client.DeleteStreamOptions{
-		ExpectedRevision: types.Revision(1_999),
+		ExpectedRevision: client.Revision(1_999),
 	}
 
 	deleteResult, err := db.DeleteStream(context.Background(), "dataset20M-1800", opts)
@@ -41,7 +39,7 @@ func TestCanTombstoneStream(t *testing.T) {
 	defer db.Close()
 
 	deleteResult, err := db.TombstoneStream(context.Background(), "dataset20M-1800", client.TombstoneStreamOptions{
-		ExpectedRevision: types.Revision(1_999),
+		ExpectedRevision: client.Revision(1_999),
 	})
 
 	if err != nil {

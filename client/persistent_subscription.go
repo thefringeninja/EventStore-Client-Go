@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	"log"
 	"sync"
 
@@ -34,8 +32,8 @@ type PersistentSubscription struct {
 	once           *sync.Once
 }
 
-func (connection *PersistentSubscription) Recv() *types.SubscriptionEvent {
-	channel := make(chan *types.SubscriptionEvent)
+func (connection *PersistentSubscription) Recv() *SubscriptionEvent {
+	channel := make(chan *SubscriptionEvent)
 	req := persistentRequest{
 		channel: channel,
 	}
@@ -51,13 +49,13 @@ func (connection *PersistentSubscription) Close() error {
 	return nil
 }
 
-func (connection *PersistentSubscription) Ack(messages ...*types.ResolvedEvent) error {
+func (connection *PersistentSubscription) Ack(messages ...*ResolvedEvent) error {
 	if len(messages) == 0 {
 		return nil
 	}
 
 	if len(messages) > MAX_ACK_COUNT {
-		return &types.PersistentSubscriptionExceedsMaxMessageCountError
+		return &PersistentSubscriptionExceedsMaxMessageCountError
 	}
 
 	var ids []uuid.UUID
@@ -80,7 +78,7 @@ func (connection *PersistentSubscription) Ack(messages ...*types.ResolvedEvent) 
 	return nil
 }
 
-func (connection *PersistentSubscription) Nack(reason string, action Nack_Action, messages ...*types.ResolvedEvent) error {
+func (connection *PersistentSubscription) Nack(reason string, action Nack_Action, messages ...*ResolvedEvent) error {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -118,7 +116,7 @@ func messageIdSliceToProto(messageIds ...uuid.UUID) []*shared.UUID {
 }
 
 type persistentRequest struct {
-	channel chan *types.SubscriptionEvent
+	channel chan *SubscriptionEvent
 }
 
 func NewPersistentSubscription(
@@ -143,8 +141,8 @@ func NewPersistentSubscription(
 			req := <-channel
 
 			if closed {
-				req.channel <- &types.SubscriptionEvent{
-					SubscriptionDropped: &types.SubscriptionDropped{
+				req.channel <- &SubscriptionEvent{
+					SubscriptionDropped: &SubscriptionDropped{
 						Error: fmt.Errorf("subscription has been dropped"),
 					},
 				}
@@ -156,11 +154,11 @@ func NewPersistentSubscription(
 			if err != nil {
 				log.Printf("[error] subscription has dropped. Reason: %v", err)
 
-				dropped := types.SubscriptionDropped{
+				dropped := SubscriptionDropped{
 					Error: err,
 				}
 
-				req.channel <- &types.SubscriptionEvent{
+				req.channel <- &SubscriptionEvent{
 					SubscriptionDropped: &dropped,
 				}
 
@@ -173,7 +171,7 @@ func NewPersistentSubscription(
 			case *persistent.ReadResp_Event:
 				{
 					resolvedEvent := fromPersistentProtoResponse(result)
-					req.channel <- &types.SubscriptionEvent{
+					req.channel <- &SubscriptionEvent{
 						EventAppeared: resolvedEvent,
 					}
 				}

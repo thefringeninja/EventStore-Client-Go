@@ -1,4 +1,4 @@
-package types
+package client
 
 type ResolvedEvent struct {
 	Link   *RecordedEvent

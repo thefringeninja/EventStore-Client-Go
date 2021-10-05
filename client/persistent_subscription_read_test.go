@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +21,7 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 	firstEvent := createTestEvent()
 	secondEvent := createTestEvent()
 	thirdEvent := createTestEvent()
-	events := []types.ProposedEvent{firstEvent, secondEvent, thirdEvent}
+	events := []client.ProposedEvent{firstEvent, secondEvent, thirdEvent}
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
@@ -73,7 +71,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 	streamID := "someStream"
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
@@ -121,13 +119,13 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.Start{},
+			From: client.Start{},
 		},
 	)
 	require.NoError(t, err)
 	// append events to StreamsClient.AppendToStreamAsync(Stream, stream_revision.StreamRevisionNoStream, Events);
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 	require.NoError(t, err)
@@ -162,7 +160,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 	streamID := "someStream"
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
 	require.NoError(t, err)
@@ -173,13 +171,13 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.End{},
+			From: client.End{},
 		},
 	)
 	require.NoError(t, err)
 
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, new StreamRevision(9), event[10])
-	opts.ExpectedRevision = types.Revision(9)
+	opts.ExpectedRevision = client.Revision(9)
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[10:]...)
 	require.NoError(t, err)
 
@@ -213,7 +211,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 	streamID := "someStream"
 	// append events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, Events);
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
@@ -225,7 +223,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *tes
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.End{},
+			From: client.End{},
 		},
 	)
 	require.NoError(t, err)
@@ -283,13 +281,13 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.Revision(2),
+			From: client.Revision(2),
 		},
 	)
 	require.NoError(t, err)
 	// append 3 event to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events)
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events...)
 	require.NoError(t, err)
@@ -322,7 +320,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
@@ -335,14 +333,14 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.Revision(10),
+			From: client.Revision(10),
 		},
 	)
 	require.NoError(t, err)
 
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(9), events[10:)
 	opts = client.AppendToStreamOptions{
-		ExpectedRevision: types.Revision(9),
+		ExpectedRevision: client.Revision(9),
 	}
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[10:]...)
 	require.NoError(t, err)
@@ -376,7 +374,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	streamID := "someStream"
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:10]...)
@@ -390,14 +388,14 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.Revision(4),
+			From: client.Revision(4),
 		},
 	)
 	require.NoError(t, err)
 
 	// append 1 event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(9), events)
 	opts = client.AppendToStreamOptions{
-		ExpectedRevision: types.Revision(9),
+		ExpectedRevision: client.Revision(9),
 	}
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[10:]...)
 	require.NoError(t, err)
@@ -433,7 +431,7 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	// append 10 events to StreamsClient.AppendToStreamAsync(Stream, StreamState.NoStream, events[:10]);
 	streamID := "someStream"
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	_, err := clientInstance.AppendToStream(context.Background(), streamID, opts, events[:11]...)
 	require.NoError(t, err)
@@ -445,14 +443,14 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.Revision(11),
+			From: client.Revision(11),
 		},
 	)
 	require.NoError(t, err)
 
 	// append event to StreamsClient.AppendToStreamAsync(Stream, StreamRevision(10), events[11:])
 	opts = client.AppendToStreamOptions{
-		ExpectedRevision: types.Revision(10),
+		ExpectedRevision: client.Revision(10),
 	}
 	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[11:]...)
 	require.NoError(t, err)
@@ -483,7 +481,7 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 	firstEvent := createTestEvent()
 	secondEvent := createTestEvent()
 	thirdEvent := createTestEvent()
-	events := []types.ProposedEvent{firstEvent, secondEvent, thirdEvent}
+	events := []client.ProposedEvent{firstEvent, secondEvent, thirdEvent}
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
@@ -492,7 +490,7 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 		streamID,
 		groupName,
 		client.PersistentStreamSubscriptionOptions{
-			From: types.Start{},
+			From: client.Start{},
 		},
 	)
 
@@ -520,8 +518,8 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 	require.NotNil(t, thirdReadEvent)
 }
 
-func testCreateEvents(count uint32) []types.ProposedEvent {
-	result := make([]types.ProposedEvent, count)
+func testCreateEvents(count uint32) []client.ProposedEvent {
+	result := make([]client.ProposedEvent, count)
 	var i uint32 = 0
 	for ; i < count; i++ {
 		result[i] = createTestEvent()

@@ -11,8 +11,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -66,7 +64,7 @@ func TestReadStreamEventsForwardsFromZeroPosition(t *testing.T) {
 	streamId := "dataset20M-1800"
 
 	opts := client.ReadStreamOptions{
-		Direction:      types.Forwards,
+		Direction:      client.Forwards,
 		ResolveLinkTos: true,
 	}
 
@@ -121,8 +119,8 @@ func TestReadStreamEventsBackwardsFromEndPosition(t *testing.T) {
 
 	streamId := "dataset20M-1800"
 	opts := client.ReadStreamOptions{
-		Direction:      types.Backwards,
-		From:           types.End{},
+		Direction:      client.Backwards,
+		From:           client.End{},
 		ResolveLinkTos: true,
 	}
 
@@ -163,14 +161,14 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 
 	var waitingForError sync.WaitGroup
 
-	proposedEvents := []types.ProposedEvent{}
+	proposedEvents := []client.ProposedEvent{}
 
 	for i := 1; i <= 10; i++ {
 		proposedEvents = append(proposedEvents, createTestEvent())
 	}
 
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	_, err := db.AppendToStream(context.Background(), "testing-closing", opts, proposedEvents...)
 	require.NoError(t, err)

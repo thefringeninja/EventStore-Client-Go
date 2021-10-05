@@ -5,14 +5,13 @@ import (
 	"fmt"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 func ExcludeSystemEvents(db *client.Client) {
 	// region exclude-system
 	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:  types.EventFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:  client.EventFilterType,
 			Regex: "/^[^\\$].*/",
 		},
 	})
@@ -44,8 +43,8 @@ func ExcludeSystemEvents(db *client.Client) {
 func EventTypePrefix(db *client.Client) {
 	// region event-type-prefix
 	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:     types.EventFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:     client.EventFilterType,
 			Prefixes: []string{"customer-"},
 		},
 	})
@@ -77,8 +76,8 @@ func EventTypePrefix(db *client.Client) {
 func EventTypeRegex(db *client.Client) {
 	// region event-type-regex
 	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:  types.EventFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:  client.EventFilterType,
 			Regex: "^user|^company",
 		},
 	})
@@ -110,8 +109,8 @@ func EventTypeRegex(db *client.Client) {
 func StreamPrefix(db *client.Client) {
 	// region stream-prefix
 	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:     types.StreamFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:     client.StreamFilterType,
 			Prefixes: []string{"user-"},
 		},
 	})
@@ -143,8 +142,8 @@ func StreamPrefix(db *client.Client) {
 func StreamRegex(db *client.Client) {
 	// region stream-regex
 	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:  types.StreamFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:  client.StreamFilterType,
 			Regex: "^user|^company",
 		},
 	})
@@ -176,8 +175,8 @@ func StreamRegex(db *client.Client) {
 func CheckpointCallbackWithInterval(db *client.Client) {
 	// region checkpoint-with-interval
 	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:  types.EventFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:  client.EventFilterType,
 			Regex: "/^[^\\$].*/",
 		},
 	})

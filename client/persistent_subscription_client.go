@@ -3,8 +3,6 @@ package client
 import (
 	"context"
 
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -21,7 +19,7 @@ func (client *persistentClient) ConnectToPersistentSubscription(
 	bufferSize int32,
 	streamName string,
 	groupName string,
-	auth *types.Credentials,
+	auth *Credentials,
 ) (*PersistentSubscription, error) {
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
@@ -36,19 +34,19 @@ func (client *persistentClient) ConnectToPersistentSubscription(
 	if err != nil {
 		defer cancel()
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return nil, types.PersistentSubscriptionFailedToInitClientError(err)
+		return nil, PersistentSubscriptionFailedToInitClientError(err)
 	}
 
 	err = readClient.Send(toPersistentReadRequest(bufferSize, groupName, []byte(streamName)))
 	if err != nil {
 		defer cancel()
-		return nil, types.PersistentSubscriptionFailedSendStreamInitError(err)
+		return nil, PersistentSubscriptionFailedSendStreamInitError(err)
 	}
 
 	readResult, err := readClient.Recv()
 	if err != nil {
 		defer cancel()
-		return nil, types.PersistentSubscriptionFailedReceiveStreamInitError(err)
+		return nil, PersistentSubscriptionFailedReceiveStreamInitError(err)
 	}
 	switch readResult.Content.(type) {
 	case *persistent.ReadResp_SubscriptionConfirmation_:
@@ -63,7 +61,7 @@ func (client *persistentClient) ConnectToPersistentSubscription(
 	}
 
 	defer cancel()
-	return nil, types.PersistentSubscriptionNoConfirmationError(err)
+	return nil, PersistentSubscriptionNoConfirmationError(err)
 }
 
 func (client *persistentClient) CreateStreamSubscription(
@@ -71,9 +69,9 @@ func (client *persistentClient) CreateStreamSubscription(
 	handle connectionHandle,
 	streamName string,
 	groupName string,
-	position types.StreamPosition,
-	settings types.SubscriptionSettings,
-	auth *types.Credentials,
+	position StreamPosition,
+	settings SubscriptionSettings,
+	auth *Credentials,
 ) error {
 	createSubscriptionConfig := createPersistentRequestProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
@@ -87,7 +85,7 @@ func (client *persistentClient) CreateStreamSubscription(
 	_, err := client.persistentSubscriptionClient.Create(ctx, createSubscriptionConfig, callOptions...)
 	if err != nil {
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return types.PersistentSubscriptionFailedCreationError(err)
+		return PersistentSubscriptionFailedCreationError(err)
 	}
 
 	return nil
@@ -97,10 +95,10 @@ func (client *persistentClient) CreateAllSubscription(
 	ctx context.Context,
 	handle connectionHandle,
 	groupName string,
-	position types.AllPosition,
-	settings types.SubscriptionSettings,
+	position AllPosition,
+	settings SubscriptionSettings,
 	filter *SubscriptionFilterOptions,
-	auth *types.Credentials,
+	auth *Credentials,
 ) error {
 	protoConfig, err := createPersistentRequestAllOptionsProto(groupName, position, settings, filter)
 	if err != nil {
@@ -118,7 +116,7 @@ func (client *persistentClient) CreateAllSubscription(
 	_, err = client.persistentSubscriptionClient.Create(ctx, protoConfig, callOptions...)
 	if err != nil {
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return types.PersistentSubscriptionFailedCreationError(err)
+		return PersistentSubscriptionFailedCreationError(err)
 	}
 
 	return nil
@@ -129,9 +127,9 @@ func (client *persistentClient) UpdateStreamSubscription(
 	handle connectionHandle,
 	streamName string,
 	groupName string,
-	position types.StreamPosition,
-	settings types.SubscriptionSettings,
-	auth *types.Credentials,
+	position StreamPosition,
+	settings SubscriptionSettings,
+	auth *Credentials,
 ) error {
 	updateSubscriptionConfig := updatePersistentRequestStreamProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
@@ -145,7 +143,7 @@ func (client *persistentClient) UpdateStreamSubscription(
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, callOptions...)
 	if err != nil {
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return types.PersistentSubscriptionUpdateFailedError(err)
+		return PersistentSubscriptionUpdateFailedError(err)
 	}
 
 	return nil
@@ -155,9 +153,9 @@ func (client *persistentClient) UpdateAllSubscription(
 	ctx context.Context,
 	handle connectionHandle,
 	groupName string,
-	position types.AllPosition,
-	settings types.SubscriptionSettings,
-	auth *types.Credentials,
+	position AllPosition,
+	settings SubscriptionSettings,
+	auth *Credentials,
 ) error {
 	updateSubscriptionConfig := updatePersistentRequestAllOptionsProto(groupName, position, settings)
 
@@ -172,7 +170,7 @@ func (client *persistentClient) UpdateAllSubscription(
 	_, err := client.persistentSubscriptionClient.Update(ctx, updateSubscriptionConfig, callOptions...)
 	if err != nil {
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return types.PersistentSubscriptionUpdateFailedError(err)
+		return PersistentSubscriptionUpdateFailedError(err)
 	}
 
 	return nil
@@ -183,7 +181,7 @@ func (client *persistentClient) DeleteStreamSubscription(
 	handle connectionHandle,
 	streamName string,
 	groupName string,
-	auth *types.Credentials,
+	auth *Credentials,
 ) error {
 	deleteSubscriptionOptions := deletePersistentRequestStreamProto(streamName, groupName)
 	var headers, trailers metadata.MD
@@ -197,13 +195,13 @@ func (client *persistentClient) DeleteStreamSubscription(
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, callOptions...)
 	if err != nil {
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return types.PersistentSubscriptionDeletionFailedError(err)
+		return PersistentSubscriptionDeletionFailedError(err)
 	}
 
 	return nil
 }
 
-func (client *persistentClient) DeleteAllSubscription(ctx context.Context, handle connectionHandle, groupName string, auth *types.Credentials) error {
+func (client *persistentClient) DeleteAllSubscription(ctx context.Context, handle connectionHandle, groupName string, auth *Credentials) error {
 	deleteSubscriptionOptions := deletePersistentRequestAllOptionsProto(groupName)
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
@@ -216,7 +214,7 @@ func (client *persistentClient) DeleteAllSubscription(ctx context.Context, handl
 	_, err := client.persistentSubscriptionClient.Delete(ctx, deleteSubscriptionOptions, callOptions...)
 	if err != nil {
 		err = client.inner.handleError(handle, headers, trailers, err)
-		return types.PersistentSubscriptionDeletionFailedError(err)
+		return PersistentSubscriptionDeletionFailedError(err)
 	}
 
 	return nil

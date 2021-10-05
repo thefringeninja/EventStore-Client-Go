@@ -9,7 +9,6 @@ import (
 	"errors"
 
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
-	"github.com/EventStore/EventStore-Client-Go/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
@@ -42,7 +41,7 @@ func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
 	opts AppendToStreamOptions,
-	events ...types.ProposedEvent,
+	events ...ProposedEvent,
 ) (*WriteResult, error) {
 	opts.setDefaults()
 	handle, err := client.grpcClient.getConnectionHandle()
@@ -134,7 +133,7 @@ func (client *Client) SetStreamMetadata(
 	context context.Context,
 	streamID string,
 	opts AppendToStreamOptions,
-	metadata types.StreamMetadata,
+	metadata StreamMetadata,
 ) (*WriteResult, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 	props, err := metadata.ToMap()
@@ -149,8 +148,8 @@ func (client *Client) SetStreamMetadata(
 		return nil, fmt.Errorf("error when serializing stream metadata: %w", err)
 	}
 
-	result, err := client.AppendToStream(context, streamName, opts, types.ProposedEvent{
-		ContentType: types.JsonContentType,
+	result, err := client.AppendToStream(context, streamName, opts, ProposedEvent{
+		ContentType: JsonContentType,
 		EventType:   "$metadata",
 		Data:        data,
 	})
@@ -166,7 +165,7 @@ func (client *Client) GetStreamMetadata(
 	context context.Context,
 	streamID string,
 	opts ReadStreamOptions,
-) (*types.StreamMetadata, error) {
+) (*StreamMetadata, error) {
 	streamName := fmt.Sprintf("$$%v", streamID)
 
 	stream, err := client.ReadStream(context, streamName, opts, 1)
@@ -183,7 +182,7 @@ func (client *Client) GetStreamMetadata(
 	event, err := stream.Recv()
 
 	if errors.Is(err, io.EOF) {
-		return &types.StreamMetadata{}, nil
+		return &StreamMetadata{}, nil
 	}
 
 	if err != nil {
@@ -198,7 +197,7 @@ func (client *Client) GetStreamMetadata(
 		return nil, fmt.Errorf("error when deserializing stream metadata json: %w", err)
 	}
 
-	meta, err := types.StreamMetadataFromMap(props)
+	meta, err := StreamMetadataFromMap(props)
 
 	if err != nil {
 		return nil, fmt.Errorf("error when parsing stream metadata json: %w", err)
@@ -445,7 +444,7 @@ func (client *Client) CreatePersistentSubscription(
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	if options.Settings == nil {
-		setts := types.SubscriptionSettingsDefault()
+		setts := SubscriptionSettingsDefault()
 		options.Settings = &setts
 	}
 
@@ -474,7 +473,7 @@ func (client *Client) CreatePersistentSubscriptionAll(
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	if options.Settings == nil {
-		setts := types.SubscriptionSettingsDefault()
+		setts := SubscriptionSettingsDefault()
 		options.Settings = &setts
 	}
 
@@ -503,7 +502,7 @@ func (client *Client) UpdatePersistentStreamSubscription(
 	persistentSubscriptionClient := newPersistentClient(client.grpcClient, persistentProto.NewPersistentSubscriptionsClient(handle.Connection()))
 
 	if options.Settings == nil {
-		setts := types.SubscriptionSettingsDefault()
+		setts := SubscriptionSettingsDefault()
 		options.Settings = &setts
 	}
 
@@ -560,7 +559,7 @@ func readInternal(
 	handle connectionHandle,
 	streamsClient api.StreamsClient,
 	readRequest *api.ReadReq,
-	auth *types.Credentials,
+	auth *Credentials,
 ) (*ReadStream, error) {
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}

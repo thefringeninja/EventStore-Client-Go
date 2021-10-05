@@ -8,17 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	"github.com/EventStore/EventStore-Client-Go/client"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestEvent() types.ProposedEvent {
-	event := types.ProposedEvent{
+func createTestEvent() client.ProposedEvent {
+	event := client.ProposedEvent{
 		EventType:   "TestEvent",
-		ContentType: types.BinaryContentType,
+		ContentType: client.BinaryContentType,
 		EventID:     uuid.Must(uuid.NewV4()),
 		Data:        []byte{0xb, 0xe, 0xe, 0xf},
 		Metadata:    []byte{0xd, 0xe, 0xa, 0xd},
@@ -27,8 +25,8 @@ func createTestEvent() types.ProposedEvent {
 	return event
 }
 
-func collectStreamEvents(stream *client.ReadStream) ([]*types.ResolvedEvent, error) {
-	events := []*types.ResolvedEvent{}
+func collectStreamEvents(stream *client.ReadStream) ([]*client.ResolvedEvent, error) {
+	events := []*client.ResolvedEvent{}
 
 	for {
 		event, err := stream.Recv()
@@ -61,7 +59,7 @@ func TestAppendToStreamSingleEventNoStream(t *testing.T) {
 	defer cancel()
 
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 
 	_, err := db.AppendToStream(context, streamID.String(), opts, testEvent)
@@ -104,7 +102,7 @@ func TestAppendWithInvalidStreamRevision(t *testing.T) {
 	defer cancel()
 
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.StreamExists{},
+		ExpectedRevision: client.StreamExists{},
 	}
 
 	_, err := db.AppendToStream(context, streamID.String(), opts, createTestEvent())
@@ -136,7 +134,7 @@ func TestAppendToSystemStreamWithIncorrectCredentials(t *testing.T) {
 	defer cancel()
 
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.Any{},
+		ExpectedRevision: client.Any{},
 	}
 
 	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
@@ -170,17 +168,17 @@ func TestMetadataOperation(t *testing.T) {
 	defer cancel()
 
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.Any{},
+		ExpectedRevision: client.Any{},
 	}
 
 	_, err = db.AppendToStream(context, streamID.String(), opts, createTestEvent())
 
 	assert.Nil(t, err, "error when writing an event")
 
-	acl := types.Acl{}
+	acl := client.Acl{}
 	acl.AddReadRoles("admin")
 
-	meta := types.StreamMetadata{}
+	meta := client.StreamMetadata{}
 	meta.SetMaxAge(2 * time.Second)
 	meta.SetAcl(acl)
 

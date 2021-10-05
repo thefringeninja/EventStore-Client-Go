@@ -1,33 +1,29 @@
 package client
 
-import (
-	"github.com/EventStore/EventStore-Client-Go/types"
-)
-
 type SubscribeToStreamOptions struct {
-	From          types.StreamPosition
+	From          StreamPosition
 	ResolveLinks  bool
-	Authenticated *types.Credentials
+	Authenticated *Credentials
 }
 
 func (o *SubscribeToStreamOptions) setDefaults() {
 	if o.From == nil {
-		o.From = types.End{}
+		o.From = End{}
 	}
 }
 
 type SubscribeToAllOptions struct {
-	From               types.AllPosition
+	From               AllPosition
 	ResolveLinks       bool
 	MaxSearchWindow    int
 	CheckpointInterval int
-	Filter             *types.SubscriptionFilter
-	Authenticated      *types.Credentials
+	Filter             *SubscriptionFilter
+	Authenticated      *Credentials
 }
 
 func (o *SubscribeToAllOptions) setDefaults() {
 	if o.From == nil {
-		o.From = types.End{}
+		o.From = End{}
 	}
 
 	if o.Filter != nil {

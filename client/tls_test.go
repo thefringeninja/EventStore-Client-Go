@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/EventStore/EventStore-Client-Go/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -34,8 +33,8 @@ func TestTLSDefaults(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 
@@ -71,8 +70,8 @@ func TestTLSDefaultsWithCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
@@ -96,8 +95,8 @@ func TestTLSWithoutCertificateAndVerify(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
@@ -121,8 +120,8 @@ func TestTLSWithoutCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
@@ -157,8 +156,8 @@ func TestTLSWithCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
@@ -188,8 +187,8 @@ func TestTLSWithCertificateFromAbsoluteFile(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
@@ -213,8 +212,8 @@ func TestTLSWithCertificateFromRelativeFile(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)
@@ -248,8 +247,8 @@ func TestTLSWithInvalidCertificate(t *testing.T) {
 	numberOfEventsToRead := 1
 	numberOfEvents := uint64(numberOfEventsToRead)
 	opts := client.ReadAllOptions{
-		From:           types.Start{},
-		Direction:      types.Backwards,
+		From:           client.Start{},
+		Direction:      client.Backwards,
 		ResolveLinkTos: true,
 	}
 	_, err = c.ReadAll(context.Background(), opts, numberOfEvents)

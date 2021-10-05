@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 func ReadFromStream(db *client.Client) {
@@ -41,7 +40,7 @@ func ReadFromStream(db *client.Client) {
 func ReadFromStreamPosition(db *client.Client) {
 	// region read-from-position
 	ropts := client.ReadStreamOptions{
-		From: types.Revision(10),
+		From: client.Revision(10),
 	}
 
 	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 20)
@@ -72,8 +71,8 @@ func ReadFromStreamPosition(db *client.Client) {
 func ReadStreamOverridingUserCredentials(db *client.Client) {
 	// region overriding-user-credentials
 	options := client.ReadStreamOptions{
-		From: types.Start{},
-		Authenticated: &types.Credentials{
+		From: client.Start{},
+		Authenticated: &client.Credentials{
 			Login:    "admin",
 			Password: "changeit",
 		},
@@ -91,7 +90,7 @@ func ReadStreamOverridingUserCredentials(db *client.Client) {
 func ReadFromStreamPositionCheck(db *client.Client) {
 	// region checking-for-stream-presence
 	ropts := client.ReadStreamOptions{
-		From: types.Revision(10),
+		From: client.Revision(10),
 	}
 
 	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 100)
@@ -125,8 +124,8 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 func ReadStreamBackwards(db *client.Client) {
 	// region reading-backwards
 	ropts := client.ReadStreamOptions{
-		Direction: types.Backwards,
-		From:      types.End{},
+		Direction: client.Backwards,
+		From:      client.End{},
 	}
 
 	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 10)
@@ -215,8 +214,8 @@ func IgnoreSystemEvents(db *client.Client) {
 func ReadFromAllBackwards(db *client.Client) {
 	// region read-from-all-stream-backwards
 	ropts := client.ReadAllOptions{
-		Direction: types.Backwards,
-		From:      types.End{},
+		Direction: client.Backwards,
+		From:      client.End{},
 	}
 
 	stream, err := db.ReadAll(context.Background(), ropts, 100)

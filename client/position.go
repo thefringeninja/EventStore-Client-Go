@@ -1,4 +1,4 @@
-package types
+package client
 
 type StreamRevision struct {
 	Value uint64

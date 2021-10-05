@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
-
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +23,7 @@ func Test_CloseConnection(t *testing.T) {
 	context, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	opts := client.AppendToStreamOptions{
-		ExpectedRevision: types.NoStream{},
+		ExpectedRevision: client.NoStream{},
 	}
 	_, err := db.AppendToStream(context, streamID.String(), opts, testEvent)
 
@@ -34,7 +32,7 @@ func Test_CloseConnection(t *testing.T) {
 	}
 
 	db.Close()
-	opts.ExpectedRevision = types.Any{}
+	opts.ExpectedRevision = client.Any{}
 	_, err = db.AppendToStream(context, streamID.String(), opts, testEvent)
 
 	assert.NotNil(t, err)

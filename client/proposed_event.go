@@ -1,4 +1,4 @@
-package types
+package client
 
 import (
 	uuid "github.com/gofrs/uuid"

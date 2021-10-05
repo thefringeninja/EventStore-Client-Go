@@ -1,14 +1,12 @@
 package client
 
-import "github.com/EventStore/EventStore-Client-Go/types"
-
 type TombstoneStreamOptions struct {
-	ExpectedRevision types.ExpectedRevision
-	Authenticated    *types.Credentials
+	ExpectedRevision ExpectedRevision
+	Authenticated    *Credentials
 }
 
 func (o *TombstoneStreamOptions) setDefaults() {
 	if o.ExpectedRevision == nil {
-		o.ExpectedRevision = types.Any{}
+		o.ExpectedRevision = Any{}
 	}
 }

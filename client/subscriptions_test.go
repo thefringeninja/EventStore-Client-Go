@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
 	uuid "github.com/gofrs/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +27,7 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 	var appendedEvents sync.WaitGroup
 
 	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", client.SubscribeToStreamOptions{
-		From: types.Start{},
+		From: client.Start{},
 	})
 
 	go func() {
@@ -63,7 +62,7 @@ func TestStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents(t *te
 
 	// Write a new event
 	opts2 := client.AppendToStreamOptions{
-		ExpectedRevision: types.Revision(5_999),
+		ExpectedRevision: client.Revision(5_999),
 	}
 	writeResult, err := db.AppendToStream(context.Background(), streamID, opts2, testEvent)
 	require.NoError(t, err)
@@ -101,9 +100,9 @@ func TestAllSubscriptionWithFilterDeliversCorrectEvents(t *testing.T) {
 	receivedEvents.Add(len(positions))
 
 	subscription, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		From: types.Start{},
-		Filter: &types.SubscriptionFilter{
-			Type:     types.EventFilterType,
+		From: client.Start{},
+		Filter: &client.SubscriptionFilter{
+			Type:     client.EventFilterType,
 			Prefixes: []string{"eventType-194"},
 		},
 	})
@@ -144,7 +143,7 @@ func TestConnectionClosing(t *testing.T) {
 	var droppedEvent sync.WaitGroup
 
 	subscription, err := db.SubscribeToStream(context.Background(), "dataset20M-0", client.SubscribeToStreamOptions{
-		From: types.Start{},
+		From: client.Start{},
 	})
 
 	go func() {

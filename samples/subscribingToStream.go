@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/EventStore/EventStore-Client-Go/client"
-	"github.com/EventStore/EventStore-Client-Go/types"
 )
 
 func SubscribeToStream(db *client.Client) {
@@ -34,13 +33,13 @@ func SubscribeToStream(db *client.Client) {
 
 	// region subscribe-to-stream-from-position
 	db.SubscribeToStream(context.Background(), "some-stream", client.SubscribeToStreamOptions{
-		From: types.Revision(20),
+		From: client.Revision(20),
 	})
 	// endregion subscribe-to-stream-from-position
 
 	// region subscribe-to-stream-live
 	options = client.SubscribeToStreamOptions{
-		From: types.End{},
+		From: client.End{},
 	}
 
 	db.SubscribeToStream(context.Background(), "some-stream", options)
@@ -48,7 +47,7 @@ func SubscribeToStream(db *client.Client) {
 
 	// region subscribe-to-stream-resolving-linktos
 	options = client.SubscribeToStreamOptions{
-		From:         types.Start{},
+		From:         client.Start{},
 		ResolveLinks: true,
 	}
 
@@ -57,7 +56,7 @@ func SubscribeToStream(db *client.Client) {
 
 	// region subscribe-to-stream-subscription-dropped
 	options = client.SubscribeToStreamOptions{
-		From: types.Start{},
+		From: client.Start{},
 	}
 
 	for {
@@ -79,7 +78,7 @@ func SubscribeToStream(db *client.Client) {
 
 			if event.EventAppeared != nil {
 				// handles the event...
-				options.From = types.Revision(event.EventAppeared.OriginalEvent().EventNumber)
+				options.From = client.Revision(event.EventAppeared.OriginalEvent().EventNumber)
 			}
 		}
 	}
@@ -112,7 +111,7 @@ func SubscribeToAll(db *client.Client) {
 
 	// region subscribe-to-all-from-position
 	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		From: types.Position{
+		From: client.Position{
 			Commit:  1_056,
 			Prepare: 1_056,
 		},
@@ -121,13 +120,13 @@ func SubscribeToAll(db *client.Client) {
 
 	// region subscribe-to-all-live
 	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		From: types.End{},
+		From: client.End{},
 	})
 	// endregion subscribe-to-all-live
 
 	// region subscribe-to-all-subscription-dropped
 	options = client.SubscribeToAllOptions{
-		From: types.Start{},
+		From: client.Start{},
 	}
 
 	for {
@@ -158,16 +157,16 @@ func SubscribeToAll(db *client.Client) {
 func SubscribeToFiltered(db *client.Client) {
 	// region stream-prefix-filtered-subscription
 	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:     types.StreamFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:     client.StreamFilterType,
 			Prefixes: []string{"test-"},
 		},
 	})
 	// endregion stream-prefix-filtered-subscription
 	// region stream-regex-filtered-subscription
 	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &types.SubscriptionFilter{
-			Type:  types.StreamFilterType,
+		Filter: &client.SubscriptionFilter{
+			Type:  client.StreamFilterType,
 			Regex: "/invoice-\\d\\d\\d/g",
 		},
 	})

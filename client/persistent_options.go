@@ -1,33 +1,29 @@
 package client
 
-import (
-	"github.com/EventStore/EventStore-Client-Go/types"
-)
-
 type PersistentStreamSubscriptionOptions struct {
-	Settings      *types.SubscriptionSettings
-	From          types.StreamPosition
-	Authenticated *types.Credentials
+	Settings      *SubscriptionSettings
+	From          StreamPosition
+	Authenticated *Credentials
 }
 
 func (o *PersistentStreamSubscriptionOptions) setDefaults() {
 	if o.From == nil {
-		o.From = types.End{}
+		o.From = End{}
 	}
 }
 
 type PersistentAllSubscriptionOptions struct {
-	Settings           *types.SubscriptionSettings
-	From               types.AllPosition
+	Settings           *SubscriptionSettings
+	From               AllPosition
 	MaxSearchWindow    int
 	CheckpointInterval int
-	Filter             *types.SubscriptionFilter
-	Authenticated      *types.Credentials
+	Filter             *SubscriptionFilter
+	Authenticated      *Credentials
 }
 
 func (o *PersistentAllSubscriptionOptions) setDefaults() {
 	if o.From == nil {
-		o.From = types.End{}
+		o.From = End{}
 	}
 
 	if o.Filter != nil {
@@ -43,7 +39,7 @@ func (o *PersistentAllSubscriptionOptions) setDefaults() {
 
 type ConnectToPersistentSubscriptionOptions struct {
 	BatchSize     uint32
-	Authenticated *types.Credentials
+	Authenticated *Credentials
 }
 
 func (o *ConnectToPersistentSubscriptionOptions) setDefaults() {
@@ -53,5 +49,5 @@ func (o *ConnectToPersistentSubscriptionOptions) setDefaults() {
 }
 
 type DeletePersistentSubscriptionOptions struct {
-	Authenticated *types.Credentials
+	Authenticated *Credentials
 }

@@ -1,4 +1,4 @@
-package types
+package client
 
 type SubscriptionEvent struct {
 	EventAppeared       *ResolvedEvent
