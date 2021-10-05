@@ -1,4 +1,4 @@
-package protoutils
+package client
 
 import (
 	"fmt"
@@ -21,17 +21,17 @@ type SubscriptionFilterOptions struct {
 	SubscriptionFilter *types.SubscriptionFilter
 }
 
-// SystemMetadataKeysType ...
-const SystemMetadataKeysType = "type"
+// systemMetadataKeysType ...
+const systemMetadataKeysType = "type"
 
 // SystemMetadataKeysIsJSON ...
-const SystemMetadataKeysContentType = "content-type"
+const systemMetadataKeysContentType = "content-type"
 
-// SystemMetadataKeysCreated ...
-const SystemMetadataKeysCreated = "created"
+// systemMetadataKeysCreated ...
+const systemMetadataKeysCreated = "created"
 
-// ToAppendHeader ...
-func ToAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) *api.AppendReq {
+// toAppendHeader ...
+func toAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) *api.AppendReq {
 	appendReq := &api.AppendReq{
 		Content: &api.AppendReq_Options_{
 			Options: &api.AppendReq_Options{},
@@ -64,16 +64,16 @@ func ToAppendHeader(streamID string, streamRevision filtering.ExpectedRevision) 
 	return appendReq
 }
 
-// ToProposedMessage ...
-func ToProposedMessage(event filtering.ProposedEvent) *api.AppendReq_ProposedMessage {
+// toProposedMessage ...
+func toProposedMessage(event filtering.ProposedEvent) *api.AppendReq_ProposedMessage {
 	contentType := "application/octet-stream"
 	if event.ContentType == types.JsonContentType {
 		contentType = "application/json"
 	}
 
 	metadata := make(map[string]string)
-	metadata[SystemMetadataKeysContentType] = contentType
-	metadata[SystemMetadataKeysType] = event.EventType
+	metadata[systemMetadataKeysContentType] = contentType
+	metadata[systemMetadataKeysType] = event.EventType
 	eventId := event.EventID
 
 	if event.Data == nil {
@@ -204,7 +204,7 @@ func toFilterOptions(options *SubscriptionFilterOptions) (*api.ReadReq_Options_F
 	return &filterOptions, nil
 }
 
-func ToDeleteRequest(streamID string, streamRevision types.ExpectedRevision) *api.DeleteReq {
+func toDeleteRequest(streamID string, streamRevision types.ExpectedRevision) *api.DeleteReq {
 	deleteReq := &api.DeleteReq{
 		Options: &api.DeleteReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -235,7 +235,7 @@ func ToDeleteRequest(streamID string, streamRevision types.ExpectedRevision) *ap
 	return deleteReq
 }
 
-func ToTombstoneRequest(streamID string, streamRevision types.ExpectedRevision) *api.TombstoneReq {
+func toTombstoneRequest(streamID string, streamRevision types.ExpectedRevision) *api.TombstoneReq {
 	tombstoneReq := &api.TombstoneReq{
 		Options: &api.TombstoneReq_Options{
 			StreamIdentifier: &shared.StreamIdentifier{
@@ -266,7 +266,7 @@ func ToTombstoneRequest(streamID string, streamRevision types.ExpectedRevision) 
 	return tombstoneReq
 }
 
-func ToReadStreamRequest(streamID string, direction types.Direction, from filtering.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func toReadStreamRequest(streamID string, direction types.Direction, from filtering.StreamPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -287,7 +287,7 @@ func ToReadStreamRequest(streamID string, direction types.Direction, from filter
 	}
 }
 
-func ToReadAllRequest(direction types.Direction, from filtering.AllPosition, count uint64, resolveLinks bool) *api.ReadReq {
+func toReadAllRequest(direction types.Direction, from filtering.AllPosition, count uint64, resolveLinks bool) *api.ReadReq {
 	return &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Count{
@@ -308,7 +308,7 @@ func ToReadAllRequest(direction types.Direction, from filtering.AllPosition, cou
 	}
 }
 
-func ToStreamSubscriptionRequest(streamID string, from filtering.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
+func toStreamSubscriptionRequest(streamID string, from filtering.StreamPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -339,7 +339,7 @@ func ToStreamSubscriptionRequest(streamID string, from filtering.StreamPosition,
 	return readReq, nil
 }
 
-func ToAllSubscriptionRequest(from filtering.AllPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
+func toAllSubscriptionRequest(from filtering.AllPosition, resolveLinks bool, filterOptions *SubscriptionFilterOptions) (*api.ReadReq, error) {
 	readReq := &api.ReadReq{
 		Options: &api.ReadReq_Options{
 			CountOption: &api.ReadReq_Options_Subscription{
@@ -377,61 +377,61 @@ func EventIDFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) uuid.
 	return uuid.FromStringOrNil(idString)
 }
 
-// CreatedFromProto ...
-func CreatedFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) time.Time {
-	timeSinceEpoch, err := strconv.ParseInt(recordedEvent.Metadata[SystemMetadataKeysCreated], 10, 64)
+// createdFromProto ...
+func createdFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) time.Time {
+	timeSinceEpoch, err := strconv.ParseInt(recordedEvent.Metadata[systemMetadataKeysCreated], 10, 64)
 	if err != nil {
-		log.Fatalf("Failed to parse created date as int from %+v", recordedEvent.Metadata[SystemMetadataKeysCreated])
+		log.Fatalf("Failed to parse created date as int from %+v", recordedEvent.Metadata[systemMetadataKeysCreated])
 	}
 	// The metadata contains the number of .NET "ticks" (100ns increments) since the UNIX epoch
 	return time.Unix(0, timeSinceEpoch*100).UTC()
 }
 
-func PositionFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) types.Position {
+func positionFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) types.Position {
 	return types.Position{Commit: recordedEvent.GetCommitPosition(), Prepare: recordedEvent.GetPreparePosition()}
 }
 
-func DeletePositionFromProto(deleteResponse *api.DeleteResp) types.Position {
+func deletePositionFromProto(deleteResponse *api.DeleteResp) types.Position {
 	return types.Position{
 		Commit:  deleteResponse.GetPosition().CommitPosition,
 		Prepare: deleteResponse.GetPosition().PreparePosition,
 	}
 }
 
-func TombstonePositionFromProto(tombstoneResponse *api.TombstoneResp) types.Position {
+func tombstonePositionFromProto(tombstoneResponse *api.TombstoneResp) types.Position {
 	return types.Position{
 		Commit:  tombstoneResponse.GetPosition().CommitPosition,
 		Prepare: tombstoneResponse.GetPosition().PreparePosition,
 	}
 }
 
-// GetContentTypeFromProto ...
-func GetContentTypeFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) string {
-	return recordedEvent.Metadata[SystemMetadataKeysContentType]
+// getContentTypeFromProto ...
+func getContentTypeFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) string {
+	return recordedEvent.Metadata[systemMetadataKeysContentType]
 }
 
-// RecordedEventFromProto
-func RecordedEventFromProto(result *api.ReadResp_ReadEvent) filtering.RecordedEvent {
+// recordedEventFromProto
+func recordedEventFromProto(result *api.ReadResp_ReadEvent) filtering.RecordedEvent {
 	recordedEvent := result.GetEvent()
-	return GetRecordedEventFromProto(recordedEvent)
+	return getRecordedEventFromProto(recordedEvent)
 }
-func GetRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
+func getRecordedEventFromProto(recordedEvent *api.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
 	return filtering.RecordedEvent{
 		EventID:        EventIDFromProto(recordedEvent),
-		EventType:      recordedEvent.Metadata[SystemMetadataKeysType],
-		ContentType:    GetContentTypeFromProto(recordedEvent),
+		EventType:      recordedEvent.Metadata[systemMetadataKeysType],
+		ContentType:    getContentTypeFromProto(recordedEvent),
 		StreamID:       string(streamIdentifier.StreamName),
 		EventNumber:    recordedEvent.GetStreamRevision(),
-		CreatedDate:    CreatedFromProto(recordedEvent),
-		Position:       PositionFromProto(recordedEvent),
+		CreatedDate:    createdFromProto(recordedEvent),
+		Position:       positionFromProto(recordedEvent),
 		Data:           recordedEvent.GetData(),
 		SystemMetadata: recordedEvent.GetMetadata(),
 		UserMetadata:   recordedEvent.GetCustomMetadata(),
 	}
 }
 
-func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.ResolvedEvent {
+func getResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.ResolvedEvent {
 	positionWire := result.GetPosition()
 	linkWire := result.GetLink()
 	eventWire := result.GetEvent()
@@ -454,12 +454,12 @@ func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.Resolve
 	}
 
 	if eventWire != nil {
-		recordedEvent := GetRecordedEventFromProto(eventWire)
+		recordedEvent := getRecordedEventFromProto(eventWire)
 		event = &recordedEvent
 	}
 
 	if linkWire != nil {
-		recordedEvent := GetRecordedEventFromProto(linkWire)
+		recordedEvent := getRecordedEventFromProto(linkWire)
 		link = &recordedEvent
 	}
 
@@ -470,13 +470,13 @@ func GetResolvedEventFromProto(result *api.ReadResp_ReadEvent) filtering.Resolve
 	}
 }
 
-func EventIDFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) uuid.UUID {
+func eventIDFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) uuid.UUID {
 	id := recordedEvent.GetId()
 	idString := id.GetString_()
 	return uuid.FromStringOrNil(idString)
 }
 
-func ToProtoUUID(id uuid.UUID) *shared.UUID {
+func toProtoUUID(id uuid.UUID) *shared.UUID {
 	return &shared.UUID{
 		Value: &shared.UUID_String_{
 			String_: id.String(),
@@ -484,29 +484,29 @@ func ToProtoUUID(id uuid.UUID) *shared.UUID {
 	}
 }
 
-func GetContentTypeFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) string {
-	return recordedEvent.Metadata[SystemMetadataKeysContentType]
+func getContentTypeFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) string {
+	return recordedEvent.Metadata[systemMetadataKeysContentType]
 }
 
-func CreatedFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) time.Time {
+func createdFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) time.Time {
 	timeSinceEpoch, err := strconv.ParseInt(
-		recordedEvent.Metadata[SystemMetadataKeysCreated], 10, 64)
+		recordedEvent.Metadata[systemMetadataKeysCreated], 10, 64)
 	if err != nil {
 		log.Fatalf("Failed to parse created date as int from %+v",
-			recordedEvent.Metadata[SystemMetadataKeysCreated])
+			recordedEvent.Metadata[systemMetadataKeysCreated])
 	}
 	// The metadata contains the number of .NET "ticks" (100ns increments) since the UNIX epoch
 	return time.Unix(0, timeSinceEpoch*100).UTC()
 }
 
-func PositionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) types.Position {
+func positionFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) types.Position {
 	return types.Position{
 		Commit:  recordedEvent.GetCommitPosition(),
 		Prepare: recordedEvent.GetPreparePosition(),
 	}
 }
 
-func FromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedEvent {
+func fromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedEvent {
 	readEvent := resp.GetEvent()
 	positionWire := readEvent.GetPosition()
 	eventWire := readEvent.GetEvent()
@@ -530,12 +530,12 @@ func FromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedE
 	}
 
 	if eventWire != nil {
-		recordedEvent := NewMessageFromPersistentProto(eventWire)
+		recordedEvent := newMessageFromPersistentProto(eventWire)
 		event = &recordedEvent
 	}
 
 	if linkWire != nil {
-		recordedEvent := NewMessageFromPersistentProto(linkWire)
+		recordedEvent := newMessageFromPersistentProto(linkWire)
 		link = &recordedEvent
 	}
 
@@ -546,51 +546,51 @@ func FromPersistentProtoResponse(resp *persistent.ReadResp) *filtering.ResolvedE
 	}
 }
 
-func NewMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
+func newMessageFromPersistentProto(recordedEvent *persistent.ReadResp_ReadEvent_RecordedEvent) filtering.RecordedEvent {
 	streamIdentifier := recordedEvent.GetStreamIdentifier()
 
 	return filtering.RecordedEvent{
-		EventID:        EventIDFromPersistentProto(recordedEvent),
-		EventType:      recordedEvent.Metadata[SystemMetadataKeysType],
-		ContentType:    GetContentTypeFromPersistentProto(recordedEvent),
+		EventID:        eventIDFromPersistentProto(recordedEvent),
+		EventType:      recordedEvent.Metadata[systemMetadataKeysType],
+		ContentType:    getContentTypeFromPersistentProto(recordedEvent),
 		StreamID:       string(streamIdentifier.StreamName),
 		EventNumber:    recordedEvent.GetStreamRevision(),
-		CreatedDate:    CreatedFromPersistentProto(recordedEvent),
-		Position:       PositionFromPersistentProto(recordedEvent),
+		CreatedDate:    createdFromPersistentProto(recordedEvent),
+		Position:       positionFromPersistentProto(recordedEvent),
 		Data:           recordedEvent.GetData(),
 		SystemMetadata: recordedEvent.GetMetadata(),
 		UserMetadata:   recordedEvent.GetCustomMetadata(),
 	}
 }
 
-func UpdatePersistentRequestStreamProto(
+func updatePersistentRequestStreamProto(
 	streamName string,
 	groupName string,
 	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq {
 	return &persistent.UpdateReq{
-		Options: UpdatePersistentSubscriptionStreamConfigProto(streamName, groupName, position, settings),
+		Options: updatePersistentSubscriptionStreamConfigProto(streamName, groupName, position, settings),
 	}
 }
 
-func UpdatePersistentRequestAllOptionsProto(
+func updatePersistentRequestAllOptionsProto(
 	groupName string,
 	position filtering.AllPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq {
-	options := UpdatePersistentRequestAllOptionsSettingsProto(position)
+	options := updatePersistentRequestAllOptionsSettingsProto(position)
 
 	return &persistent.UpdateReq{
 		Options: &persistent.UpdateReq_Options{
 			StreamOption: options,
 			GroupName:    groupName,
-			Settings:     UpdatePersistentSubscriptionSettingsProto(settings),
+			Settings:     updatePersistentSubscriptionSettingsProto(settings),
 		},
 	}
 }
 
-func UpdatePersistentRequestAllOptionsSettingsProto(
+func updatePersistentRequestAllOptionsSettingsProto(
 	position filtering.AllPosition,
 ) *persistent.UpdateReq_Options_All {
 	options := &persistent.UpdateReq_Options_All{
@@ -609,30 +609,30 @@ func UpdatePersistentRequestAllOptionsSettingsProto(
 			Start: &shared.Empty{},
 		}
 	case types.Position:
-		options.All.AllOption = ToUpdatePersistentRequestAllOptionsFromPosition(value)
+		options.All.AllOption = toUpdatePersistentRequestAllOptionsFromPosition(value)
 	}
 
 	return options
 }
 
-func UpdatePersistentSubscriptionStreamConfigProto(
+func updatePersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
 	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq_Options {
 	return &persistent.UpdateReq_Options{
-		StreamOption: UpdatePersistentSubscriptionStreamSettingsProto(streamName, groupName, position),
+		StreamOption: updatePersistentSubscriptionStreamSettingsProto(streamName, groupName, position),
 		// backward compatibility
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamName),
 		},
 		GroupName: groupName,
-		Settings:  UpdatePersistentSubscriptionSettingsProto(settings),
+		Settings:  updatePersistentSubscriptionSettingsProto(settings),
 	}
 }
 
-func UpdatePersistentSubscriptionStreamSettingsProto(
+func updatePersistentSubscriptionStreamSettingsProto(
 	streamName string,
 	groupName string,
 	position filtering.StreamPosition,
@@ -664,7 +664,7 @@ func UpdatePersistentSubscriptionStreamSettingsProto(
 	return streamOption
 }
 
-func UpdatePersistentSubscriptionSettingsProto(
+func updatePersistentSubscriptionSettingsProto(
 	settings types.SubscriptionSettings,
 ) *persistent.UpdateReq_Settings {
 	return &persistent.UpdateReq_Settings{
@@ -677,13 +677,13 @@ func UpdatePersistentSubscriptionSettingsProto(
 		LiveBufferSize:        settings.LiveBufferSize,
 		ReadBatchSize:         settings.ReadBatchSize,
 		HistoryBufferSize:     settings.HistoryBufferSize,
-		NamedConsumerStrategy: UpdatePersistentRequestConsumerStrategyProto(settings.NamedConsumerStrategy),
-		MessageTimeout:        UpdatePersistentRequestMessageTimeOutInMsProto(settings.MessageTimeoutInMs),
-		CheckpointAfter:       UpdatePersistentRequestCheckpointAfterMsProto(settings.CheckpointAfterInMs),
+		NamedConsumerStrategy: updatePersistentRequestConsumerStrategyProto(settings.NamedConsumerStrategy),
+		MessageTimeout:        updatePersistentRequestMessageTimeOutInMsProto(settings.MessageTimeoutInMs),
+		CheckpointAfter:       updatePersistentRequestCheckpointAfterMsProto(settings.CheckpointAfterInMs),
 	}
 }
 
-func UpdatePersistentRequestConsumerStrategyProto(
+func updatePersistentRequestConsumerStrategyProto(
 	strategy types.ConsumerStrategy,
 ) persistent.UpdateReq_ConsumerStrategy {
 	switch strategy {
@@ -699,7 +699,7 @@ func UpdatePersistentRequestConsumerStrategyProto(
 	}
 }
 
-func UpdatePersistentRequestMessageTimeOutInMsProto(
+func updatePersistentRequestMessageTimeOutInMsProto(
 	timeout int32,
 ) *persistent.UpdateReq_Settings_MessageTimeoutMs {
 	return &persistent.UpdateReq_Settings_MessageTimeoutMs{
@@ -707,7 +707,7 @@ func UpdatePersistentRequestMessageTimeOutInMsProto(
 	}
 }
 
-func UpdatePersistentRequestCheckpointAfterMsProto(
+func updatePersistentRequestCheckpointAfterMsProto(
 	checkpointAfterMs int32,
 ) *persistent.UpdateReq_Settings_CheckpointAfterMs {
 	return &persistent.UpdateReq_Settings_CheckpointAfterMs{
@@ -715,8 +715,8 @@ func UpdatePersistentRequestCheckpointAfterMsProto(
 	}
 }
 
-// ToUpdatePersistentRequestAllOptionsFromPosition ...
-func ToUpdatePersistentRequestAllOptionsFromPosition(position types.Position) *persistent.UpdateReq_AllOptions_Position {
+// toUpdatePersistentRequestAllOptionsFromPosition ...
+func toUpdatePersistentRequestAllOptionsFromPosition(position types.Position) *persistent.UpdateReq_AllOptions_Position {
 	return &persistent.UpdateReq_AllOptions_Position{
 		Position: &persistent.UpdateReq_Position{
 			PreparePosition: position.Prepare,
@@ -725,24 +725,24 @@ func ToUpdatePersistentRequestAllOptionsFromPosition(position types.Position) *p
 	}
 }
 
-func CreatePersistentRequestProto(
+func createPersistentRequestProto(
 	streamName string,
 	groupName string,
 	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq {
 	return &persistent.CreateReq{
-		Options: CreatePersistentSubscriptionStreamConfigProto(streamName, groupName, position, settings),
+		Options: createPersistentSubscriptionStreamConfigProto(streamName, groupName, position, settings),
 	}
 }
 
-func CreatePersistentRequestAllOptionsProto(
+func createPersistentRequestAllOptionsProto(
 	groupName string,
 	position filtering.AllPosition,
 	settings types.SubscriptionSettings,
 	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq, error) {
-	options, err := CreatePersistentRequestAllOptionsSettingsProto(position, filter)
+	options, err := createPersistentRequestAllOptionsSettingsProto(position, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -751,12 +751,12 @@ func CreatePersistentRequestAllOptionsProto(
 		Options: &persistent.CreateReq_Options{
 			StreamOption: options,
 			GroupName:    groupName,
-			Settings:     CreatePersistentSubscriptionSettingsProto(settings),
+			Settings:     createPersistentSubscriptionSettingsProto(settings),
 		},
 	}, nil
 }
 
-func CreatePersistentRequestAllOptionsSettingsProto(
+func createPersistentRequestAllOptionsSettingsProto(
 	pos filtering.AllPosition,
 	filter *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_Options_All, error) {
@@ -779,11 +779,11 @@ func CreatePersistentRequestAllOptionsSettingsProto(
 			End: &shared.Empty{},
 		}
 	case types.Position:
-		options.All.AllOption = ToCreatePersistentRequestAllOptionsFromPosition(value)
+		options.All.AllOption = toCreatePersistentRequestAllOptionsFromPosition(value)
 	}
 
 	if filter != nil {
-		filter, err := CreateRequestFilterOptionsProto(filter)
+		filter, err := createRequestFilterOptionsProto(filter)
 		if err != nil {
 			return nil, err
 		}
@@ -795,24 +795,24 @@ func CreatePersistentRequestAllOptionsSettingsProto(
 	return options, nil
 }
 
-func CreatePersistentSubscriptionStreamConfigProto(
+func createPersistentSubscriptionStreamConfigProto(
 	streamName string,
 	groupName string,
 	position filtering.StreamPosition,
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq_Options {
 	return &persistent.CreateReq_Options{
-		StreamOption: CreatePersistentSubscriptionStreamSettingsProto(streamName, position),
+		StreamOption: createPersistentSubscriptionStreamSettingsProto(streamName, position),
 		// backward compatibility
 		StreamIdentifier: &shared.StreamIdentifier{
 			StreamName: []byte(streamName),
 		},
 		GroupName: groupName,
-		Settings:  CreatePersistentSubscriptionSettingsProto(settings),
+		Settings:  createPersistentSubscriptionSettingsProto(settings),
 	}
 }
 
-func CreatePersistentSubscriptionStreamSettingsProto(
+func createPersistentSubscriptionStreamSettingsProto(
 	streamName string,
 	position filtering.StreamPosition,
 ) *persistent.CreateReq_Options_Stream {
@@ -842,7 +842,7 @@ func CreatePersistentSubscriptionStreamSettingsProto(
 	return streamOption
 }
 
-func CreatePersistentSubscriptionSettingsProto(
+func createPersistentSubscriptionSettingsProto(
 	settings types.SubscriptionSettings,
 ) *persistent.CreateReq_Settings {
 	return &persistent.CreateReq_Settings{
@@ -855,13 +855,13 @@ func CreatePersistentSubscriptionSettingsProto(
 		LiveBufferSize:        settings.LiveBufferSize,
 		ReadBatchSize:         settings.ReadBatchSize,
 		HistoryBufferSize:     settings.HistoryBufferSize,
-		NamedConsumerStrategy: ConsumerStrategyProto(settings.NamedConsumerStrategy),
-		MessageTimeout:        MessageTimeOutInMsProto(settings.MessageTimeoutInMs),
-		CheckpointAfter:       CheckpointAfterMsProto(settings.CheckpointAfterInMs),
+		NamedConsumerStrategy: consumerStrategyProto(settings.NamedConsumerStrategy),
+		MessageTimeout:        messageTimeOutInMsProto(settings.MessageTimeoutInMs),
+		CheckpointAfter:       checkpointAfterMsProto(settings.CheckpointAfterInMs),
 	}
 }
 
-func ConsumerStrategyProto(strategy types.ConsumerStrategy) persistent.CreateReq_ConsumerStrategy {
+func consumerStrategyProto(strategy types.ConsumerStrategy) persistent.CreateReq_ConsumerStrategy {
 	switch strategy {
 	case types.ConsumerStrategy_DispatchToSingle:
 		return persistent.CreateReq_DispatchToSingle
@@ -874,20 +874,20 @@ func ConsumerStrategyProto(strategy types.ConsumerStrategy) persistent.CreateReq
 	}
 }
 
-func MessageTimeOutInMsProto(timeout int32) *persistent.CreateReq_Settings_MessageTimeoutMs {
+func messageTimeOutInMsProto(timeout int32) *persistent.CreateReq_Settings_MessageTimeoutMs {
 	return &persistent.CreateReq_Settings_MessageTimeoutMs{
 		MessageTimeoutMs: timeout,
 	}
 }
 
-func CheckpointAfterMsProto(checkpointAfterMs int32) *persistent.CreateReq_Settings_CheckpointAfterMs {
+func checkpointAfterMsProto(checkpointAfterMs int32) *persistent.CreateReq_Settings_CheckpointAfterMs {
 	return &persistent.CreateReq_Settings_CheckpointAfterMs{
 		CheckpointAfterMs: checkpointAfterMs,
 	}
 }
 
-// CreateRequestFilterOptionsProto ...
-func CreateRequestFilterOptionsProto(
+// createRequestFilterOptionsProto ...
+func createRequestFilterOptionsProto(
 	options *SubscriptionFilterOptions,
 ) (*persistent.CreateReq_AllOptions_FilterOptions, error) {
 	if len(options.SubscriptionFilter.Prefixes) == 0 && len(options.SubscriptionFilter.Regex) == 0 {
@@ -927,8 +927,8 @@ func CreateRequestFilterOptionsProto(
 	return &filterOptions, nil
 }
 
-// ToUpdatePersistentRequestAllOptionsFromPosition ...
-func ToCreatePersistentRequestAllOptionsFromPosition(
+// toUpdatePersistentRequestAllOptionsFromPosition ...
+func toCreatePersistentRequestAllOptionsFromPosition(
 	position types.Position,
 ) *persistent.CreateReq_AllOptions_Position {
 	return &persistent.CreateReq_AllOptions_Position{
@@ -939,7 +939,7 @@ func ToCreatePersistentRequestAllOptionsFromPosition(
 	}
 }
 
-func DeletePersistentRequestStreamProto(streamName string, groupName string) *persistent.DeleteReq {
+func deletePersistentRequestStreamProto(streamName string, groupName string) *persistent.DeleteReq {
 	return &persistent.DeleteReq{
 		Options: &persistent.DeleteReq_Options{
 			GroupName: groupName,
@@ -952,7 +952,7 @@ func DeletePersistentRequestStreamProto(streamName string, groupName string) *pe
 	}
 }
 
-func DeletePersistentRequestAllOptionsProto(groupName string) *persistent.DeleteReq {
+func deletePersistentRequestAllOptionsProto(groupName string) *persistent.DeleteReq {
 	return &persistent.DeleteReq{
 		Options: &persistent.DeleteReq_Options{
 			GroupName: groupName,
@@ -963,7 +963,7 @@ func DeletePersistentRequestAllOptionsProto(groupName string) *persistent.Delete
 	}
 }
 
-func ToPersistentReadRequest(
+func toPersistentReadRequest(
 	bufferSize int32,
 	groupName string,
 	streamName []byte,

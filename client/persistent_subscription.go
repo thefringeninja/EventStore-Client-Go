@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"log"
@@ -112,7 +111,7 @@ func messageIdSliceToProto(messageIds ...uuid.UUID) []*shared.UUID {
 	result := make([]*shared.UUID, len(messageIds))
 
 	for index, messageId := range messageIds {
-		result[index] = protoutils.ToProtoUUID(messageId)
+		result[index] = toProtoUUID(messageId)
 	}
 
 	return result
@@ -173,7 +172,7 @@ func NewPersistentSubscription(
 			switch result.Content.(type) {
 			case *persistent.ReadResp_Event:
 				{
-					resolvedEvent := protoutils.FromPersistentProtoResponse(result)
+					resolvedEvent := fromPersistentProtoResponse(result)
 					req.channel <- &types.SubscriptionEvent{
 						EventAppeared: resolvedEvent,
 					}

@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	"github.com/EventStore/EventStore-Client-Go/protos/persistent"
@@ -40,7 +39,7 @@ func (client *persistentClient) ConnectToPersistentSubscription(
 		return nil, types.PersistentSubscriptionFailedToInitClientError(err)
 	}
 
-	err = readClient.Send(protoutils.ToPersistentReadRequest(bufferSize, groupName, []byte(streamName)))
+	err = readClient.Send(toPersistentReadRequest(bufferSize, groupName, []byte(streamName)))
 	if err != nil {
 		defer cancel()
 		return nil, types.PersistentSubscriptionFailedSendStreamInitError(err)
@@ -76,7 +75,7 @@ func (client *persistentClient) CreateStreamSubscription(
 	settings types.SubscriptionSettings,
 	auth *types.Credentials,
 ) error {
-	createSubscriptionConfig := protoutils.CreatePersistentRequestProto(streamName, groupName, position, settings)
+	createSubscriptionConfig := createPersistentRequestProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
 	if auth != nil {
@@ -100,10 +99,10 @@ func (client *persistentClient) CreateAllSubscription(
 	groupName string,
 	position types.AllPosition,
 	settings types.SubscriptionSettings,
-	filter *protoutils.SubscriptionFilterOptions,
+	filter *SubscriptionFilterOptions,
 	auth *types.Credentials,
 ) error {
-	protoConfig, err := protoutils.CreatePersistentRequestAllOptionsProto(groupName, position, settings, filter)
+	protoConfig, err := createPersistentRequestAllOptionsProto(groupName, position, settings, filter)
 	if err != nil {
 		return err
 	}
@@ -134,7 +133,7 @@ func (client *persistentClient) UpdateStreamSubscription(
 	settings types.SubscriptionSettings,
 	auth *types.Credentials,
 ) error {
-	updateSubscriptionConfig := protoutils.UpdatePersistentRequestStreamProto(streamName, groupName, position, settings)
+	updateSubscriptionConfig := updatePersistentRequestStreamProto(streamName, groupName, position, settings)
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
 	if auth != nil {
@@ -160,7 +159,7 @@ func (client *persistentClient) UpdateAllSubscription(
 	settings types.SubscriptionSettings,
 	auth *types.Credentials,
 ) error {
-	updateSubscriptionConfig := protoutils.UpdatePersistentRequestAllOptionsProto(groupName, position, settings)
+	updateSubscriptionConfig := updatePersistentRequestAllOptionsProto(groupName, position, settings)
 
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
@@ -186,7 +185,7 @@ func (client *persistentClient) DeleteStreamSubscription(
 	groupName string,
 	auth *types.Credentials,
 ) error {
-	deleteSubscriptionOptions := protoutils.DeletePersistentRequestStreamProto(streamName, groupName)
+	deleteSubscriptionOptions := deletePersistentRequestStreamProto(streamName, groupName)
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
 	if auth != nil {
@@ -205,7 +204,7 @@ func (client *persistentClient) DeleteStreamSubscription(
 }
 
 func (client *persistentClient) DeleteAllSubscription(ctx context.Context, handle connectionHandle, groupName string, auth *types.Credentials) error {
-	deleteSubscriptionOptions := protoutils.DeletePersistentRequestAllOptionsProto(groupName)
+	deleteSubscriptionOptions := deletePersistentRequestAllOptionsProto(groupName)
 	var headers, trailers metadata.MD
 	callOptions := []grpc.CallOption{grpc.Header(&headers), grpc.Trailer(&trailers)}
 	if auth != nil {

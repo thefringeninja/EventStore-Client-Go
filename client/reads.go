@@ -6,7 +6,6 @@ import (
 	"io"
 	"sync"
 
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	"github.com/EventStore/EventStore-Client-Go/types"
 
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
@@ -106,7 +105,7 @@ func newReadStream(params readStreamParams, firstEvt types.ResolvedEvent) *ReadS
 				continue
 			}
 
-			resolvedEvent := protoutils.GetResolvedEventFromProto(result.GetEvent())
+			resolvedEvent := getResolvedEventFromProto(result.GetEvent())
 			resp <- readResp{
 				event: &resolvedEvent,
 			}

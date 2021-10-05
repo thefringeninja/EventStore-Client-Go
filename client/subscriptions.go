@@ -6,7 +6,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	api "github.com/EventStore/EventStore-Client-Go/protos/streams"
 	"github.com/EventStore/EventStore-Client-Go/types"
 )
@@ -83,7 +82,7 @@ func NewSubscription(client *Client, cancel context.CancelFunc, inner api.Stream
 				}
 			case *api.ReadResp_Event:
 				{
-					resolvedEvent := protoutils.GetResolvedEventFromProto(result.GetEvent())
+					resolvedEvent := getResolvedEventFromProto(result.GetEvent())
 					req.channel <- &types.SubscriptionEvent{
 						EventAppeared: &resolvedEvent,
 					}

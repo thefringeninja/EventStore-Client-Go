@@ -8,7 +8,6 @@ import (
 
 	"errors"
 
-	"github.com/EventStore/EventStore-Client-Go/internal/protoutils"
 	persistentProto "github.com/EventStore/EventStore-Client-Go/protos/persistent"
 	"github.com/EventStore/EventStore-Client-Go/types"
 	"google.golang.org/grpc"
@@ -66,7 +65,7 @@ func (client *Client) AppendToStream(
 		return nil, fmt.Errorf("could not construct append operation. Reason: %w", err)
 	}
 
-	header := protoutils.ToAppendHeader(streamID, opts.ExpectedRevision)
+	header := toAppendHeader(streamID, opts.ExpectedRevision)
 
 	if err := appendOperation.Send(header); err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
@@ -76,7 +75,7 @@ func (client *Client) AppendToStream(
 	for _, event := range events {
 		appendRequest := &api.AppendReq{
 			Content: &api.AppendReq_ProposedMessage_{
-				ProposedMessage: protoutils.ToProposedMessage(event),
+				ProposedMessage: toProposedMessage(event),
 			},
 		}
 
@@ -228,14 +227,14 @@ func (client *Client) DeleteStream(
 			password: opts.Authenticated.Password,
 		}))
 	}
-	deleteRequest := protoutils.ToDeleteRequest(streamID, opts.ExpectedRevision)
+	deleteRequest := toDeleteRequest(streamID, opts.ExpectedRevision)
 	deleteResponse, err := streamsClient.Delete(context, deleteRequest, callOptions...)
 	if err != nil {
 		err = client.grpcClient.handleError(handle, headers, trailers, err)
 		return nil, fmt.Errorf("failed to perform delete, details: %w", err)
 	}
 
-	return &DeleteResult{Position: protoutils.DeletePositionFromProto(deleteResponse)}, nil
+	return &DeleteResult{Position: deletePositionFromProto(deleteResponse)}, nil
 }
 
 // Tombstone ...
@@ -258,7 +257,7 @@ func (client *Client) TombstoneStream(
 			password: opts.Authenticated.Password,
 		}))
 	}
-	tombstoneRequest := protoutils.ToTombstoneRequest(streamID, opts.ExpectedRevision)
+	tombstoneRequest := toTombstoneRequest(streamID, opts.ExpectedRevision)
 	tombstoneResponse, err := streamsClient.Tombstone(context, tombstoneRequest, callOptions...)
 
 	if err != nil {
@@ -266,7 +265,7 @@ func (client *Client) TombstoneStream(
 		return nil, fmt.Errorf("failed to perform delete, details: %w", err)
 	}
 
-	return &DeleteResult{Position: protoutils.TombstonePositionFromProto(tombstoneResponse)}, nil
+	return &DeleteResult{Position: tombstonePositionFromProto(tombstoneResponse)}, nil
 }
 
 // ReadStream ...
@@ -277,7 +276,7 @@ func (client *Client) ReadStream(
 	count uint64,
 ) (*ReadStream, error) {
 	opts.setDefaults()
-	readRequest := protoutils.ToReadStreamRequest(streamID, opts.Direction, opts.From, count, opts.ResolveLinkTos)
+	readRequest := toReadStreamRequest(streamID, opts.Direction, opts.From, count, opts.ResolveLinkTos)
 	handle, err := client.grpcClient.getConnectionHandle()
 	if err != nil {
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
@@ -299,7 +298,7 @@ func (client *Client) ReadAll(
 		return nil, fmt.Errorf("can't get a connection handle: %w", err)
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	readRequest := protoutils.ToReadAllRequest(opts.Direction, opts.From, count, opts.ResolveLinkTos)
+	readRequest := toReadAllRequest(opts.Direction, opts.From, count, opts.ResolveLinkTos)
 	return readInternal(context, client.grpcClient, handle, streamsClient, readRequest, opts.Authenticated)
 }
 
@@ -323,7 +322,7 @@ func (client *Client) SubscribeToStream(
 		}))
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := protoutils.ToStreamSubscriptionRequest(streamID, opts.From, opts.ResolveLinks, nil)
+	subscriptionRequest, err := toStreamSubscriptionRequest(streamID, opts.From, opts.ResolveLinks, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
@@ -371,16 +370,16 @@ func (client *Client) SubscribeToAll(
 		}))
 	}
 
-	var filterOptions *protoutils.SubscriptionFilterOptions = nil
+	var filterOptions *SubscriptionFilterOptions = nil
 	if opts.Filter != nil {
-		filterOptions = &protoutils.SubscriptionFilterOptions{
+		filterOptions = &SubscriptionFilterOptions{
 			MaxSearchWindow:    opts.MaxSearchWindow,
 			CheckpointInterval: opts.CheckpointInterval,
 			SubscriptionFilter: opts.Filter,
 		}
 	}
 
-	subscriptionRequest, err := protoutils.ToAllSubscriptionRequest(opts.From, opts.ResolveLinks, filterOptions)
+	subscriptionRequest, err := toAllSubscriptionRequest(opts.From, opts.ResolveLinks, filterOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
@@ -464,9 +463,9 @@ func (client *Client) CreatePersistentSubscriptionAll(
 		return fmt.Errorf("can't get a connection handle: %w", err)
 	}
 
-	var filterOptions *protoutils.SubscriptionFilterOptions = nil
+	var filterOptions *SubscriptionFilterOptions = nil
 	if options.Filter != nil {
-		filterOptions = &protoutils.SubscriptionFilterOptions{
+		filterOptions = &SubscriptionFilterOptions{
 			MaxSearchWindow:    options.MaxSearchWindow,
 			CheckpointInterval: options.CheckpointInterval,
 			SubscriptionFilter: options.Filter,
@@ -601,7 +600,7 @@ func readInternal(
 
 	switch msg.Content.(type) {
 	case *api.ReadResp_Event:
-		resolvedEvent := protoutils.GetResolvedEventFromProto(msg.GetEvent())
+		resolvedEvent := getResolvedEventFromProto(msg.GetEvent())
 		params := readStreamParams{
 			client:   client,
 			handle:   handle,
