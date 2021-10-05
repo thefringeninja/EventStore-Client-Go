@@ -8,18 +8,18 @@ import (
 
 	"github.com/gofrs/uuid"
 
-	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
 
 func Run() {
 	// region createClient
-	settings, err := client.ParseConnectionString("{connectionString}")
+	settings, err := esdb.ParseConnectionString("{connectionString}")
 
 	if err != nil {
 		panic(err)
 	}
 
-	db, err := client.NewClient(settings)
+	db, err := esdb.NewClient(settings)
 
 	// endregion createClient
 	if err != nil {
@@ -40,8 +40,8 @@ func Run() {
 	}
 
 	// region appendEvents
-	_, err = db.AppendToStream(context.Background(), "some-stream", client.AppendToStreamOptions{}, client.ProposedEvent{
-		ContentType: client.JsonContentType,
+	_, err = db.AppendToStream(context.Background(), "some-stream", esdb.AppendToStreamOptions{}, esdb.ProposedEvent{
+		ContentType: esdb.JsonContentType,
 		EventType:   "TestEvent",
 		Data:        data,
 	})
@@ -52,7 +52,7 @@ func Run() {
 	}
 
 	// region readStream
-	stream, err := db.ReadStream(context.Background(), "some-stream", client.ReadStreamOptions{}, 10)
+	stream, err := db.ReadStream(context.Background(), "some-stream", esdb.ReadStreamOptions{}, 10)
 
 	if err != nil {
 		panic(err)

@@ -69,5 +69,5 @@ then
 fi
 
 echo "Compiling project..."
-go build -v ./client ./samples
+go build -v ./esdb ./samples
 echo "done."

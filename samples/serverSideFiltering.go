@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
 
-func ExcludeSystemEvents(db *client.Client) {
+func ExcludeSystemEvents(db *esdb.Client) {
 	// region exclude-system
-	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:  client.EventFilterType,
+	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:  esdb.EventFilterType,
 			Regex: "/^[^\\$].*/",
 		},
 	})
@@ -40,11 +40,11 @@ func ExcludeSystemEvents(db *client.Client) {
 	// endregion exclude-system
 }
 
-func EventTypePrefix(db *client.Client) {
+func EventTypePrefix(db *esdb.Client) {
 	// region event-type-prefix
-	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:     client.EventFilterType,
+	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:     esdb.EventFilterType,
 			Prefixes: []string{"customer-"},
 		},
 	})
@@ -73,11 +73,11 @@ func EventTypePrefix(db *client.Client) {
 	// endregion event-type-prefix
 }
 
-func EventTypeRegex(db *client.Client) {
+func EventTypeRegex(db *esdb.Client) {
 	// region event-type-regex
-	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:  client.EventFilterType,
+	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:  esdb.EventFilterType,
 			Regex: "^user|^company",
 		},
 	})
@@ -106,11 +106,11 @@ func EventTypeRegex(db *client.Client) {
 	// endregion event-type-regex
 }
 
-func StreamPrefix(db *client.Client) {
+func StreamPrefix(db *esdb.Client) {
 	// region stream-prefix
-	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:     client.StreamFilterType,
+	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:     esdb.StreamFilterType,
 			Prefixes: []string{"user-"},
 		},
 	})
@@ -139,11 +139,11 @@ func StreamPrefix(db *client.Client) {
 	// endregion stream-prefix
 }
 
-func StreamRegex(db *client.Client) {
+func StreamRegex(db *esdb.Client) {
 	// region stream-regex
-	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:  client.StreamFilterType,
+	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:  esdb.StreamFilterType,
 			Regex: "^user|^company",
 		},
 	})
@@ -172,11 +172,11 @@ func StreamRegex(db *client.Client) {
 	// endregion stream-regex
 }
 
-func CheckpointCallbackWithInterval(db *client.Client) {
+func CheckpointCallbackWithInterval(db *esdb.Client) {
 	// region checkpoint-with-interval
-	sub, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:  client.EventFilterType,
+	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:  esdb.EventFilterType,
 			Regex: "/^[^\\$].*/",
 		},
 	})

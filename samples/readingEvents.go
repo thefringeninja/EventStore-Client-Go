@@ -7,12 +7,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
 
-func ReadFromStream(db *client.Client) {
+func ReadFromStream(db *esdb.Client) {
 	// region read-from-stream
-	stream, err := db.ReadStream(context.Background(), "some-stream", client.ReadStreamOptions{}, 100)
+	stream, err := db.ReadStream(context.Background(), "some-stream", esdb.ReadStreamOptions{}, 100)
 
 	if err != nil {
 		panic(err)
@@ -37,10 +37,10 @@ func ReadFromStream(db *client.Client) {
 	// endregion iterate-stream
 }
 
-func ReadFromStreamPosition(db *client.Client) {
+func ReadFromStreamPosition(db *esdb.Client) {
 	// region read-from-position
-	ropts := client.ReadStreamOptions{
-		From: client.Revision(10),
+	ropts := esdb.ReadStreamOptions{
+		From: esdb.Revision(10),
 	}
 
 	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 20)
@@ -68,11 +68,11 @@ func ReadFromStreamPosition(db *client.Client) {
 	// endregion iterate-stream
 }
 
-func ReadStreamOverridingUserCredentials(db *client.Client) {
+func ReadStreamOverridingUserCredentials(db *esdb.Client) {
 	// region overriding-user-credentials
-	options := client.ReadStreamOptions{
-		From: client.Start{},
-		Authenticated: &client.Credentials{
+	options := esdb.ReadStreamOptions{
+		From: esdb.Start{},
+		Authenticated: &esdb.Credentials{
 			Login:    "admin",
 			Password: "changeit",
 		},
@@ -87,10 +87,10 @@ func ReadStreamOverridingUserCredentials(db *client.Client) {
 	stream.Close()
 }
 
-func ReadFromStreamPositionCheck(db *client.Client) {
+func ReadFromStreamPositionCheck(db *esdb.Client) {
 	// region checking-for-stream-presence
-	ropts := client.ReadStreamOptions{
-		From: client.Revision(10),
+	ropts := esdb.ReadStreamOptions{
+		From: esdb.Revision(10),
 	}
 
 	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 100)
@@ -104,7 +104,7 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 	for {
 		event, err := stream.Recv()
 
-		if errors.Is(err, client.ErrStreamNotFound) {
+		if errors.Is(err, esdb.ErrStreamNotFound) {
 			fmt.Print("Stream not found")
 		}
 
@@ -121,11 +121,11 @@ func ReadFromStreamPositionCheck(db *client.Client) {
 	// endregion checking-for-stream-presence
 }
 
-func ReadStreamBackwards(db *client.Client) {
+func ReadStreamBackwards(db *esdb.Client) {
 	// region reading-backwards
-	ropts := client.ReadStreamOptions{
-		Direction: client.Backwards,
-		From:      client.End{},
+	ropts := esdb.ReadStreamOptions{
+		Direction: esdb.Backwards,
+		From:      esdb.End{},
 	}
 
 	stream, err := db.ReadStream(context.Background(), "some-stream", ropts, 10)
@@ -152,9 +152,9 @@ func ReadStreamBackwards(db *client.Client) {
 	// endregion reading-backwards
 }
 
-func ReadFromAllStream(db *client.Client) {
+func ReadFromAllStream(db *esdb.Client) {
 	// region read-from-all-stream
-	stream, err := db.ReadAll(context.Background(), client.ReadAllOptions{}, 100)
+	stream, err := db.ReadAll(context.Background(), esdb.ReadAllOptions{}, 100)
 
 	if err != nil {
 		panic(err)
@@ -179,9 +179,9 @@ func ReadFromAllStream(db *client.Client) {
 	// endregion read-from-all-stream-iterate
 }
 
-func IgnoreSystemEvents(db *client.Client) {
+func IgnoreSystemEvents(db *esdb.Client) {
 	// region ignore-system-events
-	stream, err := db.ReadAll(context.Background(), client.ReadAllOptions{}, 100)
+	stream, err := db.ReadAll(context.Background(), esdb.ReadAllOptions{}, 100)
 
 	if err != nil {
 		panic(err)
@@ -211,11 +211,11 @@ func IgnoreSystemEvents(db *client.Client) {
 	// endregion ignore-system-events
 }
 
-func ReadFromAllBackwards(db *client.Client) {
+func ReadFromAllBackwards(db *esdb.Client) {
 	// region read-from-all-stream-backwards
-	ropts := client.ReadAllOptions{
-		Direction: client.Backwards,
-		From:      client.End{},
+	ropts := esdb.ReadAllOptions{
+		Direction: esdb.Backwards,
+		From:      esdb.End{},
 	}
 
 	stream, err := db.ReadAll(context.Background(), ropts, 100)
@@ -243,9 +243,9 @@ func ReadFromAllBackwards(db *client.Client) {
 	// endregion read-from-all-stream-backwards-iterate
 }
 
-func ReadFromStreamResolvingLinkToS(db *client.Client) {
+func ReadFromStreamResolvingLinkToS(db *esdb.Client) {
 	// region read-from-all-stream-resolving-link-Tos
-	ropts := client.ReadAllOptions{
+	ropts := esdb.ReadAllOptions{
 		ResolveLinkTos: true,
 	}
 

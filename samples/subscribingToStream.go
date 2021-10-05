@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/EventStore/EventStore-Client-Go/client"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
 
-func SubscribeToStream(db *client.Client) {
-	options := client.SubscribeToStreamOptions{}
+func SubscribeToStream(db *esdb.Client) {
+	options := esdb.SubscribeToStreamOptions{}
 	// region subscribe-to-stream
-	stream, err := db.SubscribeToStream(context.Background(), "some-stream", client.SubscribeToStreamOptions{})
+	stream, err := db.SubscribeToStream(context.Background(), "some-stream", esdb.SubscribeToStreamOptions{})
 
 	if err != nil {
 		panic(err)
@@ -32,22 +32,22 @@ func SubscribeToStream(db *client.Client) {
 	// endregion subscribe-to-stream
 
 	// region subscribe-to-stream-from-position
-	db.SubscribeToStream(context.Background(), "some-stream", client.SubscribeToStreamOptions{
-		From: client.Revision(20),
+	db.SubscribeToStream(context.Background(), "some-stream", esdb.SubscribeToStreamOptions{
+		From: esdb.Revision(20),
 	})
 	// endregion subscribe-to-stream-from-position
 
 	// region subscribe-to-stream-live
-	options = client.SubscribeToStreamOptions{
-		From: client.End{},
+	options = esdb.SubscribeToStreamOptions{
+		From: esdb.End{},
 	}
 
 	db.SubscribeToStream(context.Background(), "some-stream", options)
 	// endregion subscribe-to-stream-live
 
 	// region subscribe-to-stream-resolving-linktos
-	options = client.SubscribeToStreamOptions{
-		From:         client.Start{},
+	options = esdb.SubscribeToStreamOptions{
+		From:         esdb.Start{},
 		ResolveLinks: true,
 	}
 
@@ -55,8 +55,8 @@ func SubscribeToStream(db *client.Client) {
 	// endregion subscribe-to-stream-resolving-linktos
 
 	// region subscribe-to-stream-subscription-dropped
-	options = client.SubscribeToStreamOptions{
-		From: client.Start{},
+	options = esdb.SubscribeToStreamOptions{
+		From: esdb.Start{},
 	}
 
 	for {
@@ -78,17 +78,17 @@ func SubscribeToStream(db *client.Client) {
 
 			if event.EventAppeared != nil {
 				// handles the event...
-				options.From = client.Revision(event.EventAppeared.OriginalEvent().EventNumber)
+				options.From = esdb.Revision(event.EventAppeared.OriginalEvent().EventNumber)
 			}
 		}
 	}
 	// endregion subscribe-to-stream-subscription-dropped
 }
 
-func SubscribeToAll(db *client.Client) {
-	options := client.SubscribeToAllOptions{}
+func SubscribeToAll(db *esdb.Client) {
+	options := esdb.SubscribeToAllOptions{}
 	// region subscribe-to-all
-	stream, err := db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{})
+	stream, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{})
 
 	if err != nil {
 		panic(err)
@@ -110,8 +110,8 @@ func SubscribeToAll(db *client.Client) {
 	// endregion subscribe-to-all
 
 	// region subscribe-to-all-from-position
-	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		From: client.Position{
+	db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		From: esdb.Position{
 			Commit:  1_056,
 			Prepare: 1_056,
 		},
@@ -119,14 +119,14 @@ func SubscribeToAll(db *client.Client) {
 	// endregion subscribe-to-all-from-position
 
 	// region subscribe-to-all-live
-	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		From: client.End{},
+	db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		From: esdb.End{},
 	})
 	// endregion subscribe-to-all-live
 
 	// region subscribe-to-all-subscription-dropped
-	options = client.SubscribeToAllOptions{
-		From: client.Start{},
+	options = esdb.SubscribeToAllOptions{
+		From: esdb.Start{},
 	}
 
 	for {
@@ -154,19 +154,19 @@ func SubscribeToAll(db *client.Client) {
 	// endregion subscribe-to-all-subscription-dropped
 }
 
-func SubscribeToFiltered(db *client.Client) {
+func SubscribeToFiltered(db *esdb.Client) {
 	// region stream-prefix-filtered-subscription
-	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:     client.StreamFilterType,
+	db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:     esdb.StreamFilterType,
 			Prefixes: []string{"test-"},
 		},
 	})
 	// endregion stream-prefix-filtered-subscription
 	// region stream-regex-filtered-subscription
-	db.SubscribeToAll(context.Background(), client.SubscribeToAllOptions{
-		Filter: &client.SubscriptionFilter{
-			Type:  client.StreamFilterType,
+	db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Filter: &esdb.SubscriptionFilter{
+			Type:  esdb.StreamFilterType,
 			Regex: "/invoice-\\d\\d\\d/g",
 		},
 	})
