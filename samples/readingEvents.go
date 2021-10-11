@@ -266,3 +266,22 @@ func ReadFromStreamResolvingLinkToS(db *esdb.Client) {
 
 	defer stream.Close()
 }
+
+func ReadAllOverridingUserCredentials(db *esdb.Client) {
+	// region read-all-overriding-user-credentials
+	ropts := esdb.ReadAllOptions{
+		From: esdb.Start{},
+		Authenticated: &esdb.Credentials{
+			Login:    "admin",
+			Password: "changeit",
+		},
+	}
+	stream, err := db.ReadAll(context.Background(), ropts, 100)
+	// endregion read-all-overriding-user-credentials
+
+	if err != nil {
+		panic(err)
+	}
+
+	stream.Close()
+}
