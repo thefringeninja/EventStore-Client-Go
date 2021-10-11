@@ -42,7 +42,7 @@ func ReadFromStream(db *esdb.Client) {
 }
 
 func ReadFromStreamPosition(db *esdb.Client) {
-	// region read-from-position
+	// region read-from-stream-position
 	ropts := esdb.ReadStreamOptions{
 		From: esdb.Revision(10),
 	}
@@ -54,7 +54,7 @@ func ReadFromStreamPosition(db *esdb.Client) {
 	}
 
 	defer stream.Close()
-	// endregion read-from-position
+	// endregion read-from-stream-position
 	// region iterate-stream
 	for {
 		event, err := stream.Recv()
@@ -158,7 +158,11 @@ func ReadStreamBackwards(db *esdb.Client) {
 
 func ReadFromAllStream(db *esdb.Client) {
 	// region read-from-all-stream
-	stream, err := db.ReadAll(context.Background(), esdb.ReadAllOptions{}, 100)
+	options := esdb.ReadAllOptions{
+		From:      esdb.Start{},
+		Direction: esdb.Forwards,
+	}
+	stream, err := db.ReadAll(context.Background(), options, 100)
 
 	if err != nil {
 		panic(err)
