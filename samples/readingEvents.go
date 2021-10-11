@@ -12,7 +12,11 @@ import (
 
 func ReadFromStream(db *esdb.Client) {
 	// region read-from-stream
-	stream, err := db.ReadStream(context.Background(), "some-stream", esdb.ReadStreamOptions{}, 100)
+	options := esdb.ReadStreamOptions{
+		From:      esdb.Start{},
+		Direction: esdb.Forwards,
+	}
+	stream, err := db.ReadStream(context.Background(), "some-stream", options, 100)
 
 	if err != nil {
 		panic(err)

@@ -27,7 +27,11 @@ func AppendToStream(db *esdb.Client) {
 		panic(err)
 	}
 
-	result, err := db.AppendToStream(context.Background(), "some-stream", esdb.AppendToStreamOptions{}, esdb.ProposedEvent{
+	options := esdb.AppendToStreamOptions{
+		ExpectedRevision: esdb.NoStream{},
+	}
+
+	result, err := db.AppendToStream(context.Background(), "some-stream", options, esdb.ProposedEvent{
 		ContentType: esdb.JsonContentType,
 		EventType:   "some-event",
 		Data:        bytes,
