@@ -321,7 +321,7 @@ func (client *Client) SubscribeToStream(
 		}))
 	}
 	streamsClient := api.NewStreamsClient(handle.Connection())
-	subscriptionRequest, err := toStreamSubscriptionRequest(streamID, opts.From, opts.ResolveLinks, nil)
+	subscriptionRequest, err := toStreamSubscriptionRequest(streamID, opts.From, opts.ResolveLinkTos, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}
@@ -378,7 +378,7 @@ func (client *Client) SubscribeToAll(
 		}
 	}
 
-	subscriptionRequest, err := toAllSubscriptionRequest(opts.From, opts.ResolveLinks, filterOptions)
+	subscriptionRequest, err := toAllSubscriptionRequest(opts.From, opts.ResolveLinkTos, filterOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct subscription. Reason: %w", err)
 	}

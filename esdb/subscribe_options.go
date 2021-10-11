@@ -1,9 +1,9 @@
 package esdb
 
 type SubscribeToStreamOptions struct {
-	From          StreamPosition
-	ResolveLinks  bool
-	Authenticated *Credentials
+	From           StreamPosition
+	ResolveLinkTos bool
+	Authenticated  *Credentials
 }
 
 func (o *SubscribeToStreamOptions) setDefaults() {
@@ -14,7 +14,7 @@ func (o *SubscribeToStreamOptions) setDefaults() {
 
 type SubscribeToAllOptions struct {
 	From               AllPosition
-	ResolveLinks       bool
+	ResolveLinkTos     bool
 	MaxSearchWindow    int
 	CheckpointInterval int
 	Filter             *SubscriptionFilter

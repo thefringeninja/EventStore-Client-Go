@@ -47,8 +47,8 @@ func SubscribeToStream(db *esdb.Client) {
 
 	// region subscribe-to-stream-resolving-linktos
 	options = esdb.SubscribeToStreamOptions{
-		From:         esdb.Start{},
-		ResolveLinks: true,
+		From:           esdb.Start{},
+		ResolveLinkTos: true,
 	}
 
 	db.SubscribeToStream(context.Background(), "$et-myEventType", options)
@@ -171,5 +171,15 @@ func SubscribeToFiltered(db *esdb.Client) {
 		},
 	})
 	// endregion stream-regex-filtered-subscription
+}
 
+func SubscribeToAllOverridingUserCredentials(db *esdb.Client) {
+	// region overriding-user-credentials
+	db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
+		Authenticated: &esdb.Credentials{
+			Login:    "admin",
+			Password: "changeit",
+		},
+	})
+	// endregion overriding-user-credentials
 }
