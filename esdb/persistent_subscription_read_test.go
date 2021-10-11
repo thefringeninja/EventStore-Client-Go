@@ -29,7 +29,9 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 		context.Background(),
 		streamID,
 		groupName,
-		esdb.PersistentStreamSubscriptionOptions{},
+		esdb.PersistentStreamSubscriptionOptions{
+			From: esdb.Start{},
+		},
 	)
 	require.NoError(t, err)
 
@@ -82,7 +84,9 @@ func Test_PersistentSubscription_ToExistingStream_StartFromBeginning_AndEventsIn
 		context.Background(),
 		streamID,
 		groupName,
-		esdb.PersistentStreamSubscriptionOptions{},
+		esdb.PersistentStreamSubscriptionOptions{
+			From: esdb.Start{},
+		},
 	)
 	require.NoError(t, err)
 	// read one event
@@ -145,8 +149,6 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromBeginning_AppendEv
 }
 
 func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppendEventsAfterwards(t *testing.T) {
-	// enable these tests once we switch to EventStore version 21.6.0 and greater
-	t.Skip()
 	containerInstance, clientInstance := initializeContainerAndClient(t)
 	defer func() {
 		err := clientInstance.Close()
@@ -196,8 +198,6 @@ func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInItAndAppe
 }
 
 func Test_PersistentSubscription_ToExistingStream_StartFromEnd_EventsInIt(t *testing.T) {
-	// enable these tests once we switch to EventStore version 21.6.0 and greater
-	t.Skip()
 	containerInstance, clientInstance := initializeContainerAndClient(t)
 	defer func() {
 		err := clientInstance.Close()
@@ -262,8 +262,6 @@ waitLoop:
 }
 
 func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAfterwards(t *testing.T) {
-	// enable these tests once we switch to EventStore version 21.6.0 and greater
-	t.Skip()
 	containerInstance, clientInstance := initializeContainerAndClient(t)
 	defer func() {
 		err := clientInstance.Close()
@@ -272,7 +270,7 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 	defer containerInstance.Close()
 
 	// create 3 events
-	events := testCreateEvents(3)
+	events := testCreateEvents(4)
 	// create persistent stream connection with From set to Position(2)
 	streamID := "someStream"
 	groupName := "Group 1"
@@ -306,8 +304,6 @@ func Test_PersistentSubscription_ToNonExistingStream_StartFromTwo_AppendEventsAf
 }
 
 func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEventsAfterwards(t *testing.T) {
-	// enable these tests once we switch to EventStore version 21.6.0 and greater
-	t.Skip()
 	containerInstance, clientInstance := initializeContainerAndClient(t)
 	defer func() {
 		err := clientInstance.Close()
@@ -360,8 +356,6 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom10_EventsInItAppendEv
 }
 
 func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testing.T) {
-	// enable these tests once we switch to EventStore version 21.6.0 and greater
-	t.Skip()
 	containerInstance, clientInstance := initializeContainerAndClient(t)
 	defer func() {
 		err := clientInstance.Close()
@@ -415,8 +409,6 @@ func Test_PersistentSubscription_ToExistingStream_StartFrom4_EventsInIt(t *testi
 }
 
 func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEventsInStream_EventsInItAppendEventsAfterwards(t *testing.T) {
-	// enable these tests once we switch to EventStore version 21.6.0 and greater
-	t.Skip()
 	containerInstance, clientInstance := initializeContainerAndClient(t)
 	defer func() {
 		err := clientInstance.Close()
@@ -452,7 +444,8 @@ func Test_PersistentSubscription_ToExistingStream_StartFromHigherRevisionThenEve
 	opts = esdb.AppendToStreamOptions{
 		ExpectedRevision: esdb.Revision(10),
 	}
-	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[11:]...)
+
+	_, err = clientInstance.AppendToStream(context.Background(), streamID, opts, events[11])
 	require.NoError(t, err)
 
 	// read one event
