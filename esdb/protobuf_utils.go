@@ -62,7 +62,7 @@ func toAppendHeader(streamID string, streamRevision ExpectedRevision) *api.Appen
 }
 
 // toProposedMessage ...
-func toProposedMessage(event ProposedEvent) *api.AppendReq_ProposedMessage {
+func toProposedMessage(event EventData) *api.AppendReq_ProposedMessage {
 	contentType := "application/octet-stream"
 	if event.ContentType == JsonContentType {
 		contentType = "application/json"

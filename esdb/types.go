@@ -574,3 +574,10 @@ type SubscriptionFilter struct {
 	Prefixes []string
 	Regex    string
 }
+
+func ExcludeSystemEventsFilter() *SubscriptionFilter {
+	return &SubscriptionFilter{
+		Type:  EventFilterType,
+		Regex: "/^[^\\$].*/",
+	}
+}

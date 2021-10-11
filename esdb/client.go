@@ -41,7 +41,7 @@ func (client *Client) AppendToStream(
 	context context.Context,
 	streamID string,
 	opts AppendToStreamOptions,
-	events ...ProposedEvent,
+	events ...EventData,
 ) (*WriteResult, error) {
 	opts.setDefaults()
 	handle, err := client.grpcClient.getConnectionHandle()
@@ -148,7 +148,7 @@ func (client *Client) SetStreamMetadata(
 		return nil, fmt.Errorf("error when serializing stream metadata: %w", err)
 	}
 
-	result, err := client.AppendToStream(context, streamName, opts, ProposedEvent{
+	result, err := client.AppendToStream(context, streamName, opts, EventData{
 		ContentType: JsonContentType,
 		EventType:   "$metadata",
 		Data:        data,

@@ -253,13 +253,13 @@ func initializeContainerAndClient(t *testing.T) (*Container, *esdb.Client) {
 
 func pushEventToStream(t *testing.T, clientInstance *esdb.Client, streamID string) {
 	testEvent := createTestEvent()
-	pushEventsToStream(t, clientInstance, streamID, []esdb.ProposedEvent{testEvent})
+	pushEventsToStream(t, clientInstance, streamID, []esdb.EventData{testEvent})
 }
 
 func pushEventsToStream(t *testing.T,
 	clientInstance *esdb.Client,
 	streamID string,
-	events []esdb.ProposedEvent) {
+	events []esdb.EventData) {
 
 	opts := esdb.AppendToStreamOptions{
 		ExpectedRevision: esdb.NoStream{},

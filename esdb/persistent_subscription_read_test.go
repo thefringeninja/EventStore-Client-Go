@@ -21,7 +21,7 @@ func Test_PersistentSubscription_ReadExistingStream_AckToReceiveNewEvents(t *tes
 	firstEvent := createTestEvent()
 	secondEvent := createTestEvent()
 	thirdEvent := createTestEvent()
-	events := []esdb.ProposedEvent{firstEvent, secondEvent, thirdEvent}
+	events := []esdb.EventData{firstEvent, secondEvent, thirdEvent}
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
@@ -481,7 +481,7 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 	firstEvent := createTestEvent()
 	secondEvent := createTestEvent()
 	thirdEvent := createTestEvent()
-	events := []esdb.ProposedEvent{firstEvent, secondEvent, thirdEvent}
+	events := []esdb.EventData{firstEvent, secondEvent, thirdEvent}
 	pushEventsToStream(t, clientInstance, streamID, events)
 
 	groupName := "Group 1"
@@ -518,8 +518,8 @@ func Test_PersistentSubscription_ReadExistingStream_NackToReceiveNewEvents(t *te
 	require.NotNil(t, thirdReadEvent)
 }
 
-func testCreateEvents(count uint32) []esdb.ProposedEvent {
-	result := make([]esdb.ProposedEvent, count)
+func testCreateEvents(count uint32) []esdb.EventData {
+	result := make([]esdb.EventData, count)
 	var i uint32 = 0
 	for ; i < count; i++ {
 		result[i] = createTestEvent()

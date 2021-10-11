@@ -161,7 +161,7 @@ func TestReadStreamReturnsEOFAfterCompletion(t *testing.T) {
 
 	var waitingForError sync.WaitGroup
 
-	proposedEvents := []esdb.ProposedEvent{}
+	proposedEvents := []esdb.EventData{}
 
 	for i := 1; i <= 10; i++ {
 		proposedEvents = append(proposedEvents, createTestEvent())

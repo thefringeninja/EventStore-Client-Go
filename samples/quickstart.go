@@ -3,6 +3,7 @@ package samples
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -38,7 +39,7 @@ func Run() {
 		panic(err)
 	}
 
-	eventData := esdb.ProposedEvent{
+	eventData := esdb.EventData{
 		ContentType: esdb.JsonContentType,
 		EventType:   "TestEvent",
 		Data:        data,
@@ -65,7 +66,7 @@ func Run() {
 	for {
 		event, err := stream.Recv()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 

@@ -10,10 +10,7 @@ import (
 func ExcludeSystemEvents(db *esdb.Client) {
 	// region exclude-system
 	sub, err := db.SubscribeToAll(context.Background(), esdb.SubscribeToAllOptions{
-		Filter: &esdb.SubscriptionFilter{
-			Type:  esdb.EventFilterType,
-			Regex: "/^[^\\$].*/",
-		},
+		Filter: esdb.ExcludeSystemEventsFilter(),
 	})
 
 	if err != nil {

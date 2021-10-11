@@ -11,8 +11,8 @@ const (
 	JsonContentType   ContentType = 1
 )
 
-// ProposedEvent ...
-type ProposedEvent struct {
+// EventData ...
+type EventData struct {
 	EventID     uuid.UUID
 	EventType   string
 	ContentType ContentType

@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestEvent() esdb.ProposedEvent {
-	event := esdb.ProposedEvent{
+func createTestEvent() esdb.EventData {
+	event := esdb.EventData{
 		EventType:   "TestEvent",
 		ContentType: esdb.BinaryContentType,
 		EventID:     uuid.Must(uuid.NewV4()),

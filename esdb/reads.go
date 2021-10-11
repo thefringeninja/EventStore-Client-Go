@@ -2,6 +2,7 @@ package esdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -90,7 +91,7 @@ func newReadStream(params readStreamParams, firstEvt ResolvedEvent) *ReadStream 
 			result, err := params.inner.Recv()
 
 			if err != nil {
-				if err != io.EOF {
+				if !errors.Is(err, io.EOF) {
 					err = params.client.handleError(params.handle, params.headers, params.trailers, err)
 				}
 

@@ -7,7 +7,6 @@ This repository contains an [EventStoreDB][es] Client SDK written in Go.
 ## Developing
 
 Integration tests run against a server using Docker, with the [EventStoreDB gRPC Client Test Container][container].
-Packages are not currently published to Maven Central, but will be once this library approaches release.
 
 ### Setup dependencies
 
