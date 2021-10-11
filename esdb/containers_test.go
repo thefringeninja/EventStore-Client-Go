@@ -34,8 +34,8 @@ type EventStoreDockerConfig struct {
 }
 
 const (
-	DEFAULT_EVENTSTORE_DOCKER_REPOSITORY = "docker.pkg.github.com/eventstore/eventstore-esdb-grpc-testdata/eventstore-esdb-grpc-testdata"
-	DEFAULT_EVENTSTORE_DOCKER_TAG        = "20.6.0-buster-slim"
+	DEFAULT_EVENTSTORE_DOCKER_REPOSITORY = "ghcr.io/eventstore/eventstore-client-grpc-testdata/eventstore-client-grpc-testdata"
+	DEFAULT_EVENTSTORE_DOCKER_TAG        = "21.6.0-buster-slim"
 	DEFAULT_EVENTSTORE_DOCKER_PORT       = "2113"
 )
 
