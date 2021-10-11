@@ -33,18 +33,20 @@ func Run() {
 	}
 
 	data, err := json.Marshal(testEvent)
-	// endregion createEvent
 
 	if err != nil {
 		panic(err)
 	}
 
-	// region appendEvents
-	_, err = db.AppendToStream(context.Background(), "some-stream", esdb.AppendToStreamOptions{}, esdb.ProposedEvent{
+	eventData := esdb.ProposedEvent{
 		ContentType: esdb.JsonContentType,
 		EventType:   "TestEvent",
 		Data:        data,
-	})
+	}
+	// endregion createEvent
+
+	// region appendEvents
+	_, err = db.AppendToStream(context.Background(), "some-stream", esdb.AppendToStreamOptions{}, eventData)
 	// endregion appendEvents
 
 	if err != nil {
