@@ -63,6 +63,7 @@ func AppendWithSameId(db *esdb.Client) {
 		panic(err)
 	}
 
+	// attempt to append the same event again
 	_, err = db.AppendToStream(context.Background(), "some-stream", esdb.AppendToStreamOptions{}, event)
 
 	if err != nil {
@@ -106,6 +107,7 @@ func AppendWithNoStream(db *esdb.Client) {
 		panic(err)
 	}
 
+	// attempt to append the same event again
 	_, err = db.AppendToStream(context.Background(), "same-event-stream", options, esdb.ProposedEvent{
 		ContentType: esdb.JsonContentType,
 		EventType:   "some-event",
@@ -170,4 +172,30 @@ func AppendWithConcurrencyCheck(db *esdb.Client) {
 		Data:        bytes,
 	})
 	// endregion append-with-concurrency-check
+}
+
+func AppendToStreamOverridingUserCredentials(db *esdb.Client) {
+	data := TestEvent{
+		Id:            "1",
+		ImportantData: "some value",
+	}
+
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+
+	event := esdb.ProposedEvent{
+		ContentType: esdb.JsonContentType,
+		EventType:   "some-event",
+		Data:        bytes,
+	}
+
+	// region overriding-user-credentials
+	credentials := &esdb.Credentials{Login: "admin", Password: "changeit"}
+
+	result, err := db.AppendToStream(context.Background(), "some-stream", esdb.AppendToStreamOptions{Authenticated: credentials}, event)
+	// endregion overriding-user-credentials
+
+	log.Printf("Result: %v", result)
 }
